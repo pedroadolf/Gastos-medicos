@@ -1,0 +1,1 @@
+PLAN EJECUTABLE: Paso 1 → Skills → Code → Test
