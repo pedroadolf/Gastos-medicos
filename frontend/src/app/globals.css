@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-fintech-navy: #0A1128;
+  --color-fintech-navy-light: #121E40;
+  --color-fintech-surface: #1E293B;
+  --color-fintech-emerald: #10B981;
+  --color-fintech-cyan: #00F0FF;
+}
+
+@layer utilities {
+  .bg-grid-white {
+    background-size: 30px 30px;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  }
+}
