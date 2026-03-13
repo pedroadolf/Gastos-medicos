@@ -122,17 +122,49 @@ async function processFilesInBackground(jobId: string, files: File[]) {
             }
         }
 
-        // 4. Actualizar Job como completado
+        // 4. Clasificación Básica de los documentos procesados
+        const enhancedResults = results.map(res => {
+            if (res.error) return res;
+            
+            let classification = "Desconocido";
+            const text = (res.text || "").toUpperCase();
+            const hasXML = !!res.structuredData;
+
+            if (hasXML) classification = "Factura (XML)";
+            else if (text.includes("INSTITUTO NACIONAL ELECTORAL") || text.includes("IFE")) classification = "INE";
+            else if (text.includes("RECETA") || text.includes("MEDICAMENTO") || text.includes("MG/DL")) classification = "Receta Médica";
+            else if (text.includes("INFORME") || text.includes("DIAGNOSTICO") || text.includes("HISTORIA CLINICA")) classification = "Informe Médico";
+            else if (text.includes("$") || text.includes("TOTAL") || text.includes("RFC")) classification = "Posible Factura/Recibo";
+
+            return { ...res, classification };
+        });
+
+        // 5. Actualizar Job como completado
         await supabase
             .from('jobs')
             .update({ 
                 status: 'completed', 
-                results: results,
+                results: enhancedResults,
                 updated_at: new Date().toISOString()
             })
             .eq('id', jobId);
 
-        console.log(`✅ [WORKER] Job ${jobId} finalizado.`);
+        console.log(`✅ [WORKER] Job ${jobId} finalizado y clasificado.`);
+
+        // 6. 🚀 DISPARAR N8N (Opcional pero recomendado)
+        const n8nWebhook = process.env.N8N_WEBHOOK_URL;
+        if (n8nWebhook) {
+            console.log(`🔗 [NOTIFY] Avisando a n8n del Job ${jobId}...`);
+            await fetch(n8nWebhook, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    event: 'job_completed',
+                    jobId: jobId,
+                    results: enhancedResults 
+                })
+            }).catch(e => console.warn("⚠️ n8n no respondió, pero el Job se guardó en Supabase."));
+        }
 
     } catch (err: any) {
         console.error(`❌ [WORKER] Error fatal en Job ${jobId}:`, err);
