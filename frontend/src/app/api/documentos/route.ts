@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { parseStringPromise } from "xml2js";
 import Tesseract from "tesseract.js";
 
+// 🔧 FIX: DOMMatrix is not defined error in Node.js (pdf-parse dependency)
+if (typeof global !== 'undefined' && !global.DOMMatrix) {
+    try {
+        const { DOMMatrix } = require('dommatrix');
+        (global as any).DOMMatrix = DOMMatrix;
+        console.log("✅ DOMMatrix polyfill aplicado");
+    } catch (e) {
+        console.warn("⚠️ No se pudo cargar dommatrix polyfill:", e);
+    }
+}
+
 // Workaround para pdf-parse en entornos ESM/Next.js
 const pdfParse = require("pdf-parse");
 
@@ -61,8 +72,10 @@ export async function POST(req: NextRequest) {
 
                 } else if (mimeType.includes("image/")) {
                     // 🔎 2. PROCESAR IAMGEN CON OCR (Tesseract)
+                    console.log(`[OCR] 📸 Procesando imagen: ${name}...`);
                     // Usamos el idioma español predeterminado
                     const { data: { text } } = await Tesseract.recognize(buffer, "spa");
+                    console.log(`[OCR] ✅ Texto extraído (${text.length} caracteres)`);
                     extractedData.text = text;
 
                     // Regex simple: Detectar la palabra "Total" seguida por números (ej. Total: $1,200.50)
@@ -73,12 +86,23 @@ export async function POST(req: NextRequest) {
 
                 } else if (mimeType === "application/pdf") {
                     // 🔎 3. PROCESAR PDF CON TEXTO (e.g. Informes médicos o Facts Puras)
-                    const data = await pdfParse(buffer);
-                    extractedData.text = data.text;
+                    console.log(`[PDF] 📄 Extrayendo texto de: ${name}...`);
+                    try {
+                        const data = await pdfParse(buffer);
+                        const text = data.text || "";
+                        console.log(`[PDF] ✅ Texto extraído (${text.length} caracteres)`);
+                        extractedData.text = text;
 
-                    const totalMatch = data.text.match(/TOTAL[\s\S]*?\$?\s*([0-9,]+\.[0-9]{2})/i);
-                    if (totalMatch) {
-                        extractedData.structuredData = { tipoDoc: "PDF Texto", montoDetectado: totalMatch[1] };
+                        const totalMatch = text.match(/TOTAL[\s\S]*?\$?\s*([0-9,]+\.[0-9]{2})/i);
+                        if (totalMatch) {
+                            extractedData.structuredData = { 
+                                tipoDoc: "PDF Texto", 
+                                montoDetectado: totalMatch[1].replace(/,/g, "")
+                            };
+                        }
+                    } catch (pdfErr: any) {
+                        console.error(`❌ [PDF] Error parseando ${name}:`, pdfErr.message);
+                        extractedData.text = "ERROR_PARSE_PDF";
                     }
                 } else {
                     extractedData.error = "Formato no soportado por el motor de extracción.";

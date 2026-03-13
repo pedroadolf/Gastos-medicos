@@ -63,7 +63,22 @@ export default function DashboardPage() {
         setLastDriveLink(null);
 
         try {
-            // 1. Procesar Documentación Manual (OCR/XML)
+            // 1. Convertir archivos subidos a Base64 para enviarlos a n8n
+            const filePromises = uploadedFiles.map(file => {
+                return new Promise<{ name: string, base64: string, type: string }>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const base64 = (reader.result as string).split(',')[1];
+                        resolve({ name: file.name, base64, type: file.type });
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            });
+            const additionalFiles = await Promise.all(filePromises);
+
+            // 2. Procesar Documentación Manual (OCR/XML) para obtener datos
+            console.log("⏱️ Iniciando Extracción OCR/XML...");
             const formData = new FormData();
             uploadedFiles.forEach((file) => formData.append("files", file));
 
@@ -72,61 +87,67 @@ export default function DashboardPage() {
                 const response = await fetch("/api/documentos", { method: "POST", body: formData });
                 const data = await response.json();
                 ocrResults = data.processedFiles || [];
+                console.log("✅ Extracción Completada:", ocrResults);
             }
 
-            // 2. Generar PDFs Automáticos según el Trámite
+            // 3. Generar TODOS los PDFs primero, luego enviar UN SOLO webhook a n8n
+            console.log("⏱️ Generando PDFs y enviando a n8n...");
             const config = procedureConfigs[procedureType];
             const generationResults = [];
 
-            for (const template of config.autoPDFs) {
-                console.log(`Generando: ${template}...`);
-                try {
-                    const reqGenerar = await fetch("/api/generar", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            datosExtraidos: {
-                                asegurado: { ...selectedAsegurado },
-                                poliza: { numero: selectedAsegurado.poliza, certificado: selectedAsegurado.certificado },
-                                siniestro: {
-                                    numeroSiniestro: selectedSiniestro || selectedAsegurado.siniestroNum || "SIN-NUEVO",
-                                    diagnostico: selectedAsegurado.padecimiento || "Trámite Médico",
-                                    hospital: selectedAsegurado.hospital || "N/A",
-                                    fechaSintomas: new Date().toISOString().split('T')[0]
-                                },
-                                totales: {
-                                    montoCalculado: selectedAsegurado.montoReclamado || "0",
-                                    cantidadFacturas: selectedAsegurado.cantidadFacturas || ocrResults.length.toString()
-                                },
-                                reclamacion: {
-                                    tipoTramite: selectedAsegurado.tipoTramite || procedureType.toUpperCase(),
-                                    tipoPago: selectedAsegurado.tipoPago || "Reembolso",
-                                    naturaleza: selectedAsegurado.naturaleza || "Enfermedad",
-                                    sector: selectedAsegurado.sectorHospitalario || "Privado",
-                                    mostrarPadecimiento: selectedAsegurado.mostrarPadecimiento || "SI"
-                                },
-                                declaracion: {
-                                    hospPropio: selectedAsegurado.hospEleccionPropia || "SI",
-                                    medPropio: selectedAsegurado.medEleccionPropia || "SI",
-                                    huboAsesoria: selectedAsegurado.huboAsesoria || "NO",
-                                    huboDescuento: selectedAsegurado.huboDescuento || "NO"
-                                }
-                            },
-                            plantillaSeleccionada: template
-                        })
-                    });
-                    const res = await reqGenerar.json();
-                    generationResults.push(res);
-                } catch (e) {
-                    console.error(`Error en ${template}:`, e);
+            // Datos compartidos para todas las plantillas
+            const datosCompartidos = {
+                asegurado: { ...selectedAsegurado },
+                poliza: { numero: selectedAsegurado.poliza, certificado: selectedAsegurado.certificado },
+                siniestro: {
+                    numeroSiniestro: selectedSiniestro || selectedAsegurado.siniestroNum || "SIN-NUEVO",
+                    diagnostico: selectedAsegurado.padecimiento || "Trámite Médico",
+                    hospital: selectedAsegurado.hospital || "N/A",
+                    fechaSintomas: new Date().toISOString().split('T')[0]
+                },
+                totales: {
+                    montoCalculado: selectedAsegurado.montoReclamado || "0",
+                    cantidadFacturas: selectedAsegurado.cantidadFacturas || ocrResults.length.toString()
+                },
+                reclamacion: {
+                    tipoTramite: selectedAsegurado.tipoTramite || procedureType.toUpperCase(),
+                    tipoPago: selectedAsegurado.tipoPago || "Reembolso",
+                    naturaleza: selectedAsegurado.naturaleza || "Enfermedad",
+                    sector: selectedAsegurado.sectorHospitalario || "Privado",
+                    mostrarPadecimiento: selectedAsegurado.mostrarPadecimiento || "SI"
+                },
+                declaracion: {
+                    hospPropio: selectedAsegurado.hospEleccionPropia || "SI",
+                    medPropio: selectedAsegurado.medEleccionPropia || "SI",
+                    huboAsesoria: selectedAsegurado.huboAsesoria || "NO",
+                    huboDescuento: selectedAsegurado.huboDescuento || "NO"
                 }
+            };
+
+            // Generar todos los PDFs localmente y enviar UN SOLO request combinado
+            try {
+                const reqGenerar = await fetch("/api/generar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        datosExtraidos: datosCompartidos,
+                        plantillasMultiples: config.autoPDFs, 
+                        plantillaSeleccionada: config.autoPDFs[0], 
+                        archivosManuales: additionalFiles
+                    })
+                });
+                const res = await reqGenerar.json();
+                console.log("✅ Resultado Generación:", res);
+                generationResults.push(res);
+            } catch (e) {
+                console.error("❌ Error generando expediente:", e);
             }
 
             // Actualizamos la ubicación sugerida (Esto asume que el usuario tiene acceso a la carpeta base)
             const baseDriveUrl = `https://drive.google.com/drive/folders/1s-r2A_g4i0X6_vT84t1J8gK8J8J8J8J8`; // ID real de tu carpeta raíz Marsh
             setLastDriveLink(baseDriveUrl);
 
-            alert(`✅ ¡Expediente Generado!\n\n- ${ocrResults.length} archivos extraídos.\n- ${generationResults.length} formatos PDF firmados enviando a n8n.\n\nEstructura: n8n creará la carpeta "${selectedAsegurado.nombre}/Mar26" en Drive.`);
+            alert(`✅ ¡Expediente Generado!\n\n- ${ocrResults.length} archivos extraídos.\n- ${config.autoPDFs.length} formatos PDF generados y enviados a n8n (1 solo request).\n\nEstructura: n8n creará la carpeta "${selectedAsegurado.nombre}/${new Date().toLocaleDateString('es-MX', {month:'short', year:'2-digit'})}" en Drive.`);
         } catch (error) {
             alert("❌ Error: No se pudo completar el proceso de generación múltiple.");
         } finally {

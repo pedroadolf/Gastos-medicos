@@ -1,0 +1,84 @@
+{
+    "name": "GMM_Automation_Processor",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "gmm-processor",
+                "options": {}
+            },
+            "name": "Webhook NextJS",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ],
+            "webhookId": "gmm-webhook-endpoint"
+        },
+        {
+            "parameters": {
+                "operation": "upload",
+                "fileContent": "={{ $json.body.documentoBase64 }}",
+                "fileName": "={{ $json.body.metadata.nombreAsegurado }}_{{ $json.body.metadata.idSiniestro }}_{{ $json.body.metadata.fechaEmision }}.pdf",
+                "folderId": "={{ $json.body.metadata.googleDriveFolderId }}"
+            },
+            "name": "Google Drive (Subir Expediente)",
+            "type": "n8n-nodes-base.googleDrive",
+            "typeVersion": 2,
+            "position": [
+                500,
+                300
+            ],
+            "credentials": {
+                "googleDriveOAuth2Api": {
+                    "id": "1",
+                    "name": "Google Drive account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "fromEmail": "notificaciones@pash.uno",
+                "toEmail": "={{ $json.body.metadata.emailAsegurado }}",
+                "subject": "=Trámite Procesado: {{ $json.body.metadata.idSiniestro }}",
+                "text": "=Hola {{ $json.body.metadata.nombreAsegurado }},\n\nTu reclamación de gastos médicos ha sido procesada con éxito a través de GMM Automation por PASH.\n\nFecha de emisión: {{ $json.body.metadata.fechaEmision }}\n\nAdjuntamos el PDF oficial rellenado y sellado para que lo verifiques o envíes a tu aseguradora.\n\nSaludos,\nEquipo PASH.",
+                "attachments": "={{ $node['Google Drive (Subir Expediente)'].json.id }}"
+            },
+            "name": "Mail (Notificar Asegurado)",
+            "type": "n8n-nodes-base.emailSend",
+            "typeVersion": 1,
+            "position": [
+                750,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook NextJS": {
+            "main": [
+                [
+                    {
+                        "node": "Google Drive (Subir Expediente)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Google Drive (Subir Expediente)": {
+            "main": [
+                [
+                    {
+                        "node": "Mail (Notificar Asegurado)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionTimeout": 3600
+    }
+}
