@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: any = {
   // Excluir estos binarios y liberías antiguas del bundler de Webpack/Turbopack
-  serverExternalPackages: ["pdf-parse", "tesseract.js"],
+  serverExternalPackages: ["tesseract.js"],
   output: "standalone",
   typescript: {
     // !! ADVERTENCIA !!
