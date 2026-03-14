@@ -131,20 +131,33 @@ async function processFilesInBackground(jobId: string, files: File[]) {
             }
         }
 
-        // 4. Clasificación Básica de los documentos procesados
+        // 4. Clasificación Inteligente: primero por contenido (OCR/XML), luego por nombre de archivo
         const enhancedResults = results.map(res => {
             if (res.error) return res;
             
             let classification = "desconocido";
             const text = (res.text || "").toUpperCase();
+            const fileName = (res.fileName || "").toUpperCase();
             const hasXML = !!res.structuredData;
 
+            // Estrategia 1: Clasificación por CONTENIDO (OCR/XML)
             if (hasXML) classification = "factura_xml";
-            else if (text.includes("INSTITUTO NACIONAL ELECTORAL") || text.includes("IFE") || text.includes("CREDENCIAL PARA VOTAR")) classification = "ine";
-            else if (text.includes("RECETA") || text.includes("MEDICAMENTO") || text.includes("MG/DL") || text.includes("POSOLOGIA")) classification = "receta_medica";
-            else if (text.includes("INFORME") || text.includes("DIAGNOSTICO") || text.includes("HISTORIA CLINICA") || text.includes("ANAMNESIS")) classification = "informe_medico";
-            else if (text.includes("RECIBO") && (text.includes("CFE") || text.includes("AGUA") || text.includes("TELEFONO") || text.includes("DOMICILIO"))) classification = "comprobante_domicilio";
-            else if (text.includes("$") || text.includes("TOTAL") || text.includes("RFC")) classification = "posible_factura";
+            else if (text.includes("INSTITUTO NACIONAL ELECTORAL") || text.includes("IFE") || text.includes("CREDENCIAL PARA VOTAR") || text.includes("CLAVE DE ELECTOR")) classification = "ine";
+            else if (text.includes("RECETA") || text.includes("MEDICAMENTO") || text.includes("MG/DL") || text.includes("POSOLOGIA") || text.includes("TABLETAS") || text.includes("DOSIS")) classification = "receta_medica";
+            else if (text.includes("INFORME") || text.includes("DIAGNOSTICO") || text.includes("HISTORIA CLINICA") || text.includes("ANAMNESIS") || text.includes("PADECIMIENTO") || text.includes("EXPEDIENTE CLINICO")) classification = "informe_medico";
+            else if (text.includes("DOMICILIO") || text.includes("CFE") || text.includes("TELMEX") || text.includes("RECIBO DE LUZ") || text.includes("ESTADO DE CUENTA")) classification = "comprobante_domicilio";
+            else if (text.includes("ESTUDIO") || text.includes("LABORATORIO") || text.includes("RADIOLOGIA") || text.includes("RESULTADO") || text.includes("MUESTRA")) classification = "estudios_diagnosticos";
+            else if (text.includes("$") || text.includes("TOTAL") || text.includes("RFC") || text.includes("CFDI")) classification = "posible_factura";
+
+            // Estrategia 2: Fallback por NOMBRE de archivo (cuando OCR no detecta texto útil)
+            if (classification === "desconocido") {
+                if (fileName.includes("INE") || fileName.includes("CREDENCIAL") || fileName.includes("IFE")) classification = "ine";
+                else if (fileName.includes("DOMICILIO") || fileName.includes("CFE") || fileName.includes("LUZ") || fileName.includes("COMPROBANTE")) classification = "comprobante_domicilio";
+                else if (fileName.includes("INFORME") || fileName.includes("MEDICO") || fileName.includes("CLINICO")) classification = "informe_medico";
+                else if (fileName.includes("RECETA") || fileName.includes("PRESCRIPCION")) classification = "receta_medica";
+                else if (fileName.includes("FACTURA") || fileName.includes("CFDI") || fileName.includes("XML")) classification = "factura_xml";
+                else if (fileName.includes("ESTUDIO") || fileName.includes("LAB") || fileName.includes("RADIO") || fileName.includes("DIAGNOSTICO")) classification = "estudios_diagnosticos";
+            }
 
             return { ...res, classification };
         });

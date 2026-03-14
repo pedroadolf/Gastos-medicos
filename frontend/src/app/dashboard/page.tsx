@@ -123,8 +123,10 @@ export default function DashboardPage() {
         const res = await reqGenerar.json();
         console.log("✅ Resultado Generación Final:", res);
         
-        const baseDriveUrl = `https://drive.google.com/drive/folders/1s-r2A_g4i0X6_vT84t1J8gK8J8J8J8J8`;
-        setLastDriveLink(baseDriveUrl);
+        // Solo mostrar botón "VER EN DRIVE" si n8n devuelve un enlace real
+        if (res.driveUrl) {
+            setLastDriveLink(res.driveUrl);
+        }
         setIsProcessing(false);
 
         alert(`✅ ¡Expediente Generado!\n\n- Análisis IA: ${ocrResults.length} archivos detectados y clasificados.\n- Formatos: ${config.autoPDFs.length} PDFs generados y enviados a n8n.\n\nEstructura: n8n creará la carpeta "${selectedAsegurado?.nombre}/${new Date().toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}" en Drive.`);
@@ -343,10 +345,11 @@ export default function DashboardPage() {
                                     {procedureConfigs[procedureType].manualChecklist.map((item, idx) => {
                                         const isChecked = Object.values(fileClassifications).some(cls => {
                                             if (item.toLowerCase().includes("id oficial") && cls === "ine") return true;
-                                            if (item.toLowerCase().includes("factura") && cls === "factura_xml") return true;
+                                            if (item.toLowerCase().includes("factura") && (cls === "factura_xml" || cls === "posible_factura")) return true;
                                             if (item.toLowerCase().includes("receta") && cls === "receta_medica") return true;
                                             if (item.toLowerCase().includes("informe") && cls === "informe_medico") return true;
                                             if (item.toLowerCase().includes("domicilio") && cls === "comprobante_domicilio") return true;
+                                            if (item.toLowerCase().includes("estudio") && cls === "estudios_diagnosticos") return true;
                                             return false;
                                         });
 
@@ -395,8 +398,19 @@ export default function DashboardPage() {
                                             <div className="flex items-center gap-2">
                                                 <p className="text-xs font-medium text-white truncate">{file.name}</p>
                                                 {classification && (
-                                                    <span className="text-[9px] bg-fintech-emerald/10 text-fintech-emerald px-1.5 py-0.5 rounded border border-fintech-emerald/30 uppercase font-bold">
-                                                        {classification.replace("_", " ")}
+                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded border uppercase font-bold ${
+                                                        classification === "desconocido" 
+                                                            ? "bg-amber-500/10 text-amber-400 border-amber-500/30" 
+                                                            : "bg-fintech-emerald/10 text-fintech-emerald border-fintech-emerald/30"
+                                                    }`}>
+                                                        {classification === "ine" ? "ID Oficial (INE)" 
+                                                         : classification === "factura_xml" ? "Factura XML" 
+                                                         : classification === "receta_medica" ? "Receta Médica"
+                                                         : classification === "informe_medico" ? "Informe Médico"
+                                                         : classification === "comprobante_domicilio" ? "Comp. Domicilio"
+                                                         : classification === "estudios_diagnosticos" ? "Estudios Dx"
+                                                         : classification === "posible_factura" ? "Posible Factura"
+                                                         : classification.replace("_", " ")}
                                                     </span>
                                                 )}
                                             </div>
