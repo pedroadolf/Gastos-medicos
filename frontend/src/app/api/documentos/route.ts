@@ -56,8 +56,17 @@ export async function POST(req: NextRequest) {
     }
 }
 
+interface ExtractedResult {
+    fileName: string;
+    mimeType?: string;
+    text?: string;
+    structuredData?: any;
+    error?: string;
+    classification?: string;
+}
+
 async function processFilesInBackground(jobId: string, files: File[]) {
-    const results = [];
+    const results: ExtractedResult[] = [];
     console.log(`👷 [WORKER] Iniciando procesamiento para Job: ${jobId}`);
 
     try {
@@ -66,11 +75,11 @@ async function processFilesInBackground(jobId: string, files: File[]) {
             const mimeType = file.type;
             const name = file.name;
 
-            let extractedData = {
+            let extractedData: ExtractedResult = {
                 fileName: name,
                 mimeType,
                 text: "",
-                structuredData: null as any
+                structuredData: null
             };
 
             try {
@@ -96,8 +105,8 @@ async function processFilesInBackground(jobId: string, files: File[]) {
                     const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("OCR_TIMEOUT")), 30000));
 
                     try {
-                        const { data: { text } } = await Promise.race([ocrTask, timeoutPromise]) as any;
-                        extractedData.text = text;
+                        const ocrResult: any = await Promise.race([ocrTask, timeoutPromise]);
+                        extractedData.text = ocrResult?.data?.text || "";
                     } catch (e: any) {
                         extractedData.text = "[ERROR_TIMEOUT]";
                     }
@@ -126,15 +135,16 @@ async function processFilesInBackground(jobId: string, files: File[]) {
         const enhancedResults = results.map(res => {
             if (res.error) return res;
             
-            let classification = "Desconocido";
+            let classification = "desconocido";
             const text = (res.text || "").toUpperCase();
             const hasXML = !!res.structuredData;
 
-            if (hasXML) classification = "Factura (XML)";
-            else if (text.includes("INSTITUTO NACIONAL ELECTORAL") || text.includes("IFE")) classification = "INE";
-            else if (text.includes("RECETA") || text.includes("MEDICAMENTO") || text.includes("MG/DL")) classification = "Receta Médica";
-            else if (text.includes("INFORME") || text.includes("DIAGNOSTICO") || text.includes("HISTORIA CLINICA")) classification = "Informe Médico";
-            else if (text.includes("$") || text.includes("TOTAL") || text.includes("RFC")) classification = "Posible Factura/Recibo";
+            if (hasXML) classification = "factura_xml";
+            else if (text.includes("INSTITUTO NACIONAL ELECTORAL") || text.includes("IFE") || text.includes("CREDENCIAL PARA VOTAR")) classification = "ine";
+            else if (text.includes("RECETA") || text.includes("MEDICAMENTO") || text.includes("MG/DL") || text.includes("POSOLOGIA")) classification = "receta_medica";
+            else if (text.includes("INFORME") || text.includes("DIAGNOSTICO") || text.includes("HISTORIA CLINICA") || text.includes("ANAMNESIS")) classification = "informe_medico";
+            else if (text.includes("RECIBO") && (text.includes("CFE") || text.includes("AGUA") || text.includes("TELEFONO") || text.includes("DOMICILIO"))) classification = "comprobante_domicilio";
+            else if (text.includes("$") || text.includes("TOTAL") || text.includes("RFC")) classification = "posible_factura";
 
             return { ...res, classification };
         });

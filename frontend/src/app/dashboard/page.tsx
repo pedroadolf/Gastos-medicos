@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Search, UploadCloud, FileText, Zap, RefreshCw, CheckCircle2, AlertCircle, Info, ExternalLink } from "lucide-react";
+import { Search, UploadCloud, FileText, Zap, RefreshCw, CheckCircle2, Loader2, Sparkles, ExternalLink } from "lucide-react";
 import { useDropzone } from "react-dropzone";
+import { supabase } from "@/lib/supabase";
 
 // Tipos basados en Google Sheets (Ampliado)
 type Asegurado = { id: string; nombre: string; poliza: string; plan: string; rfc: string;[key: string]: any };
@@ -14,6 +15,10 @@ export default function DashboardPage() {
     const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [procedureType, setProcedureType] = useState<"reembolso" | "carta-pase">("reembolso");
+    const [currentJobId, setCurrentJobId] = useState<string | null>(null);
+    const [jobStatus, setJobStatus] = useState<string | null>(null);
+    const [fileClassifications, setFileClassifications] = useState<Record<string, string>>({});
+    const [lastDriveLink, setLastDriveLink] = useState<string | null>(null);
 
     // Configuración de documentos por trámite
     const procedureConfigs = {
@@ -55,102 +60,169 @@ export default function DashboardPage() {
         accept: { "application/pdf": [".pdf"], "image/*": [".jpeg", ".png", ".jpg"], "text/xml": [".xml"] },
     });
 
-    const [lastDriveLink, setLastDriveLink] = useState<string | null>(null);
+    const triggerFinalGeneration = async (ocrResults: any[], jobId: string) => {
+        console.log("⏱️ Generando PDFs finales basado en análisis...");
+        setJobStatus("Generando Expediente Final...");
+        
+        const config = procedureConfigs[procedureType];
+        
+        // Convertir archivos para el paso final
+        const filePromises = uploadedFiles.map(file => {
+            return new Promise<{ name: string, base64: string, type: string }>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const base64 = (reader.result as string).split(',')[1];
+                    resolve({ name: file.name, base64, type: file.type });
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        });
+        const additionalFiles = await Promise.all(filePromises);
+
+        const datosCompartidos = {
+            asegurado: { ...selectedAsegurado },
+            poliza: { numero: selectedAsegurado?.poliza, certificado: selectedAsegurado?.certificado },
+            siniestro: {
+                numeroSiniestro: selectedSiniestro || selectedAsegurado?.siniestroNum || "SIN-NUEVO",
+                diagnostico: selectedAsegurado?.padecimiento || "Trámite Médico",
+                hospital: selectedAsegurado?.hospital || "N/A",
+                fechaSintomas: new Date().toISOString().split('T')[0]
+            },
+            totales: {
+                montoCalculado: selectedAsegurado?.montoReclamado || "0",
+                cantidadFacturas: ocrResults.filter(r => r.classification === 'factura_xml').length.toString()
+            },
+            reclamacion: {
+                tipoTramite: selectedAsegurado?.tipoTramite || procedureType.toUpperCase(),
+                tipoPago: selectedAsegurado?.tipoPago || "Reembolso",
+                naturaleza: selectedAsegurado?.naturaleza || "Enfermedad",
+                sector: selectedAsegurado?.sectorHospitalario || "Privado",
+                mostrarPadecimiento: selectedAsegurado?.mostrarPadecimiento || "SI"
+            },
+            declaracion: {
+                hospPropio: selectedAsegurado?.hospEleccionPropia || "SI",
+                medPropio: selectedAsegurado?.medEleccionPropia || "SI",
+                huboAsesoria: selectedAsegurado?.huboAsesoria || "NO",
+                huboDescuento: selectedAsegurado?.huboDescuento || "NO"
+            }
+        };
+
+        const reqGenerar = await fetch("/api/generar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                datosExtraidos: datosCompartidos,
+                plantillasMultiples: config.autoPDFs, 
+                plantillaSeleccionada: config.autoPDFs[0], 
+                archivosManuales: additionalFiles,
+                jobId: jobId
+            })
+        });
+
+        const res = await reqGenerar.json();
+        console.log("✅ Resultado Generación Final:", res);
+        
+        const baseDriveUrl = `https://drive.google.com/drive/folders/1s-r2A_g4i0X6_vT84t1J8gK8J8J8J8J8`;
+        setLastDriveLink(baseDriveUrl);
+        setIsProcessing(false);
+
+        alert(`✅ ¡Expediente Generado!\n\n- Análisis IA: ${ocrResults.length} archivos detectados y clasificados.\n- Formatos: ${config.autoPDFs.length} PDFs generados y enviados a n8n.\n\nEstructura: n8n creará la carpeta "${selectedAsegurado?.nombre}/${new Date().toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}" en Drive.`);
+    };
 
     const handleProcessBtn = async () => {
-        if (!selectedAsegurado) return;
+        if (!selectedAsegurado || uploadedFiles.length === 0) return;
         setIsProcessing(true);
         setLastDriveLink(null);
+        setJobStatus("Enviando archivos...");
+        setFileClassifications({});
 
         try {
-            // 1. Convertir archivos subidos a Base64 para enviarlos a n8n
-            const filePromises = uploadedFiles.map(file => {
-                return new Promise<{ name: string, base64: string, type: string }>((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        const base64 = (reader.result as string).split(',')[1];
-                        resolve({ name: file.name, base64, type: file.type });
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-            });
-            const additionalFiles = await Promise.all(filePromises);
-
-            // 2. Procesar Documentación Manual (OCR/XML) para obtener datos
-            console.log("⏱️ Iniciando Extracción OCR/XML...");
+            console.log("⏱️ Iniciando Job de Procesamiento...");
             const formData = new FormData();
             uploadedFiles.forEach((file) => formData.append("files", file));
+            
+            formData.append("metadata", JSON.stringify({
+                asegurado: selectedAsegurado.nombre,
+                tipo_tramite: procedureType
+            }));
 
-            let ocrResults = [];
-            if (uploadedFiles.length > 0) {
-                const response = await fetch("/api/documentos", { method: "POST", body: formData });
-                const data = await response.json();
-                ocrResults = data.processedFiles || [];
-                console.log("✅ Extracción Completada:", ocrResults);
+            const response = await fetch("/api/documentos", { method: "POST", body: formData });
+            const initialData = await response.json();
+            
+            if (!initialData.jobId) {
+                throw new Error("No se pudo crear el Job de procesamiento.");
             }
 
-            // 3. Generar TODOS los PDFs primero, luego enviar UN SOLO webhook a n8n
-            console.log("⏱️ Generando PDFs y enviando a n8n...");
-            const config = procedureConfigs[procedureType];
-            const generationResults = [];
+            const jobId = initialData.jobId;
+            setCurrentJobId(jobId);
+            setJobStatus("IA analizando documentos...");
 
-            // Datos compartidos para todas las plantillas
-            const datosCompartidos = {
-                asegurado: { ...selectedAsegurado },
-                poliza: { numero: selectedAsegurado.poliza, certificado: selectedAsegurado.certificado },
-                siniestro: {
-                    numeroSiniestro: selectedSiniestro || selectedAsegurado.siniestroNum || "SIN-NUEVO",
-                    diagnostico: selectedAsegurado.padecimiento || "Trámite Médico",
-                    hospital: selectedAsegurado.hospital || "N/A",
-                    fechaSintomas: new Date().toISOString().split('T')[0]
-                },
-                totales: {
-                    montoCalculado: selectedAsegurado.montoReclamado || "0",
-                    cantidadFacturas: selectedAsegurado.cantidadFacturas || ocrResults.length.toString()
-                },
-                reclamacion: {
-                    tipoTramite: selectedAsegurado.tipoTramite || procedureType.toUpperCase(),
-                    tipoPago: selectedAsegurado.tipoPago || "Reembolso",
-                    naturaleza: selectedAsegurado.naturaleza || "Enfermedad",
-                    sector: selectedAsegurado.sectorHospitalario || "Privado",
-                    mostrarPadecimiento: selectedAsegurado.mostrarPadecimiento || "SI"
-                },
-                declaracion: {
-                    hospPropio: selectedAsegurado.hospEleccionPropia || "SI",
-                    medPropio: selectedAsegurado.medEleccionPropia || "SI",
-                    huboAsesoria: selectedAsegurado.huboAsesoria || "NO",
-                    huboDescuento: selectedAsegurado.huboDescuento || "NO"
-                }
-            };
+            // Escuchar cambios en Supabase Realtime
+            const channel = supabase
+                .channel(`job-updates-${jobId}`)
+                .on(
+                    'postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'jobs', filter: `id=eq.${jobId}` },
+                    async (payload: any) => {
+                        const updatedJob = payload.new;
+                        console.log("🔄 Job Update:", updatedJob);
+                        
+                        if (updatedJob.results && Object.keys(fileClassifications).length === 0) {
+                            const newClassifications: Record<string, string> = {};
+                            updatedJob.results.forEach((res: any) => {
+                                if (res.classification) {
+                                    newClassifications[res.fileName] = res.classification;
+                                }
+                            });
+                            setFileClassifications(newClassifications);
+                        }
 
-            // Generar todos los PDFs localmente y enviar UN SOLO request combinado
-            try {
-                const reqGenerar = await fetch("/api/generar", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        datosExtraidos: datosCompartidos,
-                        plantillasMultiples: config.autoPDFs, 
-                        plantillaSeleccionada: config.autoPDFs[0], 
-                        archivosManuales: additionalFiles
-                    })
-                });
-                const res = await reqGenerar.json();
-                console.log("✅ Resultado Generación:", res);
-                generationResults.push(res);
-            } catch (e) {
-                console.error("❌ Error generando expediente:", e);
-            }
+                        if (updatedJob.status === 'completed') {
+                            setJobStatus("Completado");
+                            console.log("🚀 Job finalizado. Iniciando RE-FETCH de seguridad...");
+                            
+                            // 🚀 RE-FETCH DE SEGURIDAD: Los payloads de Realtime pueden truncar JSONs grandes
+                            const { data: fullJob, error: fetchError } = await supabase
+                                .from('jobs')
+                                .select('*')
+                                .eq('id', jobId)
+                                .single();
 
-            // Actualizamos la ubicación sugerida (Esto asume que el usuario tiene acceso a la carpeta base)
-            const baseDriveUrl = `https://drive.google.com/drive/folders/1s-r2A_g4i0X6_vT84t1J8gK8J8J8J8J8`; // ID real de tu carpeta raíz Marsh
-            setLastDriveLink(baseDriveUrl);
+                            if (fetchError || !fullJob) {
+                                console.error("❌ Error re-fetching job details:", fetchError);
+                                alert("Error recuperando resultados del análisis de base de datos.");
+                                setIsProcessing(false);
+                                return;
+                            }
 
-            alert(`✅ ¡Expediente Generado!\n\n- ${ocrResults.length} archivos extraídos.\n- ${config.autoPDFs.length} formatos PDF generados y enviados a n8n (1 solo request).\n\nEstructura: n8n creará la carpeta "${selectedAsegurado.nombre}/${new Date().toLocaleDateString('es-MX', {month:'short', year:'2-digit'})}" en Drive.`);
-        } catch (error) {
-            alert("❌ Error: No se pudo completar el proceso de generación múltiple.");
-        } finally {
+                            console.log("📦 Datos completos recuperados:", fullJob.results?.length || 0, "registros.");
+
+                            if (fullJob.results) {
+                                const finalClassifications: Record<string, string> = {};
+                                fullJob.results.forEach((res: any) => {
+                                    if (res.classification) {
+                                        finalClassifications[res.fileName] = res.classification;
+                                    }
+                                });
+                                setFileClassifications(finalClassifications);
+                            }
+
+                            supabase.removeChannel(channel);
+                            await triggerFinalGeneration(fullJob.results || [], jobId);
+                        } else if (updatedJob.status === 'failed') {
+                            setJobStatus("Error");
+                             alert("❌ Error en Worker: " + (updatedJob.error_message || "Desconocido"));
+                            supabase.removeChannel(channel);
+                            setIsProcessing(false);
+                        }
+                    }
+                )
+                .subscribe();
+
+        } catch (error: any) {
+            console.error("❌ Error en flujo:", error);
+            alert(`❌ Error: ${error.message || "No se pudo completar el proceso."}`);
             setIsProcessing(false);
         }
     };
@@ -169,9 +241,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Columna Izquierda: Configuración */}
                 <div className="lg:col-span-1 space-y-6">
-                    {/* 1. Asegurado */}
                     <div className="bg-fintech-surface border border-slate-700 rounded-xl p-5 shadow-lg">
                         <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center">
                             <span className="bg-slate-800 text-slate-400 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-[10px]">1</span>
@@ -197,7 +267,7 @@ export default function DashboardPage() {
                         </div>
 
                         {selectedAsegurado && (
-                            <div className="p-3 bg-fintech-emerald/5 border border-fintech-emerald/20 rounded-lg animate-in fade-in slide-in-from-top-2">
+                            <div className="p-3 bg-fintech-emerald/5 border border-fintech-emerald/20 rounded-lg">
                                 <div className="flex items-start">
                                     <CheckCircle2 className="w-5 h-5 text-fintech-emerald mt-0.5 mr-2 shrink-0" />
                                     <div>
@@ -209,55 +279,44 @@ export default function DashboardPage() {
                         )}
                     </div>
 
-                    {/* 2. Tipo de Trámite */}
                     <div className="bg-fintech-surface border border-slate-700 rounded-xl p-5 shadow-lg">
                         <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center">
                             <span className="bg-slate-800 text-slate-400 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-[10px]">2</span>
                             Configuración del Trámite
                         </h2>
-
                         <div className="grid grid-cols-2 gap-2 mb-4">
                             <button
                                 onClick={() => setProcedureType("reembolso")}
-                                className={`py-2 px-3 text-xs font-medium rounded-lg border transition-all ${procedureType === "reembolso" ? "bg-fintech-cyan/20 border-fintech-cyan text-fintech-cyan" : "bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500"}`}
-                            >
-                                Reembolso
-                            </button>
+                                className={`py-2 px-3 text-xs font-medium rounded-lg border transition-all ${procedureType === "reembolso" ? "bg-fintech-cyan/20 border-fintech-cyan text-fintech-cyan" : "bg-slate-900 border-slate-700 text-slate-400"}`}
+                            >Reembolso</button>
                             <button
                                 onClick={() => setProcedureType("carta-pase")}
-                                className={`py-2 px-3 text-xs font-medium rounded-lg border transition-all ${procedureType === "carta-pase" ? "bg-fintech-cyan/20 border-fintech-cyan text-fintech-cyan" : "bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500"}`}
-                            >
-                                Carta Pase
-                            </button>
+                                className={`py-2 px-3 text-xs font-medium rounded-lg border transition-all ${procedureType === "carta-pase" ? "bg-fintech-cyan/20 border-fintech-cyan text-fintech-cyan" : "bg-slate-900 border-slate-700 text-slate-400"}`}
+                            >Carta Pase</button>
                         </div>
-
-                        <div className="space-y-3">
-                            <div className="p-3 bg-slate-900/50 rounded-lg">
-                                <p className="text-[10px] text-slate-500 font-bold uppercase mb-2">Automáticos (Se llenan solos):</p>
-                                {procedureConfigs[procedureType].autoPDFs.map((pdf, idx) => (
-                                    <div key={idx} className="flex items-center text-[11px] text-slate-300 mb-1">
-                                        <span className="w-1 h-1 bg-fintech-cyan rounded-full mr-2"></span>
-                                        {pdf.replace(".pdf", "")}
-                                    </div>
-                                ))}
-                            </div>
+                        <div className="p-3 bg-slate-900/50 rounded-lg">
+                            <p className="text-[10px] text-slate-500 font-bold uppercase mb-2">Automáticos:</p>
+                            {procedureConfigs[procedureType].autoPDFs.map((pdf, idx) => (
+                                <div key={idx} className="flex items-center text-[11px] text-slate-300 mb-1">
+                                    <span className="w-1 h-1 bg-fintech-cyan rounded-full mr-2"></span>
+                                    {pdf.replace(".pdf", "")}
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    {/* 3. Siniestro / Padecimiento */}
-                    <div className="bg-fintech-surface border border-slate-700 rounded-xl p-5 shadow-lg opacity-90 transition-opacity">
+                    <div className="bg-fintech-surface border border-slate-700 rounded-xl p-5 shadow-lg">
                         <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center">
                             <span className="bg-slate-800 text-slate-400 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-[10px]">3</span>
                             Evento Médico
                         </h2>
-
                         <select
                             title="Seleccionar Siniestro"
                             disabled={!selectedAsegurado}
-                            className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-lg focus:ring-fintech-cyan focus:border-fintech-cyan p-2.5 block cursor-pointer disabled:opacity-30"
+                            className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-lg p-2.5 block disabled:opacity-30"
                             onChange={(e) => setSelectedSiniestro(e.target.value)}
                         >
-                            <option value="">{selectedAsegurado ? "-- Seleccionar Siniestro Existente --" : "-- Busca a un asegurado arriba --"}</option>
+                            <option value="">{selectedAsegurado ? "-- Seleccionar Siniestro --" : "-- Busca asegurado --"}</option>
                             {selectedAsegurado && siniestrosBD
                                 .filter(s => s.aseguradoId === selectedAsegurado.id)
                                 .map((s) => (
@@ -267,39 +326,54 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Columna Derecha: Documentación Manual */}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="bg-fintech-surface border border-slate-700 rounded-xl p-5 shadow-lg min-h-[500px] flex flex-col">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center">
                                 <span className="bg-slate-800 text-slate-400 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-[10px]">4</span>
-                                Documentación Necesaria (Manual)
+                                Documentación Manual
                             </h2>
                             <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded font-mono">{uploadedFiles.length} adjuntos</span>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            {/* Checklist */}
                             <div className="bg-slate-900/30 border border-slate-800 p-4 rounded-xl">
                                 <p className="text-[11px] text-slate-500 font-bold uppercase mb-3">Checklist del Trámite:</p>
                                 <div className="space-y-2">
-                                    {procedureConfigs[procedureType].manualChecklist.map((item, idx) => (
-                                        <div key={idx} className="flex items-center text-xs text-slate-400">
-                                            <div className="w-3.5 h-3.5 border border-slate-700 rounded mr-2 flex items-center justify-center">
-                                                {/* Aquí podríamos detectar si el OCR ya encontró algo similar */}
+                                    {procedureConfigs[procedureType].manualChecklist.map((item, idx) => {
+                                        const isChecked = Object.values(fileClassifications).some(cls => {
+                                            if (item.toLowerCase().includes("id oficial") && cls === "ine") return true;
+                                            if (item.toLowerCase().includes("factura") && cls === "factura_xml") return true;
+                                            if (item.toLowerCase().includes("receta") && cls === "receta_medica") return true;
+                                            if (item.toLowerCase().includes("informe") && cls === "informe_medico") return true;
+                                            if (item.toLowerCase().includes("domicilio") && cls === "comprobante_domicilio") return true;
+                                            return false;
+                                        });
+
+                                        const isJobFinished = jobStatus === "Completado" || (!isProcessing && Object.keys(fileClassifications).length > 0);
+                                        const isMissing = isJobFinished && !isChecked;
+
+                                        return (
+                                            <div key={idx} className={`flex items-center text-xs transition-colors ${isChecked ? "text-fintech-emerald font-bold" : isMissing ? "text-rose-400" : "text-slate-400"}`}>
+                                                <div className={`w-3.5 h-3.5 border rounded mr-2 flex items-center justify-center transition-all ${isChecked ? "bg-fintech-emerald border-fintech-emerald" : isMissing ? "bg-rose-500/20 border-rose-500" : "border-slate-700"}`}>
+                                                    {isChecked ? (
+                                                        <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                                                    ) : isMissing ? (
+                                                        <span className="text-[10px] font-bold leading-none">✕</span>
+                                                    ) : null}
+                                                </div>
+                                                {item}
+                                                {isChecked && <Sparkles className="w-2.5 h-2.5 ml-2 text-fintech-cyan animate-pulse" />}
+                                                {isMissing && <span className="ml-2 text-[9px] font-bold uppercase tracking-tighter opacity-70">No detectado</span>}
                                             </div>
-                                            {item}
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
 
-                            {/* Dropzone */}
                             <div
                                 {...getRootProps()}
-                                className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 transition-all cursor-pointer
-                                    ${isDragActive ? "border-fintech-emerald bg-fintech-emerald/5" : "border-slate-800 hover:border-fintech-cyan bg-slate-900/20"}
-                                `}
+                                className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 transition-all cursor-pointer ${isDragActive ? "border-fintech-emerald bg-fintech-emerald/5" : "border-slate-800 hover:border-fintech-cyan bg-slate-900/20"}`}
                             >
                                 <input {...getInputProps()} />
                                 <UploadCloud className={`w-8 h-8 mb-2 ${isDragActive ? "text-fintech-emerald" : "text-slate-600"}`} />
@@ -307,49 +381,47 @@ export default function DashboardPage() {
                             </div>
                         </div>
 
-                        {/* Archivos Cargados */}
-                        <div className="flex-1 overflow-y-auto max-h-[220px] scrollbar-hide space-y-2">
-                            {uploadedFiles.map((file, i) => (
-                                <div key={i} className="flex items-center p-3 bg-slate-900/50 border border-slate-800 rounded-lg group animate-in slide-in-from-right-2">
-                                    <FileText className="w-4 h-4 text-slate-500 mr-3" />
-                                    <div className="flex-1">
-                                        <p className="text-xs font-medium text-white truncate">{file.name}</p>
-                                        <p className="text-[10px] text-slate-500 font-mono">{(file.size / 1024).toFixed(1)} KB</p>
+                        <div className="flex-1 overflow-y-auto max-h-[220px] space-y-2 mb-6">
+                            {uploadedFiles.map((file, i) => {
+                                const classification = fileClassifications[file.name];
+                                return (
+                                    <div key={i} className="flex items-center p-3 bg-slate-900/50 border border-slate-800 rounded-lg">
+                                        {isProcessing && !classification ? (
+                                            <Loader2 className="w-4 h-4 text-fintech-cyan mr-3 animate-spin" />
+                                        ) : (
+                                            <FileText className={`w-4 h-4 mr-3 ${classification ? "text-fintech-emerald" : "text-slate-500"}`} />
+                                        )}
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-xs font-medium text-white truncate">{file.name}</p>
+                                                {classification && (
+                                                    <span className="text-[9px] bg-fintech-emerald/10 text-fintech-emerald px-1.5 py-0.5 rounded border border-fintech-emerald/30 uppercase font-bold">
+                                                        {classification.replace("_", " ")}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <button onClick={() => setUploadedFiles(uploadedFiles.filter((_, idx) => idx !== i))} className="text-slate-600 hover:text-rose-400 p-2">✕</button>
                                     </div>
-                                    <button
-                                        onClick={() => setUploadedFiles(uploadedFiles.filter((_, idx) => idx !== i))}
-                                        className="text-slate-600 hover:text-rose-400 p-2"
-                                    >✕</button>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
-                        <div className="mt-6 pt-5 border-t border-slate-800/80 flex items-center justify-end gap-3">
+                        <div className="pt-5 border-t border-slate-800/80 flex items-center justify-end gap-3">
                             {lastDriveLink && (
-                                <a
-                                    href={lastDriveLink}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center px-6 py-3 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 hover:bg-slate-750 transition-all border border-slate-700"
-                                >
-                                    <ExternalLink className="w-4 h-4 mr-2" />
-                                    VER EN DRIVE
+                                <a href={lastDriveLink} target="_blank" rel="noopener noreferrer" className="flex items-center px-6 py-3 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 border border-slate-700">
+                                    <ExternalLink className="w-4 h-4 mr-2" /> VER EN DRIVE
                                 </a>
                             )}
                             <button
                                 onClick={handleProcessBtn}
-                                disabled={!selectedAsegurado || isProcessing}
-                                className={`flex items-center px-10 py-3 rounded-xl font-bold text-sm shadow-xl transition-all
-                                    ${!selectedAsegurado || isProcessing
-                                        ? "bg-slate-800 text-slate-600 cursor-not-allowed"
-                                        : "bg-fintech-cyan hover:bg-cyan-400 text-slate-900 shadow-cyan-500/20"
-                                    }
-                                `}
+                                disabled={!selectedAsegurado || isProcessing || uploadedFiles.length === 0}
+                                className={`flex items-center px-10 py-3 rounded-xl font-bold text-sm shadow-xl transition-all ${!selectedAsegurado || isProcessing || uploadedFiles.length === 0 ? "bg-slate-800 text-slate-600 cursor-not-allowed" : "bg-fintech-cyan hover:bg-cyan-400 text-slate-900"}`}
                             >
                                 {isProcessing ? (
                                     <>
                                         <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
-                                        ARMANDO EXPEDIENTE...
+                                        {jobStatus || "PROCESANDO..."}
                                     </>
                                 ) : (
                                     <>
