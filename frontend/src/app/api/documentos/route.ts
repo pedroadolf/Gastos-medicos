@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { parseStringPromise } from "xml2js";
 import Tesseract from "tesseract.js";
 import { PdfReader } from "pdfreader";
-import { supabase } from "@/lib/supabase";
+import { supabase, getSupabaseService } from "@/lib/supabase";
 
 // Esta ruta ahora actúa como el "Productor" de trabajos
 export async function POST(req: NextRequest) {
@@ -18,8 +18,10 @@ export async function POST(req: NextRequest) {
 
         console.log(`🚀 [QUEUE] Recibidos ${files.length} archivos. Creando Job...`);
 
-        // 1. Crear el Job en Supabase
-        const { data: job, error: jobError } = await supabase
+        // 1. Crear el Job en Supabase usando Service Role centralizado en supabase.ts
+        const supabaseService = getSupabaseService();
+
+        const { data: job, error: jobError } = await supabaseService
             .from('jobs')
             .insert([
                 { 
@@ -33,7 +35,12 @@ export async function POST(req: NextRequest) {
 
         if (jobError) {
             console.error("❌ Error creando Job:", jobError);
-            return NextResponse.json({ error: "Error al iniciar proceso" }, { status: 500 });
+            return NextResponse.json({ 
+                error: "Error al iniciar proceso en Base de Datos", 
+                details: jobError.message,
+                hint: jobError.hint,
+                code: jobError.code
+            }, { status: 500 });
         }
 
         const jobId = job.id;
@@ -163,7 +170,8 @@ async function processFilesInBackground(jobId: string, files: File[]) {
         });
 
         // 5. Actualizar Job como completado
-        await supabase
+        const supabaseService = getSupabaseService();
+        await supabaseService
             .from('jobs')
             .update({ 
                 status: 'completed', 
@@ -191,7 +199,8 @@ async function processFilesInBackground(jobId: string, files: File[]) {
 
     } catch (err: any) {
         console.error(`❌ [WORKER] Error fatal en Job ${jobId}:`, err);
-        await supabase
+        const supabaseService = getSupabaseService();
+        await supabaseService
             .from('jobs')
             .update({ status: 'failed', error_message: err.message })
             .eq('id', jobId);
