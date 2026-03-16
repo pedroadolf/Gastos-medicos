@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { parseStringPromise } from "xml2js";
 import Tesseract from "tesseract.js";
 import { PdfReader } from "pdfreader";
-import { supabase, getSupabaseService } from "@/lib/supabase";
+import { supabase, getSupabaseService, supabaseUrl } from "@/lib/supabase";
 
 // Esta ruta ahora actúa como el "Productor" de trabajos
 export async function POST(req: NextRequest) {
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "No se recibieron archivos" }, { status: 400 });
         }
 
-        console.log(`🚀 [QUEUE] Recibidos ${files.length} archivos. Creando Job...`);
+        console.log(`🚀 [QUEUE] Recibidos ${files.length} archivos. Creando Job en ${supabaseUrl}...`);
 
         // 1. Crear el Job en Supabase usando Service Role centralizado en supabase.ts
         const supabaseService = getSupabaseService();
@@ -39,7 +39,8 @@ export async function POST(req: NextRequest) {
                 error: "Error al iniciar proceso en Base de Datos", 
                 details: jobError.message,
                 hint: jobError.hint,
-                code: jobError.code
+                code: jobError.code,
+                target: supabaseUrl
             }, { status: 500 });
         }
 

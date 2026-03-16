@@ -12,6 +12,9 @@ if (!finalUrl || !supabaseAnonKey) {
   console.warn('⚠️ [WARN] Supabase credentials missing or invalid.');
 }
 
+// Exportamos la URL final para diagnóstico si es necesario
+export const supabaseUrl = finalUrl;
+
 // Exportamos el cliente anónimo (usado en componentes client-side si aplica)
 export const supabase = createClient(finalUrl, supabaseAnonKey);
 

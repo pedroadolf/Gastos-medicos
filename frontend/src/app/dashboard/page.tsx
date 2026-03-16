@@ -153,7 +153,8 @@ export default function DashboardPage() {
             const initialData = await response.json();
             
             if (!initialData.jobId) {
-                throw new Error("No se pudo crear el Job de procesamiento.");
+                const detailMsg = initialData.details ? `\n\nDetalle: ${initialData.details}\nCódigo: ${initialData.code}\nTarget: ${initialData.target}` : "";
+                throw new Error("No se pudo crear el Job de procesamiento." + detailMsg);
             }
 
             const jobId = initialData.jobId;
