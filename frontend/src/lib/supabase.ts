@@ -5,8 +5,10 @@ const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-// Determinamos la URL final una sola vez
-const finalUrl = (!envUrl || envUrl.includes('supabase.pash.uno')) ? FALLBACK_URL : envUrl;
+// Determinamos la URL final. 
+// Usamos la de entorno si existe (especialmente importante para el navegador que requiere HTTPS).
+// El fallback interno solo se usa si no hay URL configurada.
+const finalUrl = envUrl || FALLBACK_URL;
 
 if (!finalUrl || !supabaseAnonKey) {
   console.warn('⚠️ [WARN] Supabase credentials missing or invalid.');
