@@ -262,7 +262,7 @@ export async function llenarFormatoGMM(
 
     // 4. Aplanar el PDF (Lock)
     // Opcional: Aplanamos para que el PDF final ya no sea editable por el usuario y sea inmutable.
-    form.flatten();
+    // form.flatten(); // COMENTADO POR BUG DE PDF-LIB "WinAnsi cannot encode '✔'" al renderizar CheckBoxes
 
     // 5. Guardar y Exportar Bytes
     const pdfBytes = await pdfDoc.save();
