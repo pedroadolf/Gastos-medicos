@@ -97,10 +97,10 @@ export async function POST(req: NextRequest) {
 
                 const doRequest = () => new Promise<void>((resolve) => {
                     const url = new URL(webhookDestino);
-                    const isHttps = url.protocol === 'https:';
-                    const reqModule = isHttps ? https : http;
+                    let isHttps = url.protocol === 'https:';
+                    let reqModule: any = isHttps ? https : http;
 
-                    const options = {
+                    const options: any = {
                         method: 'POST',
                         hostname: url.hostname,
                         port: url.port || (isHttps ? 443 : 80),
@@ -108,22 +108,32 @@ export async function POST(req: NextRequest) {
                         headers: {
                             'Content-Type': 'application/json',
                             'Content-Length': Buffer.byteLength(requestPayload)
-                        } as Record<string, string | number>,
+                        },
                         timeout: 30000,
                         rejectUnauthorized: false
                     };
 
                     if (process.env.N8N_WEBHOOK_HOST_HEADER) {
                         options.headers['Host'] = process.env.N8N_WEBHOOK_HOST_HEADER;
+                        
+                        // Si estamos usando Host override hacia Traefik localmente,
+                        // forzamos HTTPS en el puerto 443 con SNI para evitar el Redirect 308 de Traefik HTTP->HTTPS
+                        isHttps = true;
+                        reqModule = https;
+                        options.port = 443;
+                        options.servername = process.env.N8N_WEBHOOK_HOST_HEADER; // SNI para Traefik
                     }
 
-                    const req = reqModule.request(options, (res) => {
+                    const req = reqModule.request(options, (res: any) => {
                         let responseBody = '';
-                        res.on('data', (chunk) => responseBody += chunk);
+                        res.on('data', (chunk: any) => responseBody += chunk);
                         res.on('end', () => {
                             if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
                                 n8nSuccess = true;
                                 console.log(`✅ [DEBUG] n8n respondió OK (Status ${res.statusCode})`);
+                            } else if (res.statusCode === 308 || res.statusCode === 301 || res.statusCode === 302) {
+                                n8nError = `Redirected to ${res.headers.location}. Asegúrate de usar HTTPS en el N8N_WEBHOOK_URL o el bypass SNI falló.`;
+                                console.error(`❌ [DEBUG] n8n respondió con REDIRECT (Status ${res.statusCode}):`, res.headers.location);
                             } else {
                                 n8nError = responseBody;
                                 console.error(`❌ [DEBUG] n8n respondió con ERROR (Status ${res.statusCode}):`, n8nError);
@@ -132,7 +142,7 @@ export async function POST(req: NextRequest) {
                         });
                     });
 
-                    req.on('error', (err) => {
+                    req.on('error', (err: any) => {
                         n8nError = err.message;
                         console.error("❌ Error de red al contactar a n8n:", err.message);
                         resolve();
