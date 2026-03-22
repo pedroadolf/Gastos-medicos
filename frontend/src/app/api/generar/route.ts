@@ -78,9 +78,14 @@ export async function POST(req: NextRequest) {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
+                const headers: Record<string, string> = { "Content-Type": "application/json" };
+                if (process.env.N8N_WEBHOOK_HOST_HEADER) {
+                    headers["Host"] = process.env.N8N_WEBHOOK_HOST_HEADER;
+                }
+
                 const response = await fetch(webhookDestino, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: headers,
                     signal: controller.signal,
                     body: JSON.stringify({
                         // Compatibilidad: primer documento como campo principal
