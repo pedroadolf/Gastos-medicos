@@ -264,7 +264,7 @@ export async function llenarFormatoGMM(
     // Opcional: Aplanamos para que el PDF final ya no sea editable por el usuario y sea inmutable.
     // form.flatten(); // COMENTADO POR BUG DE PDF-LIB "WinAnsi cannot encode '✔'" al renderizar CheckBoxes
 
-    // 5. Guardar y Exportar Bytes
-    const pdfBytes = await pdfDoc.save();
+    // 5. Guardar y Exportar Bytes (evitamos updateFieldAppearances para evadir el crash WinAnsi)
+    const pdfBytes = await pdfDoc.save({ updateFieldAppearances: false });
     return pdfBytes;
 }

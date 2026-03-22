@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { llenarFormatoGMM } from "@/lib/pdfGenerator";
 import fs from "fs";
 import path from "path";
+import http from "http";
+import https from "https";
 
 export async function POST(req: NextRequest) {
     try {
@@ -73,49 +75,81 @@ export async function POST(req: NextRequest) {
             console.log("📡 Disparando UN SOLO trigger a n8n:", webhookDestino);
 
             try {
-                process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
-
-                const headers: Record<string, string> = { "Content-Type": "application/json" };
-                if (process.env.N8N_WEBHOOK_HOST_HEADER) {
-                    headers["Host"] = process.env.N8N_WEBHOOK_HOST_HEADER;
-                }
-
-                const response = await fetch(webhookDestino, {
-                    method: "POST",
-                    headers: headers,
-                    signal: controller.signal,
-                    body: JSON.stringify({
-                        // Compatibilidad: primer documento como campo principal
-                        documentoBase64: documentosGenerados[0].base64,
-                        // Todos los documentos generados
-                        documentosGenerados: documentosGenerados,
-                        archivosManuales: archivosManuales || [],
-                        metadata: {
-                            siniestroId: datosExtraidos.siniestro?.numeroSiniestro || "DESCONOCIDO",
-                            nombreArchivoGenerado: documentosGenerados[0].nombre,
-                            plantillasUsadas: documentosGenerados.map(d => d.nombre),
-                            totalPlantillas: documentosGenerados.length,
-                            nombreAsegurado: datosExtraidos.asegurado?.nombre || "Expediente_GMM",
-                            nombreCarpetaAsegurado: (datosExtraidos.asegurado?.nombre || "Asegurado_Sin_Nombre").trim(),
-                            nombreCarpetaEvento: prefijoFecha,
-                            fechaEmision: new Date().toISOString().split('T')[0],
-                            emailAsegurado: datosExtraidos.asegurado?.email || "test@pash.uno",
-                            googleDriveFolderId: process.env.GOOGLE_DRIVE_FOLDER_ID || "root"
-                        }
-                    }),
+                const requestPayload = JSON.stringify({
+                    // Compatibilidad: primer documento como campo principal
+                    documentoBase64: documentosGenerados[0].base64,
+                    // Todos los documentos generados
+                    documentosGenerados: documentosGenerados,
+                    archivosManuales: archivosManuales || [],
+                    metadata: {
+                        siniestroId: datosExtraidos.siniestro?.numeroSiniestro || "DESCONOCIDO",
+                        nombreArchivoGenerado: documentosGenerados[0].nombre,
+                        plantillasUsadas: documentosGenerados.map(d => d.nombre),
+                        totalPlantillas: documentosGenerados.length,
+                        nombreAsegurado: datosExtraidos.asegurado?.nombre || "Expediente_GMM",
+                        nombreCarpetaAsegurado: (datosExtraidos.asegurado?.nombre || "Asegurado_Sin_Nombre").trim(),
+                        nombreCarpetaEvento: prefijoFecha,
+                        fechaEmision: new Date().toISOString().split('T')[0],
+                        emailAsegurado: datosExtraidos.asegurado?.email || "test@pash.uno",
+                        googleDriveFolderId: process.env.GOOGLE_DRIVE_FOLDER_ID || "root"
+                    }
                 });
 
-                if (response.ok) {
-                    n8nSuccess = true;
-                    console.log(`✅ [DEBUG] n8n respondió OK (Status ${response.status})`);
-                } else {
-                    n8nError = await response.text();
-                    console.error(`❌ [DEBUG] n8n respondió con ERROR (Status ${response.status}):`, n8nError);
-                }
-                clearTimeout(timeoutId);
+                const doRequest = () => new Promise<void>((resolve) => {
+                    const url = new URL(webhookDestino);
+                    const isHttps = url.protocol === 'https:';
+                    const reqModule = isHttps ? https : http;
+
+                    const options = {
+                        method: 'POST',
+                        hostname: url.hostname,
+                        port: url.port || (isHttps ? 443 : 80),
+                        path: url.pathname + url.search,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Content-Length': Buffer.byteLength(requestPayload)
+                        } as Record<string, string | number>,
+                        timeout: 30000,
+                        rejectUnauthorized: false
+                    };
+
+                    if (process.env.N8N_WEBHOOK_HOST_HEADER) {
+                        options.headers['Host'] = process.env.N8N_WEBHOOK_HOST_HEADER;
+                    }
+
+                    const req = reqModule.request(options, (res) => {
+                        let responseBody = '';
+                        res.on('data', (chunk) => responseBody += chunk);
+                        res.on('end', () => {
+                            if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+                                n8nSuccess = true;
+                                console.log(`✅ [DEBUG] n8n respondió OK (Status ${res.statusCode})`);
+                            } else {
+                                n8nError = responseBody;
+                                console.error(`❌ [DEBUG] n8n respondió con ERROR (Status ${res.statusCode}):`, n8nError);
+                            }
+                            resolve();
+                        });
+                    });
+
+                    req.on('error', (err) => {
+                        n8nError = err.message;
+                        console.error("❌ Error de red al contactar a n8n:", err.message);
+                        resolve();
+                    });
+
+                    req.on('timeout', () => {
+                        req.destroy();
+                        n8nError = 'Timeout after 30000ms';
+                        console.error("❌ Error de red al contactar a n8n (Timeout):", n8nError);
+                        resolve();
+                    });
+
+                    req.write(requestPayload);
+                    req.end();
+                });
+
+                await doRequest();
             } catch (err: any) {
                 n8nError = err.message;
                 console.error("❌ Error de red al contactar a n8n:", err.message);
