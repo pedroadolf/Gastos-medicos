@@ -31,5 +31,15 @@ yarn-error.log*
 # Agent copy (legacy/backup)
 .agent copy/
 venv/
-n8n-feb26-488617-c9139e207e4b.json
-n8n-feb26-488617-c9139e207e4b.json
+data/
+
+# Antigravity artifacts and state
+.antigravity/
+artifacts/
+
+# Temporary and test scripts
+test_*.js
+supabase_diagnostic.js
+*test_payload*
+*updated_workflow*
+temp.json

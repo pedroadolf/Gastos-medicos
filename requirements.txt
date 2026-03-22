@@ -10,3 +10,6 @@ chromadb>=0.4.24
 pytest>=8.0.0
 pytest-asyncio>=0.23.5
 playwright>=1.41.2
+
+# MCP SDK
+mcp-agent>=0.1.0

@@ -5,8 +5,9 @@
 - Genera PLAN.md en artifacts/ con: objetivos, skills necesarias, timeline
 
 ## 2. SKILLS SETUP (1min)
-- Analiza knowledge/skills/ para cargar habilidades base
-- Usa knowledge/skills/07_blueprint_skills_base.md como template
+- Analiza .agent/skills/ para cargar habilidades base
+- Usa .agent/skills/blueprint-base/SKILL.md como template
+- Lee .agent/skills/master-habilidades/SKILL.md para nuevas creaciones
 - Crea agents/ personalizados según proyecto
 
 ## 3. EJECUCIÓN (Variable)

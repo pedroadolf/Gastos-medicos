@@ -1,7 +1,7 @@
 .PHONY: init run test clean status
 
-init: install.sh
-	./install.sh
+init: scripts/install.sh
+	./scripts/install.sh
 
 run:
 	source venv/bin/activate && python src/main.py

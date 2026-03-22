@@ -8,14 +8,12 @@ Este documento define la estructura del equipo de agentes (squad) que trabaja en
 
 | Agente | Rol | Responsabilidades |
 | :--- | :--- | :--- |
-| **Manager (Lead)** | Orquestador | Coordina al equipo, lee el `PLAN.md` y delega tareas. |
-| **Frontend dev** | UI / UX | Desarrollo de React/Next.js, Tailwind, shadcn/ui. |
-| **Backend/DB** | Datos | Google Sheets, Supabase, PostgreSQL. |
-| **Workflow Specialist (n8n)** | Automatización | Creación y mantenimiento de flujos en n8n. |
-| **Dokploy Ops** | DevOps / Deploy | Gestión del VPS, contenedores, SSL y despliegues vía Dokploy. |
-| **QA / Tester** | Calidad | Tests unitarios, integración y E2E (Playwright). |
-| **Security Officer** | Seguridad | Auditoría de código, gestión de secretos y RLS. |
-| **Knowledge Manager** | Documentación | Mantenimiento de KIs y reglas en `knowledge/`. |
+| **Manager (#1)** | Orquestador | Coordina al equipo, lee el `PLAN.md` y delega tareas. |
+| **Frontend dev (#2)** | UI / UX | Desarrollo de React/Next.js, Tailwind, shadcn/ui. |
+| **Backend/DB (#3)** | Datos | Google Sheets, Supabase, PostgreSQL. Valida e inserta datos del workflow. |
+| **Workflow Specialist (#4)** | Automatización | Diseña nodos n8n (Drive Trigger -> OCR -> Parse XML -> Sheets/DB -> ZIP -> Email). |
+| **Filesystem (#9)** | Drive / Local | Maneja PDFs/recetas en Drive y sistema de archivos local. |
+| **Dokploy Ops (#10)** | DevOps / MCP | Gestión del VPS, contenedores y n8n-MCP como puente principal. |
 
 ---
 
@@ -32,24 +30,30 @@ Este documento define la estructura del equipo de agentes (squad) que trabaja en
 
 **Nombre:** `dokploy-agent`  
 **Ubicación:** `/.agent/agents/dokploy_agent.md`  
-**Herramientas:** MCP de Dokploy.
+**Herramientas:** MCP de Dokploy y n8n-MCP.
 
 Este agente se encarga de:
 - Desplegar nuevas versiones de la aplicación.
 - Configurar variables de entorno en el servidor.
 - Gestionar dominios y certificados SSL.
-- Monitorear logs de contenedores y salud del VPS.
+- Monitorear logs de contenedores.
+- **n8n integration:** Descubrir, editar y ejecutar workflows.
 
 ---
 
 ## 📚 SKILL REGISTRY
 
-Todas las habilidades disponibles están mapeadas en `knowledge/skills/`.
+Todas las habilidades disponibles están mapeadas en `.agent/skills/`.
 Para este proyecto, es crítico el uso de:
-- `analizador-proyectos`
-- `frontend-design`
-- `master-habilidades`
-- `dokploy-ops` (Nueva)
+- `analizador-proyectos`: `.agent/skills/analizador-proyectos/`
+- `frontend-design`: (Global o local)
+- `master-habilidades`: `.agent/skills/master-habilidades/`
+- `dokploy-ops`: `.agent/skills/dokploy-ops/`
+- `filesystem-manager`: `.agent/skills/filesystem-manager/`
+- `knowledge-manager`: `.agent/skills/knowledge-manager/`
+- `workflow-executor`: `.agent/skills/workflow-executor/`
+- `gmm-workflow-builder`: `.agent/skills/gmm-workflow-builder/`
+
 
 ---
 
