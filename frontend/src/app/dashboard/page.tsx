@@ -27,12 +27,12 @@ export default function DashboardPage() {
     const procedureConfigs = {
         "reembolso": {
             label: "Trámite de Reembolso",
-            autoPDFs: ["3_Carta-Remesa-Marsh-Mar26.pdf", "4_SRGMM-Mar26.pdf"],
+            autoPDFs: ["3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf"],
             manualChecklist: ["Informe médico firmado", "Estudios diagnósticos", "Comprobante domicilio (<3 meses)", "ID Oficial Afectado/Titular", "Facturas desglosadas", "Estado de cuenta (CLABE)"]
         },
         "carta-pase": {
             label: "Carta Pase (Terapias/Cirugías)",
-            autoPDFs: ["3_Carta-Remesa-Marsh-Mar26.pdf", "4_SRGMM-Mar26.pdf", "5_Declaración-jurada-Mar26.pdf"],
+            autoPDFs: ["3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf", "5_Declaración-jurada-Mar26.pdf"],
             manualChecklist: ["Informe médico firmado", "Estudios diagnósticos", "Comprobante domicilio (<3 meses)", "ID Oficial Afectado/Titular"]
         }
     };
