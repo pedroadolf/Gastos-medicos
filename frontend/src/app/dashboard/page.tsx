@@ -19,6 +19,9 @@ export default function DashboardPage() {
     const [jobStatus, setJobStatus] = useState<string | null>(null);
     const [fileClassifications, setFileClassifications] = useState<Record<string, string>>({});
     const [lastDriveLink, setLastDriveLink] = useState<string | null>(null);
+    // Search dropdown state
+    const [searchQuery, setSearchQuery] = useState("");
+    const [showDropdown, setShowDropdown] = useState(false);
 
     // Configuración de documentos por trámite
     const procedureConfigs = {
@@ -250,23 +253,57 @@ export default function DashboardPage() {
                             <span className="bg-slate-800 text-slate-400 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-[10px]">1</span>
                             Asegurado Seleccionado
                         </h2>
+                        {/* Buscador con dropdown en tiempo real */}
                         <div className="relative mb-4">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none z-10" />
                             <input
                                 type="text"
-                                placeholder={isLoadingData ? "Conectando con Google Sheets..." : "Buscar Asegurado..."}
+                                value={searchQuery}
+                                placeholder={isLoadingData ? "Conectando con Google Sheets..." : `Buscar por nombre o RFC (${aseguradosBD.length} registros)`}
                                 disabled={isLoadingData}
-                                className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-lg focus:ring-fintech-cyan focus:border-fintech-cyan block pl-9 p-2.5 transition-all outline-none"
+                                autoComplete="off"
+                                className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-lg focus:ring-1 focus:ring-fintech-cyan focus:border-fintech-cyan block pl-9 pr-4 p-2.5 transition-all outline-none"
                                 onChange={(e) => {
-                                    const val = e.target.value.toLowerCase();
-                                    if (val.length < 3) {
-                                        setSelectedAsegurado(null);
-                                        return;
-                                    }
-                                    const match = aseguradosBD.find(a => a.nombre.toLowerCase().includes(val) || a.rfc.toLowerCase().includes(val));
-                                    setSelectedAsegurado(match || null);
+                                    setSearchQuery(e.target.value);
+                                    setShowDropdown(e.target.value.length >= 1);
+                                    if (e.target.value === "") setSelectedAsegurado(null);
                                 }}
+                                onFocus={() => searchQuery.length >= 1 && setShowDropdown(true)}
+                                onBlur={() => setTimeout(() => setShowDropdown(false), 180)}
                             />
+                            {/* Dropdown de resultados */}
+                            {showDropdown && (() => {
+                                const q = searchQuery.toLowerCase();
+                                const matches = aseguradosBD.filter(a =>
+                                    a.nombre.toLowerCase().includes(q) ||
+                                    (a.rfc || "").toLowerCase().includes(q) ||
+                                    (a.empresa || "").toLowerCase().includes(q)
+                                );
+                                return matches.length > 0 ? (
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl z-50 max-h-56 overflow-y-auto">
+                                        {matches.map((a) => (
+                                            <button
+                                                key={a.id}
+                                                type="button"
+                                                className="w-full text-left px-3 py-2.5 hover:bg-slate-700 transition-colors border-b border-slate-700/50 last:border-0"
+                                                onMouseDown={() => {
+                                                    setSelectedAsegurado(a);
+                                                    setSearchQuery(a.nombre);
+                                                    setShowDropdown(false);
+                                                    setSelectedSiniestro(null);
+                                                }}
+                                            >
+                                                <p className="text-sm font-semibold text-white truncate">{a.nombre}</p>
+                                                <p className="text-[10px] text-slate-400 font-mono">{a.rfc} · {a.empresa}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl z-50 px-3 py-2.5">
+                                        <p className="text-xs text-slate-500">Sin resultados para "{searchQuery}"</p>
+                                    </div>
+                                );
+                            })()}
                         </div>
 
                         {selectedAsegurado && (
@@ -275,7 +312,8 @@ export default function DashboardPage() {
                                     <CheckCircle2 className="w-5 h-5 text-fintech-emerald mt-0.5 mr-2 shrink-0" />
                                     <div>
                                         <p className="text-sm font-bold text-white">{selectedAsegurado.nombre}</p>
-                                        <p className="text-[11px] text-slate-400 font-mono tracking-tight">{selectedAsegurado.rfc} | {selectedAsegurado.poliza}</p>
+                                        <p className="text-[11px] text-slate-400 font-mono tracking-tight">{selectedAsegurado.rfc} · {selectedAsegurado.poliza}</p>
+                                        <p className="text-[10px] text-slate-500 mt-0.5">{selectedAsegurado.padecimiento} · {selectedAsegurado.siniestroNum}</p>
                                     </div>
                                 </div>
                             </div>
