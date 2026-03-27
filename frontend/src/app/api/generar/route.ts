@@ -143,8 +143,9 @@ export async function POST(req: NextRequest) {
                     });
 
                     req.on('error', (err: any) => {
-                        n8nError = err.message;
-                        console.error("❌ Error de red al contactar a n8n:", err.message);
+                        n8nError = `${err.code || 'UNKNOWN'}: ${err.message}`;
+                        console.error(`❌ Error de red al contactar a n8n (${err.code}):`, err.message);
+                        if (err.syscall) console.error(`  Syscall: ${err.syscall}`);
                         resolve();
                     });
 
