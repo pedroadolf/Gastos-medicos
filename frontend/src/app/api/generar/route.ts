@@ -95,65 +95,78 @@ export async function POST(req: NextRequest) {
                     }
                 });
 
-                const doRequest = () => new Promise<void>((resolve) => {
-                    const url = new URL(webhookDestino);
-                    let isHttps = url.protocol === 'https:';
-                    let reqModule: any = isHttps ? https : http;
+                const doRequest = async (targetUrl: string, isFallback: boolean = false) => {
+                    return new Promise<void>((resolve) => {
+                        try {
+                            const url = new URL(targetUrl);
+                            const isHttps = url.protocol === 'https:';
+                            const reqModule: any = isHttps ? https : http;
 
-                    const options: any = {
-                        method: 'POST',
-                        hostname: url.hostname,
-                        port: url.port || (isHttps ? 443 : 80),
-                        path: url.pathname + url.search,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Content-Length': Buffer.byteLength(requestPayload)
-                        },
-                        timeout: 30000,
-                        rejectUnauthorized: false
-                    };
+                            const options: any = {
+                                method: 'POST',
+                                hostname: url.hostname,
+                                port: url.port || (isHttps ? 443 : 80),
+                                path: url.pathname + url.search,
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Content-Length': Buffer.byteLength(requestPayload)
+                                },
+                                timeout: 10000,
+                                rejectUnauthorized: false
+                            };
 
-                    if (process.env.N8N_WEBHOOK_HOST_HEADER && !isHttps) {
-                        options.headers['Host'] = process.env.N8N_WEBHOOK_HOST_HEADER;
-                    }
-                    const req = reqModule.request(options, (res: any) => {
-                        let responseBody = '';
-                        res.on('data', (chunk: any) => responseBody += chunk);
-                        res.on('end', () => {
-                            console.log(`📡 [Webhook Proxy] Status: ${res.statusCode} | Destino: ${url.hostname}:${options.port}${url.pathname}`);
-                            if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-                                n8nSuccess = true;
-                                console.log(`✅ [DEBUG] n8n respondió OK (Status ${res.statusCode})`);
-                            } else if (res.statusCode === 308 || res.statusCode === 301 || res.statusCode === 302) {
-                                n8nError = `Redirected to ${res.headers.location}.`;
-                                console.error(`❌ [DEBUG] n8n respondió con REDIRECT (Status ${res.statusCode}):`, res.headers.location);
-                            } else {
-                                n8nError = responseBody;
-                                console.error(`❌ [DEBUG] n8n respondió con ERROR (Status ${res.statusCode}):`, n8nError);
+                            if (process.env.N8N_WEBHOOK_HOST_HEADER && !isHttps) {
+                                options.headers['Host'] = process.env.N8N_WEBHOOK_HOST_HEADER;
                             }
+
+                            const typeStr = isFallback ? 'FALLBACK PÚBLICO' : 'INTERNO DOCKER';
+                            console.log(`📡 [Webhook Proxy] Intentando ${typeStr}: ${url.hostname}:${options.port}${url.pathname}`);
+
+                            const req = reqModule.request(options, (res: any) => {
+                                let responseBody = '';
+                                res.on('data', (chunk: any) => responseBody += chunk);
+                                res.on('end', () => {
+                                    console.log(`📡 [Webhook Proxy] Status: ${res.statusCode} | Intento: ${typeStr}`);
+                                    if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+                                        n8nSuccess = true;
+                                        console.log(`✅ [DEBUG] n8n respondió OK`);
+                                    } else {
+                                        console.error(`❌ [DEBUG] n8n respondió con error ${res.statusCode}:`, responseBody);
+                                        if (!isFallback) n8nError = responseBody;
+                                    }
+                                    resolve();
+                                });
+                            });
+
+                            req.on('error', (err: any) => {
+                                console.error(`❌ Error en intento ${typeStr} (${err.code}):`, err.message);
+                                resolve();
+                            });
+
+                            req.on('timeout', () => {
+                                req.destroy();
+                                console.error(`❌ Timeout en intento ${typeStr}`);
+                                resolve();
+                            });
+
+                            req.write(requestPayload);
+                            req.end();
+                        } catch (e: any) {
+                            console.error(`❌ Error fatal en doRequest (${isFallback ? 'fallback' : 'interno'}):`, e.message);
                             resolve();
-                        });
+                        }
                     });
+                };
 
-                    req.on('error', (err: any) => {
-                        n8nError = `${err.code || 'UNKNOWN'}: ${err.message}`;
-                        console.error(`❌ Error de red al contactar a n8n (${err.code}):`, err.message);
-                        if (err.syscall) console.error(`  Syscall: ${err.syscall}`);
-                        resolve();
-                    });
+                // Intento 1: Interno (Dokploy)
+                await doRequest(webhookDestino);
 
-                    req.on('timeout', () => {
-                        req.destroy();
-                        n8nError = 'Timeout after 30000ms';
-                        console.error("❌ Error de red al contactar a n8n (Timeout):", n8nError);
-                        resolve();
-                    });
-
-                    req.write(requestPayload);
-                    req.end();
-                });
-
-                await doRequest();
+                // Intento 2: Fallback Público (si falla el primero)
+                if (!n8nSuccess) {
+                    const publicUrl = "https://n8n.pash.uno/webhook/sgmm-new-request-modular";
+                    console.log("🔄 Iniciando Fallback a URL pública...");
+                    await doRequest(publicUrl, true);
+                }
             } catch (err: any) {
                 n8nError = err.message;
                 console.error("❌ Error de red al contactar a n8n:", err.message);
