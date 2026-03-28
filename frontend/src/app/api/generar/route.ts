@@ -113,26 +113,19 @@ export async function POST(req: NextRequest) {
                         rejectUnauthorized: false
                     };
 
-                    if (process.env.N8N_WEBHOOK_HOST_HEADER) {
+                    if (process.env.N8N_WEBHOOK_HOST_HEADER && !isHttps) {
                         options.headers['Host'] = process.env.N8N_WEBHOOK_HOST_HEADER;
-                        
-                        // Si estamos usando Host override hacia Traefik localmente,
-                        // forzamos HTTPS en el puerto 443 con SNI para evitar el Redirect 308 de Traefik HTTP->HTTPS
-                        isHttps = true;
-                        reqModule = https;
-                        options.port = 443;
-                        options.servername = process.env.N8N_WEBHOOK_HOST_HEADER; // SNI para Traefik
                     }
-
                     const req = reqModule.request(options, (res: any) => {
                         let responseBody = '';
                         res.on('data', (chunk: any) => responseBody += chunk);
                         res.on('end', () => {
+                            console.log(`📡 [Webhook Proxy] Status: ${res.statusCode} | Destino: ${url.hostname}:${options.port}${url.pathname}`);
                             if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
                                 n8nSuccess = true;
                                 console.log(`✅ [DEBUG] n8n respondió OK (Status ${res.statusCode})`);
                             } else if (res.statusCode === 308 || res.statusCode === 301 || res.statusCode === 302) {
-                                n8nError = `Redirected to ${res.headers.location}. Asegúrate de usar HTTPS en el N8N_WEBHOOK_URL o el bypass SNI falló.`;
+                                n8nError = `Redirected to ${res.headers.location}.`;
                                 console.error(`❌ [DEBUG] n8n respondió con REDIRECT (Status ${res.statusCode}):`, res.headers.location);
                             } else {
                                 n8nError = responseBody;
