@@ -175,7 +175,7 @@
       "id": "tool-vector-store-1",
       "name": "PDF_Search_Tool",
       "parameters": {
-        "toolDescription": "Historical medical claim data including audit results.",
+        "description": "Historical medical claim data including audit results.",
         "name": "gmm_history_vector_store_tool",
         "topK": 5
       },
@@ -297,7 +297,7 @@
       "name": "AuditorFiscal Tool",
       "parameters": {
         "jsCode": "// Advanced Fiscal Audit Logic for Mexico GMM\nconst invoice = items[0].json;\nconst rfcRegex = /^([A-ZÑ&]{3,4}) ?(?:- ?)?(\\d{2}(?:0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])) ?(?:- ?)?([A-Z\\d]{2})([A\\d])$/;\n\nconst subtotal = parseFloat(invoice.subtotal || 0);\nconst iva = parseFloat(invoice.iva || 0);\nconst total = parseFloat(invoice.total || 0);\nconst rfc = invoice.rfc || \"\";\n\nconst isRfcValid = rfcRegex.test(rfc);\nconst isArithmeticValid = Math.abs((subtotal + iva) - total) < 0.05;\n\nreturn [{\n  json: {\n    auditStatus: (isRfcValid && isArithmeticValid) ? \"SUCCESS\" : \"WARNING\",\n    checks: {\n      rfc_valid: isRfcValid,\n      arithmetic_valid: isArithmeticValid,\n      variance: Math.abs((subtotal + iva) - total).toFixed(2)\n    },\n    metadata: {\n      auditedAt: new Date().toISOString(),\n      provider_rfc: rfc\n    }\n  }\n}];",
-        "toolDescription": "Validates fiscal information (RFC and arithmetic) for Mexican medical invoices."
+        "description": "Validates fiscal information (RFC and arithmetic) for Mexican medical invoices."
       },
       "position": [
         1072,
@@ -311,7 +311,7 @@
       "name": "ValidadorMedico Tool",
       "parameters": {
         "jsCode": "// Basic Medical Specialty Consistency Check\nconst data = items[0].json;\nconst specialty = (data.specialty || \"\").toLowerCase();\nconst procedure = (data.procedure || \"\").toLowerCase();\n\nconst mappings = {\n  \"cardiolo\": [\"electrocardiograma\", \"ecocardiograma\", \"cateterismo\", \"estudio cardiaco\"],\n  \"gastro\": [\"endoscopia\", \"colonoscopia\", \"cirugía abdominal\"],\n  \"ortopedia\": [\"radiografía\", \"fractura\", \"yeso\", \"artroscopia\", \"reemplazo de cadera\"],\n  \"pediatría\": [\"vacuna\", \"consulta infantil\", \"crecimiento\"]\n};\n\nlet match = false;\nfor (const key in mappings) {\n  if (specialty.includes(key)) {\n    match = mappings[key].some(p => procedure.includes(p));\n    break;\n  }\n}\n\nreturn [{\n  json: {\n    medicalConsistency: match ? \"CONSISTENT\" : \"UNCERTAIN\",\n    reason: match ? \"Specialty covers this procedure\" : \"Procedure not explicitly mapped to specialty\",\n    details: {\n      specialtyFound: specialty,\n      procedureFound: procedure\n    }\n  }\n}];",
-        "toolDescription": "Verifies if the medical procedure is consistent with the doctor's specialty."
+        "description": "Verifies if the medical procedure is consistent with the doctor's specialty."
       },
       "position": [
         1680,
@@ -325,7 +325,7 @@
       "name": "ResumenGenerador Tool",
       "parameters": {
         "jsCode": "// Final GMM Audit Summary Compiler\nconst allData = items[0].json;\n// Collect all insights from AI agent tools\nreturn [{\n  json: {\n    audit_summary: {\n      status: \"FINALIZED\",\n      decision: allData.auditStatus === \"SUCCESS\" && allData.medicalConsistency === \"CONSISTENT\" ? \"APPROVED\" : \"MANUAL_REVIEW_REQUIRED\",\n      timestamp: new Date().toISOString(),\n      report_id: `AUDIT-${Math.random().toString(36).substr(2, 9).toUpperCase()}`\n    }\n  }\n}];",
-        "toolDescription": "Compiles all audit findings into a final structured JSON report."
+        "description": "Compiles all audit findings into a final structured JSON report."
       },
       "position": [
         1520,
