@@ -1,0 +1,621 @@
+{
+  "updatedAt": "2026-03-29T20:44:18.573Z",
+  "createdAt": "2026-03-18T00:33:38.781Z",
+  "id": "Y0Ed5qmai3sDSbyi",
+  "name": "GMM-Monitor-Auditado",
+  "description": null,
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "id": "ScheduleTrigger",
+      "name": "ScheduleTrigger",
+      "position": [
+        -208,
+        -192
+      ],
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check_id_v3",
+              "leftValue": "={{ $json.id }}",
+              "operator": {
+                "operation": "notEmpty",
+                "type": "string"
+              }
+            }
+          ],
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "combinator": "and"
+          }
+        },
+        "options": {}
+      },
+      "id": "FilterExistingRows",
+      "name": "FilterExistingRows",
+      "position": [
+        464,
+        -96
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nreturn items.map(item => {\n    return {\n        json: {\n            timestamp: new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' }),\n            workflowId: item.json.id,\n            workflowName: item.json.name,\n            lastStatus: 'Active',\n            monitoredAt: new Date().toISOString()\n        }\n    };\n});"
+      },
+      "id": "FormatExecutionData",
+      "name": "FormatExecutionData",
+      "position": [
+        688,
+        -168
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "\"__rl\"": true,
+          "mode": "id",
+          "value": "1aHust80ArTzLxr_n1s9XSFdTvNopCYRmvoU75MJmsHA"
+        },
+        "sheetName": {
+          "\"__rl\"": true,
+          "mode": "name",
+          "value": "Dashboard"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "workflowId",
+              "displayName": "workflowId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "workflowName",
+              "displayName": "workflowName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lastStatus",
+              "displayName": "lastStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "monitoredAt",
+              "displayName": "monitoredAt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "DashboardSheetsAppend",
+      "name": "DashboardSheetsAppend",
+      "position": [
+        912,
+        -96
+      ],
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "q3dwRw3CpAZKZxM1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "gmm-monitor-manual-v2",
+        "options": {}
+      },
+      "id": "WebhookManualTrigger",
+      "name": "WebhookManualTrigger",
+      "position": [
+        -208,
+        0
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "webhookId": "983b5990-6d24-4cad-b48c-bfa134f05b34"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  { json: { id: 'eLPePdBS1utfjed0', name: 'GMM-Agent-v2-Autonomous-Gemini' } },\n  { json: { id: 'M5yz5irHURXv0wl0', name: 'GMM-PDF-Processor-Agente-Auditado' } },\n  { json: { id: 'niTxNaK2iazIV6Ku', name: 'GMM-Package-ZIP-Email-Auditado' } },\n  { json: { id: 'iWDi0Oizh4tpnihN', name: 'GMM-Data-Register-Auditado' } },\n  { json: { id: 'BqCVGVZqSbmaJMfq', name: 'GMM-Error-Handler-Proactive' } },\n  { json: { id: 'HXsQabpNnpV3Ntmp', name: 'GMM-FailSafe-Alert' } }\n];"
+      },
+      "id": "GetGMMWorkflowIds",
+      "name": "GetGMMWorkflowIds",
+      "position": [
+        240,
+        -96
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "SHEETS_GMM_ID",
+              "value": "1aHust80ArTzLxr_n1s9XSFdTvNopCYRmvoU75MJmsHA"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "InitConfig-Shared",
+      "name": "InitConfig-Shared",
+      "position": [
+        16,
+        -96
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "DashboardSheetsAppend": {
+      "main": []
+    },
+    "FilterExistingRows": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "FormatExecutionData",
+            "type": "main"
+          },
+          {
+            "node": "DashboardSheetsAppend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FormatExecutionData": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "DashboardSheetsAppend",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "GetGMMWorkflowIds": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "FilterExistingRows",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "InitConfig-Shared": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "GetGMMWorkflowIds",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "ScheduleTrigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "InitConfig-Shared",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "WebhookManualTrigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "InitConfig-Shared",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "binaryMode": "separate",
+    "errorWorkflow": "BqCVGVZqSbmaJMfq"
+  },
+  "staticData": {
+    "node:ScheduleTrigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": {},
+  "versionId": "07f5852a-a4a9-4b56-840d-15cdefa4ba11",
+  "activeVersionId": "ac813923-f512-4fb9-afe7-22d35e51fb7d",
+  "versionCounter": 99,
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2026-03-18T00:33:38.781Z",
+      "createdAt": "2026-03-18T00:33:38.781Z",
+      "role": "workflow:owner",
+      "workflowId": "Y0Ed5qmai3sDSbyi",
+      "projectId": "XM6RyYxoVfaDMVrh",
+      "project": {
+        "updatedAt": "2026-03-07T01:51:00.726Z",
+        "createdAt": "2026-03-07T01:41:52.722Z",
+        "id": "XM6RyYxoVfaDMVrh",
+        "name": "pedro soto <pash.mx@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "e2ce3a8c-1436-4b2a-a40d-af0a46612231"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": {
+    "updatedAt": "2026-03-28T02:01:52.876Z",
+    "createdAt": "2026-03-28T01:57:51.464Z",
+    "versionId": "ac813923-f512-4fb9-afe7-22d35e51fb7d",
+    "workflowId": "Y0Ed5qmai3sDSbyi",
+    "nodes": [
+      {
+        "id": "ScheduleTrigger",
+        "name": "ScheduleTrigger",
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes"
+              }
+            ]
+          }
+        },
+        "position": [
+          -208,
+          0
+        ],
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3
+      },
+      {
+        "id": "FilterExistingRows",
+        "name": "FilterExistingRows",
+        "parameters": {
+          "conditions": {
+            "combinator": "and",
+            "conditions": [
+              {
+                "id": "check_id_v3",
+                "leftValue": "={{ $json.id }}",
+                "operator": {
+                  "operation": "notEmpty",
+                  "type": "string"
+                }
+              }
+            ],
+            "options": {
+              "version": 2,
+              "leftValue": "",
+              "caseSensitive": true,
+              "typeValidation": "strict",
+              "combinator": "and"
+            }
+          }
+        },
+        "position": [
+          240,
+          96
+        ],
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.3
+      },
+      {
+        "id": "FormatExecutionData",
+        "name": "FormatExecutionData",
+        "parameters": {
+          "jsCode": "const items = $input.all();\nreturn items.map(item => {\n    return {\n        json: {\n            timestamp: new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' }),\n            workflowId: item.json.id,\n            workflowName: item.json.name,\n            lastStatus: 'Active',\n            monitoredAt: new Date().toISOString()\n        }\n    };\n});"
+        },
+        "position": [
+          464,
+          96
+        ],
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "q3dwRw3CpAZKZxM1",
+            "name": "Google Sheets account"
+          }
+        },
+        "id": "DashboardSheetsAppend",
+        "name": "DashboardSheetsAppend",
+        "parameters": {
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {}
+          },
+          "documentId": {
+            "\"__rl\"": true,
+            "mode": "id",
+            "value": "1aHust80ArTzLxr_n1s9XSFdTvNopCYRmvoU75MJmsHA"
+          },
+          "operation": "append",
+          "resource": "sheet",
+          "sheetName": {
+            "\"__rl\"": true,
+            "mode": "name",
+            "value": "Dashboard"
+          }
+        },
+        "position": [
+          688,
+          96
+        ],
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7
+      },
+      {
+        "id": "WebhookManualTrigger",
+        "name": "WebhookManualTrigger",
+        "parameters": {
+          "httpMethod": "POST",
+          "options": {},
+          "path": "gmm-monitor-manual-v2"
+        },
+        "position": [
+          -208,
+          192
+        ],
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "webhookId": "983b5990-6d24-4cad-b48c-bfa134f05b34"
+      },
+      {
+        "id": "GetGMMWorkflowIds",
+        "name": "GetGMMWorkflowIds",
+        "parameters": {
+          "jsCode": "return [\n  { json: { id: 'eLPePdBS1utfjed0', name: 'GMM-Agent-v2-Autonomous-Gemini' } },\n  { json: { id: 'M5yz5irHURXv0wl0', name: 'GMM-PDF-Processor-Agente-Auditado' } },\n  { json: { id: 'niTxNaK2iazIV6Ku', name: 'GMM-Package-ZIP-Email-Auditado' } },\n  { json: { id: 'iWDi0Oizh4tpnihN', name: 'GMM-Data-Register-Auditado' } },\n  { json: { id: 'BqCVGVZqSbmaJMfq', name: 'GMM-Error-Handler-Proactive' } },\n  { json: { id: 'HXsQabpNnpV3Ntmp', name: 'GMM-FailSafe-Alert' } }\n];"
+        },
+        "position": [
+          16,
+          96
+        ],
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2
+      },
+      {
+        "id": "InitConfig-Shared",
+        "name": "InitConfig-Shared",
+        "parameters": {
+          "options": {},
+          "values": {
+            "string": [
+              {
+                "name": "SHEETS_GMM_ID",
+                "value": "1aHust80ArTzLxr_n1s9XSFdTvNopCYRmvoU75MJmsHA"
+              }
+            ]
+          }
+        },
+        "position": [
+          -208,
+          -192
+        ],
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 1
+      }
+    ],
+    "connections": {
+      "DashboardSheetsAppend": {
+        "main": []
+      },
+      "FilterExistingRows": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "FormatExecutionData",
+              "type": "main"
+            },
+            {
+              "node": "DashboardSheetsAppend",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "FormatExecutionData": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "DashboardSheetsAppend",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "GetGMMWorkflowIds": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "FilterExistingRows",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "InitConfig-Shared": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "GetGMMWorkflowIds",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "ScheduleTrigger": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "InitConfig-Shared",
+              "type": "main"
+            }
+          ]
+        ]
+      },
+      "WebhookManualTrigger": {
+        "main": [
+          [
+            {
+              "index": 0,
+              "node": "InitConfig-Shared",
+              "type": "main"
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "pedro soto",
+    "name": "Version ac813923",
+    "description": "",
+    "autosaved": false,
+    "workflowPublishHistory": [
+      {
+        "createdAt": "2026-03-28T02:01:48.109Z",
+        "id": 1156,
+        "workflowId": "Y0Ed5qmai3sDSbyi",
+        "versionId": "ac813923-f512-4fb9-afe7-22d35e51fb7d",
+        "event": "deactivated",
+        "userId": "e2ce3a8c-1436-4b2a-a40d-af0a46612231"
+      },
+      {
+        "createdAt": "2026-03-28T02:01:52.871Z",
+        "id": 1157,
+        "workflowId": "Y0Ed5qmai3sDSbyi",
+        "versionId": "ac813923-f512-4fb9-afe7-22d35e51fb7d",
+        "event": "activated",
+        "userId": "e2ce3a8c-1436-4b2a-a40d-af0a46612231"
+      },
+      {
+        "createdAt": "2026-03-28T01:57:51.516Z",
+        "id": 1152,
+        "workflowId": "Y0Ed5qmai3sDSbyi",
+        "versionId": "ac813923-f512-4fb9-afe7-22d35e51fb7d",
+        "event": "deactivated",
+        "userId": "e2ce3a8c-1436-4b2a-a40d-af0a46612231"
+      },
+      {
+        "createdAt": "2026-03-28T01:57:51.545Z",
+        "id": 1153,
+        "workflowId": "Y0Ed5qmai3sDSbyi",
+        "versionId": "ac813923-f512-4fb9-afe7-22d35e51fb7d",
+        "event": "activated",
+        "userId": "e2ce3a8c-1436-4b2a-a40d-af0a46612231"
+      }
+    ]
+  }
+}
