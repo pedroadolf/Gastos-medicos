@@ -175,7 +175,7 @@
       "id": "tool-vector-store-1",
       "name": "PDF_Search_Tool",
       "parameters": {
-        "description": "Historical medical claim data including audit results.",
+        "toolDescription": "Historical medical claim data including audit results.",
         "name": "gmm_history_vector_store_tool",
         "topK": 5
       },
