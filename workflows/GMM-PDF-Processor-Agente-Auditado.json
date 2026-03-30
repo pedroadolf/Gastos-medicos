@@ -272,7 +272,11 @@
       "id": "drive-download-pdf-1",
       "name": "Download PDF Binary",
       "parameters": {
-        "fileId": "={{ $node[\"List PDFs in Folder\"].json.id }}",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $node[\"List PDFs in Folder\"].json.id }}",
+          "mode": "expression"
+        },
         "operation": "download",
         "options": {}
       },
@@ -441,16 +445,14 @@
       "ai_languageModel": [
         [
           {
-            "index": 0,
             "node": "AlOCR",
-            "type": "ai_languageModel"
-          }
-        ],
-        [
+            "type": "ai_languageModel",
+            "index": 0
+          },
           {
-            "index": 0,
             "node": "PDF Search Tool",
-            "type": "ai_languageModel"
+            "type": "ai_languageModel",
+            "index": 0
           }
         ]
       ]
