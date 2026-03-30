@@ -173,11 +173,10 @@
     },
     {
       "id": "tool-vector-store-1",
-      "name": "PDF Search Tool",
+      "name": "PDF_Search_Tool",
       "parameters": {
-        "description": "Search previous medical claims and audit history in the GMM vector store. Useful for identifying recurring patterns or historical pricing.",
+        "description": "Historical medical claim data including audit results.",
         "name": "gmm_history_vector_store_tool",
-        "toolDescription": "Use this tool to search historical medical claim data. It helps cross-reference the current invoice with past audits for consistency in pricing and diagnoses. Input should be a relevant search query about the patient or procedure.",
         "topK": 5
       },
       "position": [
@@ -233,11 +232,12 @@
       "onError": "continueRegularOutput",
       "parameters": {
         "filters": {
-          "name": "siniestros"
+          "name": "siniestros",
+          "mimeType": "application/vnd.google-apps.folder"
         },
         "operation": "search",
         "options": {},
-        "resource": "folder"
+        "resource": "file"
       },
       "position": [
         48,
@@ -296,7 +296,8 @@
       "id": "auditor-fiscal-1",
       "name": "AuditorFiscal Tool",
       "parameters": {
-        "jsCode": "// Advanced Fiscal Audit Logic for Mexico GMM\nconst invoice = items[0].json;\nconst rfcRegex = /^([A-ZÑ&]{3,4}) ?(?:- ?)?(\\d{2}(?:0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])) ?(?:- ?)?([A-Z\\d]{2})([A\\d])$/;\n\nconst subtotal = parseFloat(invoice.subtotal || 0);\nconst iva = parseFloat(invoice.iva || 0);\nconst total = parseFloat(invoice.total || 0);\nconst rfc = invoice.rfc || \"\";\n\nconst isRfcValid = rfcRegex.test(rfc);\nconst isArithmeticValid = Math.abs((subtotal + iva) - total) < 0.05;\n\nreturn [{\n  json: {\n    auditStatus: (isRfcValid && isArithmeticValid) ? \"SUCCESS\" : \"WARNING\",\n    checks: {\n      rfc_valid: isRfcValid,\n      arithmetic_valid: isArithmeticValid,\n      variance: Math.abs((subtotal + iva) - total).toFixed(2)\n    },\n    metadata: {\n      auditedAt: new Date().toISOString(),\n      provider_rfc: rfc\n    }\n  }\n}];"
+        "jsCode": "// Advanced Fiscal Audit Logic for Mexico GMM\nconst invoice = items[0].json;\nconst rfcRegex = /^([A-ZÑ&]{3,4}) ?(?:- ?)?(\\d{2}(?:0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])) ?(?:- ?)?([A-Z\\d]{2})([A\\d])$/;\n\nconst subtotal = parseFloat(invoice.subtotal || 0);\nconst iva = parseFloat(invoice.iva || 0);\nconst total = parseFloat(invoice.total || 0);\nconst rfc = invoice.rfc || \"\";\n\nconst isRfcValid = rfcRegex.test(rfc);\nconst isArithmeticValid = Math.abs((subtotal + iva) - total) < 0.05;\n\nreturn [{\n  json: {\n    auditStatus: (isRfcValid && isArithmeticValid) ? \"SUCCESS\" : \"WARNING\",\n    checks: {\n      rfc_valid: isRfcValid,\n      arithmetic_valid: isArithmeticValid,\n      variance: Math.abs((subtotal + iva) - total).toFixed(2)\n    },\n    metadata: {\n      auditedAt: new Date().toISOString(),\n      provider_rfc: rfc\n    }\n  }\n}];",
+        "toolDescription": "Validates fiscal information (RFC and arithmetic) for Mexican medical invoices."
       },
       "position": [
         1072,
@@ -309,7 +310,8 @@
       "id": "validador-medico-1",
       "name": "ValidadorMedico Tool",
       "parameters": {
-        "jsCode": "// Basic Medical Specialty Consistency Check\nconst data = items[0].json;\nconst specialty = (data.specialty || \"\").toLowerCase();\nconst procedure = (data.procedure || \"\").toLowerCase();\n\nconst mappings = {\n  \"cardiolo\": [\"electrocardiograma\", \"ecocardiograma\", \"cateterismo\", \"estudio cardiaco\"],\n  \"gastro\": [\"endoscopia\", \"colonoscopia\", \"cirugía abdominal\"],\n  \"ortopedia\": [\"radiografía\", \"fractura\", \"yeso\", \"artroscopia\", \"reemplazo de cadera\"],\n  \"pediatría\": [\"vacuna\", \"consulta infantil\", \"crecimiento\"]\n};\n\nlet match = false;\nfor (const key in mappings) {\n  if (specialty.includes(key)) {\n    match = mappings[key].some(p => procedure.includes(p));\n    break;\n  }\n}\n\nreturn [{\n  json: {\n    medicalConsistency: match ? \"CONSISTENT\" : \"UNCERTAIN\",\n    reason: match ? \"Specialty covers this procedure\" : \"Procedure not explicitly mapped to specialty\",\n    details: {\n      specialtyFound: specialty,\n      procedureFound: procedure\n    }\n  }\n}];"
+        "jsCode": "// Basic Medical Specialty Consistency Check\nconst data = items[0].json;\nconst specialty = (data.specialty || \"\").toLowerCase();\nconst procedure = (data.procedure || \"\").toLowerCase();\n\nconst mappings = {\n  \"cardiolo\": [\"electrocardiograma\", \"ecocardiograma\", \"cateterismo\", \"estudio cardiaco\"],\n  \"gastro\": [\"endoscopia\", \"colonoscopia\", \"cirugía abdominal\"],\n  \"ortopedia\": [\"radiografía\", \"fractura\", \"yeso\", \"artroscopia\", \"reemplazo de cadera\"],\n  \"pediatría\": [\"vacuna\", \"consulta infantil\", \"crecimiento\"]\n};\n\nlet match = false;\nfor (const key in mappings) {\n  if (specialty.includes(key)) {\n    match = mappings[key].some(p => procedure.includes(p));\n    break;\n  }\n}\n\nreturn [{\n  json: {\n    medicalConsistency: match ? \"CONSISTENT\" : \"UNCERTAIN\",\n    reason: match ? \"Specialty covers this procedure\" : \"Procedure not explicitly mapped to specialty\",\n    details: {\n      specialtyFound: specialty,\n      procedureFound: procedure\n    }\n  }\n}];",
+        "toolDescription": "Verifies if the medical procedure is consistent with the doctor's specialty."
       },
       "position": [
         1680,
@@ -322,7 +324,8 @@
       "id": "resumen-generador-1",
       "name": "ResumenGenerador Tool",
       "parameters": {
-        "jsCode": "// Final GMM Audit Summary Compiler\nconst allData = items[0].json;\n// Collect all insights from AI agent tools\nreturn [{\n  json: {\n    audit_summary: {\n      status: \"FINALIZED\",\n      decision: allData.auditStatus === \"SUCCESS\" && allData.medicalConsistency === \"CONSISTENT\" ? \"APPROVED\" : \"MANUAL_REVIEW_REQUIRED\",\n      timestamp: new Date().toISOString(),\n      report_id: `AUDIT-${Math.random().toString(36).substr(2, 9).toUpperCase()}`\n    }\n  }\n}];"
+        "jsCode": "// Final GMM Audit Summary Compiler\nconst allData = items[0].json;\n// Collect all insights from AI agent tools\nreturn [{\n  json: {\n    audit_summary: {\n      status: \"FINALIZED\",\n      decision: allData.auditStatus === \"SUCCESS\" && allData.medicalConsistency === \"CONSISTENT\" ? \"APPROVED\" : \"MANUAL_REVIEW_REQUIRED\",\n      timestamp: new Date().toISOString(),\n      report_id: `AUDIT-${Math.random().toString(36).substr(2, 9).toUpperCase()}`\n    }\n  }\n}];",
+        "toolDescription": "Compiles all audit findings into a final structured JSON report."
       },
       "position": [
         1520,
@@ -335,7 +338,7 @@
       "id": "0ff3a2fc-de14-4d5d-a7fe-a6c3b2875243",
       "name": "Test-Webhook-GMM-Audit",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
+      "typeVersion": 2.1,
       "position": [
         48,
         -250
@@ -357,10 +360,11 @@
       ],
       "parameters": {
         "filters": {
-          "name": "sgmm-automation"
+          "name": "sgmm-automation",
+          "mimeType": "application/vnd.google-apps.folder"
         },
         "operation": "search",
-        "resource": "folder"
+        "resource": "file"
       },
       "credentials": {
         "googleDriveOAuth2Api": {
@@ -381,10 +385,11 @@
       "parameters": {
         "filters": {
           "name": "siniestros",
+          "mimeType": "application/vnd.google-apps.folder",
           "parentId": "={{ $node[\"Find-Root-SGMM-Folder\"].json.id }}"
         },
         "operation": "search",
-        "resource": "folder"
+        "resource": "file"
       },
       "credentials": {
         "googleDriveOAuth2Api": {
@@ -416,7 +421,7 @@
       "parameters": {
         "operation": "executeSql",
         "query": "-- 1. Enable pgvector extension\nCREATE EXTENSION IF NOT EXISTS vector;\n\n-- 2. Create the gmm_embeddings table\nCREATE TABLE IF NOT EXISTS public.gmm_embeddings (\n  id bigserial PRIMARY KEY,\n  content text NOT NULL,\n  metadata jsonb,\n  embedding vector(1536)\n);\n\n-- 3. Create index\nCREATE INDEX IF NOT EXISTS gmm_embeddings_idx ON public.gmm_embeddings USING hnsw (embedding vector_cosine_ops);\n\n-- 4. Function for similarity search\nCREATE OR REPLACE FUNCTION match_embeddings (\n  query_embedding vector(1536),\n  match_threshold float,\n  match_count int\n)\nRETURNS TABLE (\n  id bigint,\n  content text,\n  metadata jsonb,\n  similarity float\n)\nLANGUAGE plpgsql\nAS $$\nBEGIN\n  RETURN QUERY\n  SELECT\n    gmm_embeddings.id,\n    gmm_embeddings.content,\n    gmm_embeddings.metadata,\n    1 - (gmm_embeddings.embedding <=> query_embedding) AS similarity\n  FROM gmm_embeddings\n  WHERE 1 - (gmm_embeddings.embedding <=> query_embedding) > match_threshold\n  ORDER BY similarity DESC\n  LIMIT match_count;\nEND;\n$$;",
-        "resource": "generic"
+        "resource": "database"
       },
       "credentials": {
         "supabaseApi": {
@@ -445,6 +450,11 @@
           {
             "index": 0,
             "node": "AlOCR",
+            "type": "ai_languageModel"
+          },
+          {
+            "index": 0,
+            "node": "PDF_Search_Tool",
             "type": "ai_languageModel"
           }
         ]
@@ -538,7 +548,7 @@
         ]
       ]
     },
-    "PDF Search Tool": {
+    "PDF_Search_Tool": {
       "ai_tool": [
         [
           {
@@ -598,7 +608,7 @@
         [
           {
             "index": 0,
-            "node": "PDF Search Tool",
+            "node": "PDF_Search_Tool",
             "type": "ai_vectorStore"
           }
         ]
