@@ -260,7 +260,8 @@
         768
       ],
       "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3
+      "typeVersion": 3,
+      "onError": "continueRegularOutput"
     },
     {
       "credentials": {
@@ -285,7 +286,8 @@
         768
       ],
       "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3
+      "typeVersion": 3,
+      "onError": "continueRegularOutput"
     },
     {
       "id": "auditor-fiscal-1",
@@ -349,7 +351,8 @@
       ],
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "webhookId": "374cdb51-bbe6-4ce9-9e7a-e12ec90c9761"
+      "webhookId": "374cdb51-bbe6-4ce9-9e7a-e12ec90c9761",
+      "onError": "continueRegularOutput"
     },
     {
       "credentials": {
@@ -371,7 +374,8 @@
         656
       ],
       "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3
+      "typeVersion": 3,
+      "onError": "continueRegularOutput"
     },
     {
       "credentials": {
@@ -393,7 +397,8 @@
         656
       ],
       "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3
+      "typeVersion": 3,
+      "onError": "continueRegularOutput"
     },
     {
       "id": "b63fa03b-3ede-479f-8e6e-726f6e3a86bb",
