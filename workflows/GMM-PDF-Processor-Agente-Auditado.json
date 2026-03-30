@@ -130,6 +130,7 @@
       "id": "gemini-ocr-id-101",
       "name": "ChatModelOCR",
       "parameters": {
+        "modelName": "models/gemini-1.5-flash-8b",
         "options": {}
       },
       "position": [
