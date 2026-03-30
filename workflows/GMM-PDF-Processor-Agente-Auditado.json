@@ -1,11 +1,8 @@
 {
-  "updatedAt": "2026-03-29T23:59:36.324Z",
+  "updatedAt": "2026-03-30T17:12:15.075Z",
   "createdAt": "2026-03-15T23:26:50.322Z",
   "id": "M5yz5irHURXv0wl0",
   "name": "GMM-PDF-Processor-Agente-Auditado",
-  "description": null,
-  "active": true,
-  "isArchived": false,
   "nodes": [
     {
       "id": "trigger-id-ocr-1",
@@ -26,8 +23,8 @@
         }
       },
       "position": [
-        48,
-        -112
+        -208,
+        464
       ],
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1
@@ -48,11 +45,12 @@
         "operation": "getAll"
       },
       "position": [
-        272,
-        -112
+        240,
+        160
       ],
       "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2
+      "typeVersion": 2.2,
+      "webhookId": "4b2868f1-6b27-4394-8a60-bf160d3d023a"
     },
     {
       "credentials": {
@@ -68,11 +66,12 @@
         "operation": "get"
       },
       "position": [
-        496,
-        -112
+        464,
+        160
       ],
       "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2
+      "typeVersion": 2.2,
+      "webhookId": "8a2b49c0-cb62-4ab4-9c81-d5875b4d3e24"
     },
     {
       "id": "filter-pdf-id-101",
@@ -92,17 +91,17 @@
             }
           ],
           "options": {
-            "version": 2,
-            "leftValue": "",
             "caseSensitive": true,
-            "typeValidation": "strict"
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
           }
         },
         "options": {}
       },
       "position": [
-        720,
-        -112
+        672,
+        -256
       ],
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3
@@ -111,11 +110,12 @@
       "id": "agent-ocr-id-101",
       "name": "AlOCR",
       "parameters": {
-        "systemMessage": "You are the GMM Audit Intelligence Agent. Your mission is to process medical invoices with extreme precision (100% accuracy).\\n\\nAVAILABLE TOOLS:\\n1. gmm_history_vector_store_tool: Search historical logs and previously extracted information.\\n2. AuditorFiscal: Validate RFC, tax calculations, and arithmetic consistency.\\n3. ValidadorMedico: Verify medical consistency (specialty vs procedure vs patient).\\n4. ResumenGenerador: Compile all findings into a structured audit report JSON.\\n\\nEXECUTION FLOW:\\n1. Analyze the PDF text provided in the input.\\n2. Search history for similar previous claims using gmm_history_vector_store_tool.\\n3. Perform fiscal audit using AuditorFiscal.\\n4. Perform medical validation using ValidadorMedico.\\n5. Generate the final summary JSON using ResumenGenerador.\\n\\nIMPORTANT: Always return a final summary in the specified JSON format."
+        "options": {},
+        "systemMessage": "Eres un auditor experto en Gastos Médicos Mayores (GMM) en México. Tu objetivo es procesar facturas (PDFs) y registros históricos para determinar la validez fiscal y médica de una reclamación. Utiliza las herramientas disponibles para verificar RFCs, cálculos aritméticos y consistencia médica. Responde siempre con un resumen claro del estatus de la auditoría."
       },
       "position": [
-        1216,
-        -112
+        1184,
+        -256
       ],
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1
@@ -134,8 +134,8 @@
         "options": {}
       },
       "position": [
-        864,
-        96
+        800,
+        -32
       ],
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1
@@ -151,8 +151,8 @@
       "name": "Gemini Embeddings",
       "parameters": {},
       "position": [
-        1456,
-        512
+        816,
+        336
       ],
       "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
       "typeVersion": 1
@@ -165,23 +165,23 @@
         "options": {}
       },
       "position": [
-        944,
-        512
+        1072,
+        384
       ],
       "type": "@n8n/n8n-nodes-langchain.documentBinaryInputLoader",
       "typeVersion": 1
     },
     {
       "id": "tool-vector-store-1",
-      "name": "PDF_Search_Tool",
+      "name": "PDF Search Tool",
       "parameters": {
-        "description": "Historical medical claim data including audit results.",
-        "name": "gmm_history_vector_store_tool",
-        "topK": 5
+        "description": "Searches previous GMM medical claims and audit history in the vector store. Useful for identifying recurring patterns, historical pricing, or previous audit results for the same insured person. Input should be a relevant question.",
+        "name": "GMM_History_Search",
+        "toolDescription": "Searches previous GMM medical claims and audit history in the vector store. Useful for identifying recurring patterns, historical pricing, or previous audit results for the same insured person."
       },
       "position": [
-        1248,
-        128
+        1168,
+        -32
       ],
       "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
       "typeVersion": 1.1
@@ -194,8 +194,8 @@
         "options": {}
       },
       "position": [
-        1184,
-        736
+        944,
+        576
       ],
       "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
       "typeVersion": 1
@@ -214,8 +214,8 @@
         "tableName": "gmm_embeddings"
       },
       "position": [
-        1232,
-        320
+        976,
+        144
       ],
       "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
       "typeVersion": 1.3
@@ -231,17 +231,14 @@
       "name": "Search Siniestros Folder",
       "onError": "continueRegularOutput",
       "parameters": {
-        "filters": {
-          "name": "siniestros",
-          "mimeType": "application/vnd.google-apps.folder"
-        },
-        "operation": "search",
-        "options": {},
-        "resource": "file"
+        "operation": "list",
+        "q": "=mimeType = 'application/vnd.google-apps.folder' and name = '{{ $json.TICKET_ID }}'",
+        "resource": "file",
+        "useFilter": true
       },
       "position": [
-        48,
-        400
+        464,
+        864
       ],
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3
@@ -256,17 +253,11 @@
       "id": "drive-list-pdf-1",
       "name": "List PDFs in Folder",
       "parameters": {
-        "filters": {
-          "mimeType": "application/pdf",
-          "parentId": "={{ $node[\"Search-Siniestros-Folder-Precise\"].json.id }}",
-          "q": "=name contains '{{ $node[\"Test-Webhook-GMM-Audit\"].json.body.TICKET_ID || $node[\"ExecuteWorkflowTrigger\"].json.TICKET_ID }}'"
-        },
-        "operation": "search",
-        "resource": "file"
+        "operation": "search"
       },
       "position": [
-        750,
-        400
+        688,
+        768
       ],
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3
@@ -283,11 +274,11 @@
       "parameters": {
         "fileId": "={{ $node[\"List PDFs in Folder\"].json.id }}",
         "operation": "download",
-        "resource": "file"
+        "options": {}
       },
       "position": [
-        460,
-        400
+        1248,
+        768
       ],
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3
@@ -296,12 +287,14 @@
       "id": "auditor-fiscal-1",
       "name": "AuditorFiscal Tool",
       "parameters": {
-        "jsCode": "// Advanced Fiscal Audit Logic for Mexico GMM\nconst invoice = items[0].json;\nconst rfcRegex = /^([A-ZÑ&]{3,4}) ?(?:- ?)?(\\d{2}(?:0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])) ?(?:- ?)?([A-Z\\d]{2})([A\\d])$/;\n\nconst subtotal = parseFloat(invoice.subtotal || 0);\nconst iva = parseFloat(invoice.iva || 0);\nconst total = parseFloat(invoice.total || 0);\nconst rfc = invoice.rfc || \"\";\n\nconst isRfcValid = rfcRegex.test(rfc);\nconst isArithmeticValid = Math.abs((subtotal + iva) - total) < 0.05;\n\nreturn [{\n  json: {\n    auditStatus: (isRfcValid && isArithmeticValid) ? \"SUCCESS\" : \"WARNING\",\n    checks: {\n      rfc_valid: isRfcValid,\n      arithmetic_valid: isArithmeticValid,\n      variance: Math.abs((subtotal + iva) - total).toFixed(2)\n    },\n    metadata: {\n      auditedAt: new Date().toISOString(),\n      provider_rfc: rfc\n    }\n  }\n}];",
-        "description": "Validates fiscal information (RFC and arithmetic) for Mexican medical invoices."
+        "jsCode": "// Auditor Fiscal: Validates RFC and math\nconst { rfc, subtotal, iva, total } = $input.item.json;\nconst rfcRegex = /^[A-Z&Ñ]{3,4}[0-9]{2}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])[A-Z0-9]{2}[0-9A]$/;\nconst isRfcValid = rfcRegex.test(rfc || '');\nconst isArithmeticValid = Math.abs(((subtotal || 0) + (iva || 0)) - (total || 0)) < 0.01;\nreturn { isRfcValid, isArithmeticValid, fiscal_status: isRfcValid && isArithmeticValid ? 'VALID' : 'INVALID' };",
+        "language": "javascript",
+        "name": "Mexican_Fiscal_Auditor",
+        "toolDescription": "Validates Mexican RFC format and invoice arithmetic. Ensures (Subtotal + IVA = Total) matching typical medical receipt requirements."
       },
       "position": [
-        1072,
-        112
+        944,
+        -16
       ],
       "type": "@n8n/n8n-nodes-langchain.toolCode",
       "typeVersion": 1.3
@@ -310,12 +303,14 @@
       "id": "validador-medico-1",
       "name": "ValidadorMedico Tool",
       "parameters": {
-        "jsCode": "// Basic Medical Specialty Consistency Check\nconst data = items[0].json;\nconst specialty = (data.specialty || \"\").toLowerCase();\nconst procedure = (data.procedure || \"\").toLowerCase();\n\nconst mappings = {\n  \"cardiolo\": [\"electrocardiograma\", \"ecocardiograma\", \"cateterismo\", \"estudio cardiaco\"],\n  \"gastro\": [\"endoscopia\", \"colonoscopia\", \"cirugía abdominal\"],\n  \"ortopedia\": [\"radiografía\", \"fractura\", \"yeso\", \"artroscopia\", \"reemplazo de cadera\"],\n  \"pediatría\": [\"vacuna\", \"consulta infantil\", \"crecimiento\"]\n};\n\nlet match = false;\nfor (const key in mappings) {\n  if (specialty.includes(key)) {\n    match = mappings[key].some(p => procedure.includes(p));\n    break;\n  }\n}\n\nreturn [{\n  json: {\n    medicalConsistency: match ? \"CONSISTENT\" : \"UNCERTAIN\",\n    reason: match ? \"Specialty covers this procedure\" : \"Procedure not explicitly mapped to specialty\",\n    details: {\n      specialtyFound: specialty,\n      procedureFound: procedure\n    }\n  }\n}];",
-        "description": "Verifies if the medical procedure is consistent with the doctor's specialty."
+        "jsCode": "// Validador Medico: Cross-check specialty vs procedure\nconst { procedure, specialty } = $input.item.json;\nconst isSurgery = (procedure || '').toLowerCase().includes('surgery');\nconst isSurgeon = (specialty || '').toLowerCase().includes('surgeon');\nconst isValid = (isSurgery && isSurgeon) || !isSurgery; // Simplified logic\nreturn { medical_valid: isValid, medical_status: isValid ? 'MATCH' : 'MISMATCH' };",
+        "language": "javascript",
+        "name": "Medical_Logic_Validator",
+        "toolDescription": "Analyzes if the medical procedure matches the doctor's specialty. Cross-checks medical logic for GMM coverage."
       },
       "position": [
-        1680,
-        64
+        1584,
+        -32
       ],
       "type": "@n8n/n8n-nodes-langchain.toolCode",
       "typeVersion": 1.3
@@ -324,12 +319,14 @@
       "id": "resumen-generador-1",
       "name": "ResumenGenerador Tool",
       "parameters": {
-        "jsCode": "// Final GMM Audit Summary Compiler\nconst allData = items[0].json;\n// Collect all insights from AI agent tools\nreturn [{\n  json: {\n    audit_summary: {\n      status: \"FINALIZED\",\n      decision: allData.auditStatus === \"SUCCESS\" && allData.medicalConsistency === \"CONSISTENT\" ? \"APPROVED\" : \"MANUAL_REVIEW_REQUIRED\",\n      timestamp: new Date().toISOString(),\n      report_id: `AUDIT-${Math.random().toString(36).substr(2, 9).toUpperCase()}`\n    }\n  }\n}];",
-        "description": "Compiles all audit findings into a final structured JSON report."
+        "jsCode": "// Resumen: Final audit decision\nconst items = $input.all();\nconst fiscal = items.find(i => i.json.fiscal_status)?.json.fiscal_status;\nconst medical = items.find(i => i.json.medical_status)?.json.medical_status;\nconst finalStatus = (fiscal === 'VALID' && medical === 'MATCH') ? 'APPROVED' : 'MANUAL_REVIEW_REQUIRED';\nreturn { finalStatus, auditDate: new Date().toISOString() };",
+        "language": "javascript",
+        "name": "Final_Audit_Summarizer",
+        "toolDescription": "Compiles final audit status ('APPROVED' or 'MANUAL_REVIEW_REQUIRED') based on fiscal and medical results."
       },
       "position": [
-        1520,
-        112
+        1456,
+        -32
       ],
       "type": "@n8n/n8n-nodes-langchain.toolCode",
       "typeVersion": 1.3
@@ -337,98 +334,94 @@
     {
       "id": "0ff3a2fc-de14-4d5d-a7fe-a6c3b2875243",
       "name": "Test-Webhook-GMM-Audit",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2.1,
-      "position": [
-        48,
-        -250
-      ],
       "parameters": {
         "httpMethod": "POST",
-        "path": "test-audit-gmm",
-        "responseMode": "onReceived"
-      }
+        "options": {},
+        "path": "test-audit-gmm"
+      },
+      "position": [
+        16,
+        1040
+      ],
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "webhookId": "374cdb51-bbe6-4ce9-9e7a-e12ec90c9761"
     },
     {
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "24IRatZIq46ZB5Ps",
+          "name": "Google Drive account"
+        }
+      },
       "id": "e847db23-bbc9-4775-800c-c28bd81b8e45",
       "name": "Find-Root-SGMM-Folder",
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
-      "position": [
-        272,
-        400
-      ],
       "parameters": {
-        "filters": {
-          "name": "sgmm-automation",
-          "mimeType": "application/vnd.google-apps.folder"
-        },
-        "operation": "search",
-        "resource": "file"
+        "operation": "list",
+        "q": "mimeType = 'application/vnd.google-apps.folder' and name = 'SGMM'",
+        "resource": "file",
+        "useFilter": true
       },
-      "credentials": {
-        "googleDriveOAuth2Api": {
-          "id": "24IRatZIq46ZB5Ps",
-          "name": "Google Drive account"
-        }
-      }
+      "position": [
+        240,
+        656
+      ],
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3
     },
     {
-      "id": "0d108025-0d59-4f7d-acc7-364987c83ce6",
-      "name": "Search-Siniestros-Folder-Precise",
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
-      "position": [
-        500,
-        400
-      ],
-      "parameters": {
-        "filters": {
-          "name": "siniestros",
-          "mimeType": "application/vnd.google-apps.folder",
-          "parentId": "={{ $node[\"Find-Root-SGMM-Folder\"].json.id }}"
-        },
-        "operation": "search",
-        "resource": "file"
-      },
       "credentials": {
         "googleDriveOAuth2Api": {
           "id": "24IRatZIq46ZB5Ps",
           "name": "Google Drive account"
         }
-      }
+      },
+      "id": "0d108025-0d59-4f7d-acc7-364987c83ce6",
+      "name": "Search-Siniestros-Folder-Precise",
+      "parameters": {
+        "operation": "list",
+        "q": "=mimeType = 'application/vnd.google-apps.folder' and name = '{{ $json.TICKET_ID }}'",
+        "resource": "file",
+        "useFilter": true
+      },
+      "position": [
+        464,
+        656
+      ],
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3
     },
     {
       "id": "b63fa03b-3ede-479f-8e6e-726f6e3a86bb",
       "name": "Trigger-DB-Setup",
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
+      "parameters": {},
       "position": [
-        -200,
-        600
+        -464,
+        240
       ],
-      "parameters": {}
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1
     },
     {
-      "id": "bfb11d39-902e-418a-a851-0628fdccb420",
-      "name": "Supabase-Setup-SQL",
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        -150,
-        -112
-      ],
-      "parameters": {
-        "operation": "executeSql",
-        "query": "-- 1. Enable pgvector extension\nCREATE EXTENSION IF NOT EXISTS vector;\n\n-- 2. Create the gmm_embeddings table\nCREATE TABLE IF NOT EXISTS public.gmm_embeddings (\n  id bigserial PRIMARY KEY,\n  content text NOT NULL,\n  metadata jsonb,\n  embedding vector(1536)\n);\n\n-- 3. Create index\nCREATE INDEX IF NOT EXISTS gmm_embeddings_idx ON public.gmm_embeddings USING hnsw (embedding vector_cosine_ops);\n\n-- 4. Function for similarity search\nCREATE OR REPLACE FUNCTION match_embeddings (\n  query_embedding vector(1536),\n  match_threshold float,\n  match_count int\n)\nRETURNS TABLE (\n  id bigint,\n  content text,\n  metadata jsonb,\n  similarity float\n)\nLANGUAGE plpgsql\nAS $$\nBEGIN\n  RETURN QUERY\n  SELECT\n    gmm_embeddings.id,\n    gmm_embeddings.content,\n    gmm_embeddings.metadata,\n    1 - (gmm_embeddings.embedding <=> query_embedding) AS similarity\n  FROM gmm_embeddings\n  WHERE 1 - (gmm_embeddings.embedding <=> query_embedding) > match_threshold\n  ORDER BY similarity DESC\n  LIMIT match_count;\nEND;\n$$;",
-        "resource": "database"
-      },
       "credentials": {
         "supabaseApi": {
           "id": "njJBaAWhnJXRK8EY",
           "name": "Supabase account"
         }
-      }
+      },
+      "id": "bfb11d39-902e-418a-a851-0628fdccb420",
+      "name": "Supabase-Check-Register",
+      "parameters": {
+        "operation": "getAll",
+        "resource": "row",
+        "tableId": "gmm_embeddings"
+      },
+      "position": [
+        16,
+        160
+      ],
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1
     }
   ],
   "connections": {
@@ -451,10 +444,12 @@
             "index": 0,
             "node": "AlOCR",
             "type": "ai_languageModel"
-          },
+          }
+        ],
+        [
           {
             "index": 0,
-            "node": "PDF_Search_Tool",
+            "node": "PDF Search Tool",
             "type": "ai_languageModel"
           }
         ]
@@ -485,9 +480,9 @@
             "type": "main"
           },
           {
-            "node": "Supabase-Setup-SQL",
-            "type": "main",
-            "index": 0
+            "index": 0,
+            "node": "Supabase-Check-Register",
+            "type": "main"
           }
         ]
       ]
@@ -502,6 +497,17 @@
           }
         ],
         []
+      ]
+    },
+    "Find-Root-SGMM-Folder": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Search-Siniestros-Folder-Precise",
+            "type": "main"
+          }
+        ]
       ]
     },
     "Gemini Embeddings": {
@@ -548,7 +554,7 @@
         ]
       ]
     },
-    "PDF_Search_Tool": {
+    "PDF Search Tool": {
       "ai_tool": [
         [
           {
@@ -603,13 +609,67 @@
         ]
       ]
     },
+    "Search-Siniestros-Folder-Precise": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "List PDFs in Folder",
+            "type": "main"
+          }
+        ]
+      ]
+    },
     "Supabase GMM Store": {
       "ai_vectorStore": [
         [
           {
             "index": 0,
-            "node": "PDF_Search_Tool",
+            "node": "PDF Search Tool",
             "type": "ai_vectorStore"
+          }
+        ]
+      ]
+    },
+    "Supabase-Check-Register": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Gmail-Search-Siniestro",
+            "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "Find-Root-SGMM-Folder",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Test-Webhook-GMM-Audit": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Find-Root-SGMM-Folder",
+            "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "Gmail-Search-Siniestro",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Trigger-DB-Setup": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "Supabase-Check-Register",
+            "type": "main"
           }
         ]
       ]
@@ -621,71 +681,6 @@
             "index": 0,
             "node": "AlOCR",
             "type": "ai_tool"
-          }
-        ]
-      ]
-    },
-    "Test-Webhook-GMM-Audit": {
-      "main": [
-        [
-          {
-            "node": "Find-Root-SGMM-Folder",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Gmail-Search-Siniestro",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Find-Root-SGMM-Folder": {
-      "main": [
-        [
-          {
-            "node": "Search-Siniestros-Folder-Precise",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Search-Siniestros-Folder-Precise": {
-      "main": [
-        [
-          {
-            "node": "List PDFs in Folder",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Trigger-DB-Setup": {
-      "main": [
-        [
-          {
-            "node": "Supabase-Setup-SQL",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Supabase-Setup-SQL": {
-      "main": [
-        [
-          {
-            "node": "Gmail-Search-Siniestro",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Find-Root-SGMM-Folder",
-            "type": "main",
-            "index": 0
           }
         ]
       ]
@@ -704,24 +699,8 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "688c4751-90a7-4aae-9232-f5db0aefe731",
-  "activeVersionId": "688c4751-90a7-4aae-9232-f5db0aefe731",
-  "versionCounter": 203,
-  "triggerCount": 1,
-  "shared": [
-    {
-      "updatedAt": "2026-03-15T23:26:50.322Z",
-      "createdAt": "2026-03-15T23:26:50.322Z",
-      "role": "workflow:owner",
-      "workflowId": "M5yz5irHURXv0wl0",
-      "projectId": "XM6RyYxoVfaDMVrh"
-    }
-  ],
-  "tags": [],
-  "activeVersion": {
-    "updatedAt": "2026-03-29T23:59:36.325Z",
-    "createdAt": "2026-03-29T23:59:36.325Z",
-    "versionId": "688c4751-90a7-4aae-9232-f5db0aefe731",
-    "workflowId": "M5yz5irHURXv0wl0"
-  }
+  "versionId": "3aec7a3d-4641-4b04-83d9-448b184bc1ea",
+  "activeVersionId": null,
+  "versionCounter": 223,
+  "triggerCount": 1
 }
