@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 
 // Tipos basados en Google Sheets (Ampliado)
 type Asegurado = { id: string; nombre: string; poliza: string; plan: string; rfc: string;[key: string]: any };
-type Siniestro = { id: string; aseguradoId: string; titulo: string; fecha: string; estado: string;[key: string]: any };
+type Siniestro = { id: string; aseguradoId: string; titulo: string; numeroSiniestro?: string; fecha: string; estado: string;[key: string]: any };
 
 export default function DashboardPage() {
     const [selectedAsegurado, setSelectedAsegurado] = useState<Asegurado | null>(null);
@@ -423,7 +423,9 @@ export default function DashboardPage() {
                             {selectedAsegurado && siniestrosBD
                                 .filter(s => s.aseguradoId === selectedAsegurado.id)
                                 .map((s) => (
-                                    <option key={s.id} value={s.id}>{s.titulo}</option>
+                                    <option key={s.id} value={s.id}>
+                                        {s.titulo} {s.numeroSiniestro ? `(${s.numeroSiniestro})` : ""}
+                                    </option>
                                 ))}
                         </select>
                     </div>

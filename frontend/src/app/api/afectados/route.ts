@@ -163,6 +163,7 @@ export async function GET() {
                 id: `${sNum}-${index}`,
                 aseguradoId: rfc,
                 titulo: pad || "Trámite Médico",
+                numeroSiniestro: sNum,
                 hospital: val(row, ["3_Carta_Remesa_Hospital"]),
                 fecha: new Date().toISOString().split("T")[0],
                 estado: val(row, ["STATUS_PROCESO"]) || "Activo",
