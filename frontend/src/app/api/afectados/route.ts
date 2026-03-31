@@ -124,7 +124,7 @@ export async function GET() {
                     "3_Carta_Remesa_No_Siniestro",
                     "4_SRGMM_Reclamo_Subsecuente_Siniestro",
                 ]),
-                padecimiento: val(row, ["3_Carta_Remesa_Padecimiento", "4_SRGMM_Describir_Sintomas"]),
+                padecimiento: (val(row, ["Variables"]).includes("/") ? val(row, ["Variables"]).split("/").pop()?.trim() : "") || val(row, ["3_Carta_Remesa_Padecimiento", "4_SRGMM_Describir_Sintomas"]),
                 hospital:     val(row, ["3_Carta_Remesa_Hospital"]),
 
                 tipoTramite: esInicial ? "Inicial" : esCompl ? "Complemento" : "Inicial",
@@ -157,10 +157,11 @@ export async function GET() {
         const siniestros = dataRows.map((row: any[], index: number) => {
             const sNum = val(row, ["2_Case_Management_Numero_Siniestro", "4_SRGMM_Siniestro"]) || `SIN-${index + 1}`;
             const rfc  = val(row, ["4_SRGMM_Titular_Rfc_1", "4_SRGMM_Afec_Rfc"]);
-            let pad = val(row, ["3_Carta_Remesa_Padecimiento"]);
+            const rawVar = val(row, ["Variables"]);
+            let pad = rawVar.includes("/") ? rawVar.split("/").pop()?.trim() || "" : rawVar;
+            
             if (!pad) {
-                const rawVar = val(row, ["Variables"]);
-                pad = rawVar.includes("/") ? rawVar.split("/").pop()?.trim() || "" : rawVar;
+                pad = val(row, ["3_Carta_Remesa_Padecimiento", "4_SRGMM_Describir_Sintomas"]);
             }
 
             return {
