@@ -157,7 +157,11 @@ export async function GET() {
         const siniestros = dataRows.map((row: any[], index: number) => {
             const sNum = val(row, ["2_Case_Management_Numero_Siniestro", "4_SRGMM_Siniestro"]) || `SIN-${index + 1}`;
             const rfc  = val(row, ["4_SRGMM_Titular_Rfc_1", "4_SRGMM_Afec_Rfc"]);
-            const pad  = val(row, ["3_Carta_Remesa_Padecimiento", "Variables"]);
+            let pad = val(row, ["3_Carta_Remesa_Padecimiento"]);
+            if (!pad) {
+                const rawVar = val(row, ["Variables"]);
+                pad = rawVar.includes("/") ? rawVar.split("/").pop()?.trim() || "" : rawVar;
+            }
 
             return {
                 id: `${sNum}-${index}`,
