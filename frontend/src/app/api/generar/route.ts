@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
                                     console.log(`📡 [Webhook Proxy] Status: ${res.statusCode} | Intento: ${typeStr}`);
                                     if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
                                         n8nSuccess = true;
-                                        console.log(`✅ [DEBUG] n8n respondió OK`);
+                                        console.log(`✅ [DEBUG] n8n respondió OK: ${responseBody || 'Success'}`);
                                     } else {
                                         console.error(`❌ [DEBUG] n8n respondió con error ${res.statusCode}:`, responseBody);
                                         if (!isFallback) n8nError = responseBody;
@@ -140,12 +140,14 @@ export async function POST(req: NextRequest) {
 
                             req.on('error', (err: any) => {
                                 console.error(`❌ Error en intento ${typeStr} (${err.code}):`, err.message);
+                                n8nError = err.message;
                                 resolve();
                             });
 
                             req.on('timeout', () => {
                                 req.destroy();
                                 console.error(`❌ Timeout en intento ${typeStr}`);
+                                n8nError = "Timeout reaching n8n";
                                 resolve();
                             });
 
@@ -153,18 +155,19 @@ export async function POST(req: NextRequest) {
                             req.end();
                         } catch (e: any) {
                             console.error(`❌ Error fatal en doRequest (${isFallback ? 'fallback' : 'interno'}):`, e.message);
+                            n8nError = e.message;
                             resolve();
                         }
                     });
                 };
 
-                // Intento 1: Interno (Dokploy)
+                // Intento 1: Principal (Destino dinámico o .env)
                 await doRequest(webhookDestino);
 
                 // Intento 2: Fallback Público (si falla el primero)
                 if (!n8nSuccess) {
-                    const publicUrl = "https://n8n.pash.uno/webhook/sgmm-new-request-modular";
-                    console.log("🔄 Iniciando Fallback a URL pública...");
+                    const publicUrl = "https://n8n.pash.uno/webhook/gmm-new-request-prod";
+                    console.log("🔄 Iniciando Fallback a URL pública (Prod Webhook)...");
                     await doRequest(publicUrl, true);
                 }
             } catch (err: any) {
