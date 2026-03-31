@@ -129,17 +129,18 @@ export default function DashboardPage() {
             throw new Error(res.error || "Error al enviar la petición a n8n");
         }
 
-        console.log("✅ Petición recibida por n8n, iniciando polling para el JobId:", res.jobId);
+        const targetJobId = res.jobId || jobId;
+        console.log("✅ Petición recibida por n8n, iniciando polling para el JobId:", targetJobId);
         setJobStatus("Procesando trámite final...");
 
         // Función para consultar estado
-        const maxIntentos = 36; // 3 minutos máximo (cada 5s)
+        const maxIntentos = 120; // 10 minutos máximo (cada 5s) para procesos pesados de IA
         let n8nResult = null;
         let jobFailed = false;
 
         for (let i = 0; i < maxIntentos; i++) {
             await new Promise(r => setTimeout(r, 5000));
-            const statusRes = await fetch(`/api/gmm-callback?jobId=${res.jobId}`);
+            const statusRes = await fetch(`/api/gmm-callback?jobId=${targetJobId}`);
             if (!statusRes.ok) continue;
 
             const data = await statusRes.json();
@@ -155,7 +156,7 @@ export default function DashboardPage() {
         }
 
         if (n8nResult === null && !jobFailed) {
-            throw new Error('Timeout: el proceso en n8n tardó más de 3 minutos en finalizar.');
+            throw new Error('Timeout: el proceso en n8n tardó más de 10 minutos en finalizar. Verifica el workflow en n8n.');
         }
 
         console.log("✅ Resultado Generación Final:", n8nResult);

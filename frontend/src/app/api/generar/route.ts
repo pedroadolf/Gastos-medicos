@@ -7,7 +7,7 @@ import https from "https";
 
 export async function POST(req: NextRequest) {
     try {
-        const { datosExtraidos, webHookUrl_n8n, plantillaSeleccionada, plantillasMultiples, archivosManuales } = await req.json();
+        const { datosExtraidos, webHookUrl_n8n, plantillaSeleccionada, plantillasMultiples, archivosManuales, jobId } = await req.json();
 
         if (!datosExtraidos) {
             return NextResponse.json({ error: "No se enviaron datos para poblar el PDF." }, { status: 400 });
@@ -92,7 +92,8 @@ export async function POST(req: NextRequest) {
                         nombreCarpetaEvento: prefijoFecha,
                         fechaEmision: new Date().toISOString().split('T')[0],
                         emailAsegurado: datosExtraidos.asegurado?.email || "test@pash.uno",
-                        googleDriveFolderId: process.env.GOOGLE_DRIVE_FOLDER_ID || "root"
+                        googleDriveFolderId: process.env.GOOGLE_DRIVE_FOLDER_ID || "root",
+                        jobId: jobId // 🔑 Crucial para el callback
                     }
                 });
 
@@ -178,7 +179,7 @@ export async function POST(req: NextRequest) {
             message: `${documentosGenerados.length} PDF(s) generados y enviados a n8n en un solo request.`,
             prefijoUsado: prefijoFecha,
             documentosGenerados: documentosGenerados.length,
-            jobId: n8nJobId,
+            jobId: jobId || n8nJobId,
             status: "processing"
         });
 
