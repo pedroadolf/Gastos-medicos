@@ -124,15 +124,60 @@ export default function DashboardPage() {
         });
 
         const res = await reqGenerar.json();
-        console.log("✅ Resultado Generación Final:", res);
         
+        if (!res.success) {
+            throw new Error(res.error || "Error al enviar la petición a n8n");
+        }
+
+        console.log("✅ Petición recibida por n8n, iniciando polling para el JobId:", res.jobId);
+        setJobStatus("Procesando trámite final...");
+
+        // Función para consultar estado
+        const maxIntentos = 36; // 3 minutos máximo (cada 5s)
+        let n8nResult = null;
+        let jobFailed = false;
+
+        for (let i = 0; i < maxIntentos; i++) {
+            await new Promise(r => setTimeout(r, 5000));
+            const statusRes = await fetch(`/api/gmm-callback?jobId=${res.jobId}`);
+            if (!statusRes.ok) continue;
+
+            const data = await statusRes.json();
+            
+            if (data.status === 'completed') {
+                n8nResult = data.result || {};
+                break;
+            }
+            if (data.status === 'failed') {
+                jobFailed = true;
+                throw new Error(data.error || "El proceso falló en n8n.");
+            }
+        }
+
+        if (n8nResult === null && !jobFailed) {
+            throw new Error('Timeout: el proceso en n8n tardó más de 3 minutos en finalizar.');
+        }
+
+        console.log("✅ Resultado Generación Final:", n8nResult);
+        
+        // TODO: Ajustar cómo envía n8n la URL de drive, asumimos que devuelve un json en result
+        // Si n8nResult es un string (JSON stringificado desde n8n), lo intentamos parsear
+        let finalOutput = n8nResult;
+        if (typeof n8nResult === 'string') {
+            try {
+                finalOutput = JSON.parse(n8nResult);
+            } catch (e) {
+                // ignorar si no es json
+            }
+        }
+
         // Solo mostrar botón "VER EN DRIVE" si n8n devuelve un enlace real
-        if (res.driveUrl) {
-            setLastDriveLink(res.driveUrl);
+        if (finalOutput?.driveUrl || finalOutput?.url) {
+            setLastDriveLink(finalOutput.driveUrl || finalOutput.url);
         }
         setIsProcessing(false);
 
-        alert(`✅ ¡Expediente Generado!\n\n- Análisis IA: ${ocrResults.length} archivos detectados y clasificados.\n- Formatos: ${config.autoPDFs.length} PDFs generados y enviados a n8n.\n\nEstructura: n8n creará la carpeta "${selectedAsegurado?.nombre}/${new Date().toLocaleDateString('es-MX', { month: 'short', day: 'numeric' })}" en Drive.`);
+        alert(`✅ ¡Expediente Generado!\n\n- Análisis IA: ${ocrResults.length} archivos procesados.\n- Enviados a n8n exitosamente.\n\nEstructura: n8n creó la carpeta "${selectedAsegurado?.nombre}" en Drive.`);
     };
 
     const handleProcessBtn = async () => {

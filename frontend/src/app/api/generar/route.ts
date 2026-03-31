@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
         // 🔗 UN SOLO webhook a n8n con TODOS los documentos combinados
         let n8nSuccess = false;
         let n8nError = null;
+        let n8nJobId = null;
         const webhookDestino = webHookUrl_n8n || process.env.N8N_WEBHOOK_URL || "";
 
         // Prefijo de fecha dinámico (ej: Mar26)
@@ -96,69 +97,58 @@ export async function POST(req: NextRequest) {
                 });
 
                 const doRequest = async (targetUrl: string, isFallback: boolean = false) => {
-                    return new Promise<void>((resolve) => {
-                        try {
-                            const url = new URL(targetUrl);
-                            const isHttps = url.protocol === 'https:';
-                            const reqModule: any = isHttps ? https : http;
+                    const typeStr = isFallback ? 'FALLBACK PÚBLICO' : 'INTERNO DOCKER';
+                    console.log(`📡 [Webhook Proxy] Intentando ${typeStr}: ${targetUrl}`);
+                    
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 seconds, fail fast
 
-                            const options: any = {
-                                method: 'POST',
-                                hostname: url.hostname,
-                                port: url.port || (isHttps ? 443 : 80),
-                                path: url.pathname + url.search,
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Content-Length': Buffer.byteLength(requestPayload)
-                                },
-                                timeout: 10000,
-                                rejectUnauthorized: false
-                            };
-
-                            if (process.env.N8N_WEBHOOK_HOST_HEADER && !isHttps) {
-                                options.headers['Host'] = process.env.N8N_WEBHOOK_HOST_HEADER;
-                            }
-
-                            const typeStr = isFallback ? 'FALLBACK PÚBLICO' : 'INTERNO DOCKER';
-                            console.log(`📡 [Webhook Proxy] Intentando ${typeStr}: ${url.hostname}:${options.port}${url.pathname}`);
-
-                            const req = reqModule.request(options, (res: any) => {
-                                let responseBody = '';
-                                res.on('data', (chunk: any) => responseBody += chunk);
-                                res.on('end', () => {
-                                    console.log(`📡 [Webhook Proxy] Status: ${res.statusCode} | Intento: ${typeStr}`);
-                                    if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-                                        n8nSuccess = true;
-                                        console.log(`✅ [DEBUG] n8n respondió OK: ${responseBody || 'Success'}`);
-                                    } else {
-                                        console.error(`❌ [DEBUG] n8n respondió con error ${res.statusCode}:`, responseBody);
-                                        if (!isFallback) n8nError = responseBody;
-                                    }
-                                    resolve();
-                                });
-                            });
-
-                            req.on('error', (err: any) => {
-                                console.error(`❌ Error en intento ${typeStr} (${err.code}):`, err.message);
-                                n8nError = err.message;
-                                resolve();
-                            });
-
-                            req.on('timeout', () => {
-                                req.destroy();
-                                console.error(`❌ Timeout en intento ${typeStr}`);
-                                n8nError = "Timeout reaching n8n";
-                                resolve();
-                            });
-
-                            req.write(requestPayload);
-                            req.end();
-                        } catch (e: any) {
-                            console.error(`❌ Error fatal en doRequest (${isFallback ? 'fallback' : 'interno'}):`, e.message);
-                            n8nError = e.message;
-                            resolve();
+                        const headers: any = {
+                            "Content-Type": "application/json"
+                        };
+                        
+                        if (process.env.N8N_WEBHOOK_HOST_HEADER && !targetUrl.startsWith('https:')) {
+                            headers['Host'] = process.env.N8N_WEBHOOK_HOST_HEADER;
                         }
-                    });
+
+                        // Use fetch internally
+                        const response = await fetch(targetUrl, {
+                            method: "POST",
+                            headers,
+                            body: requestPayload,
+                            signal: controller.signal
+                        });
+                        
+                        clearTimeout(timeoutId);
+                        
+                        const responseBody = await response.text();
+                        console.log(`📡 [Webhook Proxy] Status: ${response.status} | Intento: ${typeStr}`);
+                        
+                        if (response.ok) {
+                            n8nSuccess = true;
+                            console.log(`✅ [DEBUG] n8n respondió OK: ${responseBody || 'Success'}`);
+                            try {
+                                const parsedResponse = JSON.parse(responseBody);
+                                if (parsedResponse.jobId) {
+                                    n8nJobId = parsedResponse.jobId;
+                                }
+                            } catch (e) {
+                                // Not JSON, ignore
+                            }
+                        } else {
+                            console.error(`❌ [DEBUG] n8n respondió con error ${response.status}:`, responseBody);
+                            if (!isFallback) n8nError = responseBody;
+                        }
+                    } catch (e: any) {
+                        if (e.name === 'AbortError') {
+                            console.error(`❌ Timeout en intento ${typeStr}`);
+                            n8nError = "Timeout reaching n8n";
+                        } else {
+                            console.error(`❌ Error fatal en doRequest (${typeStr}):`, e.message);
+                            n8nError = e.message;
+                        }
+                    }
                 };
 
                 // Intento 1: Principal (Destino dinámico o .env)
@@ -187,7 +177,9 @@ export async function POST(req: NextRequest) {
             success: true,
             message: `${documentosGenerados.length} PDF(s) generados y enviados a n8n en un solo request.`,
             prefijoUsado: prefijoFecha,
-            documentosGenerados: documentosGenerados.length
+            documentosGenerados: documentosGenerados.length,
+            jobId: n8nJobId,
+            status: "processing"
         });
 
     } catch (error: any) {
