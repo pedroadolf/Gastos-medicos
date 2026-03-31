@@ -408,7 +408,16 @@ export default function DashboardPage() {
                             title="Seleccionar Siniestro"
                             disabled={!selectedAsegurado}
                             className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-lg p-2.5 block disabled:opacity-30"
-                            onChange={(e) => setSelectedSiniestro(e.target.value)}
+                            onChange={(e) => {
+                                const sId = e.target.value;
+                                setSelectedSiniestro(sId);
+                                if (!sId) return;
+                                
+                                const idx = parseInt(sId.split('-').pop() || "");
+                                if (!isNaN(idx) && aseguradosBD[idx]) {
+                                    setSelectedAsegurado({ ...aseguradosBD[idx] });
+                                }
+                            }}
                         >
                             <option value="">{selectedAsegurado ? "-- Seleccionar Siniestro --" : "-- Busca asegurado --"}</option>
                             {selectedAsegurado && siniestrosBD
