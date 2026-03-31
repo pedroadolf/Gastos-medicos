@@ -326,9 +326,13 @@ export default function DashboardPage() {
                                     (a.rfc || "").toLowerCase().includes(q) ||
                                     (a.empresa || "").toLowerCase().includes(q)
                                 );
-                                return matches.length > 0 ? (
+                                
+                                // Deduplicar por ID (RFC) para que la persona solo salga una vez
+                                const uniqueMatches = matches.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+
+                                return uniqueMatches.length > 0 ? (
                                     <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl z-50 max-h-56 overflow-y-auto">
-                                        {matches.map((a) => (
+                                        {uniqueMatches.map((a) => (
                                             <button
                                                 key={a.id}
                                                 type="button"
