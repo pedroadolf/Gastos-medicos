@@ -302,6 +302,8 @@ export default function DashboardPage() {
                         <div className="relative mb-4">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none z-10" />
                             <input
+                                id="asegurado-search"
+                                name="asegurado-search"
                                 type="text"
                                 value={searchQuery}
                                 placeholder={isLoadingData ? "Conectando con Google Sheets..." : `Buscar por nombre o RFC (${aseguradosBD.length} registros)`}
@@ -397,6 +399,8 @@ export default function DashboardPage() {
                             Evento Médico
                         </h2>
                         <select
+                            id="siniestro-selector"
+                            name="siniestro-selector"
                             title="Seleccionar Siniestro"
                             disabled={!selectedAsegurado}
                             className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-lg p-2.5 block disabled:opacity-30"
