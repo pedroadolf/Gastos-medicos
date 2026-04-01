@@ -14,8 +14,7 @@
       "position": [
         -208,
         112
-      ],
-      "webhookId": "db40c9b2-6ae9-47bc-8494-86ce313e5d4e"
+      ]
     },
     {
       "parameters": {},
@@ -132,12 +131,13 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://gmm.pash.uno/api/callback",
         "authentication": "headerAuth",
+        "jsonBody": "{\n  \"jobId\": \"{{ $execution.id }}\",\n  \"status\": \"completed\",\n  \"result\": \"{{ $json.output }}\"\n}",
+        "method": "POST",
+        "options": {},
         "sendBody": true,
         "specifyBody": "json",
-        "options": {}
+        "url": "https://gmm.pash.uno/api/callback"
       },
       "id": "578563c5-5e5b-458a-bc74-91a74bfa0309",
       "name": "Callback Dashboard",
@@ -161,12 +161,13 @@
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://gmm.pash.uno/api/callback",
         "authentication": "headerAuth",
+        "jsonBody": "{\n  \"jobId\": \"{{ $execution.id }}\",\n  \"status\": \"failed\",\n  \"error\": \"{{ $json.error.message }}\"\n}",
+        "method": "POST",
+        "options": {},
         "sendBody": true,
         "specifyBody": "json",
-        "options": {}
+        "url": "https://gmm.pash.uno/api/callback"
       },
       "id": "11517bad-e1eb-4d35-8fa3-579a0132fd59",
       "name": "Callback Dashboard Error",
@@ -311,12 +312,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1",
-    "saveDataErrorExecution": "all",
-    "saveDataSuccessExecution": "all",
-    "saveManualExecutions": true,
-    "saveExecutionProgress": true,
-    "callerPolicy": "workflowsFromSameOwner"
+    "executionOrder": "v1"
   },
-  "active": true
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
 }
