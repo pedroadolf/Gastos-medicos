@@ -251,7 +251,11 @@ export default function DashboardPage() {
                         
                         if (updatedJob.results && Object.keys(fileClassifications).length === 0) {
                             const newClassifications: Record<string, string> = {};
-                            updatedJob.results.forEach((res: any) => {
+                            const resultsArray2 = Array.isArray(updatedJob.results) 
+                                ? updatedJob.results 
+                                : Object.values(updatedJob.results || {});
+                            
+                            resultsArray2.forEach((res: any) => {
                                 if (res.classification) {
                                     newClassifications[res.fileName] = res.classification;
                                 }
@@ -277,11 +281,16 @@ export default function DashboardPage() {
                                 return;
                             }
 
-                            console.log("📦 Datos completos recuperados:", fullJob.results?.length || 0, "registros.");
+                            const finalResults = Array.isArray(fullJob.results) 
+                                ? fullJob.results 
+                                : Object.values(fullJob.results || {});
 
-                            if (fullJob.results) {
+                            console.log("📦 Datos completos recuperados:", finalResults.length, "registros.");
+
+                            if (finalResults.length > 0) {
                                 const finalClassifications: Record<string, string> = {};
-                                fullJob.results.forEach((res: any) => {
+                                
+                                finalResults.forEach((res: any) => {
                                     if (res.classification) {
                                         finalClassifications[res.fileName] = res.classification;
                                     }
@@ -290,7 +299,7 @@ export default function DashboardPage() {
                             }
 
                             // 🔑 Usamos el jobId de la sesión (closure) para evitar problemas de payload truncado
-                            await triggerFinalGeneration(fullJob.results || [], jobId);
+                            await triggerFinalGeneration(finalResults, jobId);
                         } else if (updatedJob.status === 'failed') {
                             setJobStatus("Error");
                              alert("❌ Error en Worker: " + (updatedJob.error_message || "Desconocido"));
