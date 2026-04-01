@@ -23,6 +23,29 @@ export default function DashboardPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
 
+    // Cronómetro
+    const [startTime, setStartTime] = useState<number | null>(null);
+    const [elapsedTime, setElapsedTime] = useState(0);
+
+    // Efecto del cronómetro
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (isProcessing && startTime) {
+            interval = setInterval(() => {
+                setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+            }, 1000);
+        } else {
+            setElapsedTime(0);
+        }
+        return () => clearInterval(interval);
+    }, [isProcessing, startTime]);
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
     // Configuración de documentos por trámite
     const procedureConfigs = {
         "reembolso": {
@@ -189,6 +212,7 @@ export default function DashboardPage() {
     const handleProcessBtn = async () => {
         if (!selectedAsegurado || uploadedFiles.length === 0) return;
         setIsProcessing(true);
+        setStartTime(Date.now());
         setLastDriveLink(null);
         setJobStatus("Enviando archivos...");
         setFileClassifications({});
@@ -539,18 +563,26 @@ export default function DashboardPage() {
                             <button
                                 onClick={handleProcessBtn}
                                 disabled={!selectedAsegurado || isProcessing || uploadedFiles.length === 0}
-                                className={`flex items-center px-10 py-3 rounded-xl font-bold text-sm shadow-xl transition-all ${!selectedAsegurado || isProcessing || uploadedFiles.length === 0 ? "bg-slate-800 text-slate-600 cursor-not-allowed" : "bg-fintech-cyan hover:bg-cyan-400 text-slate-900"}`}
+                                className={`flex flex-col items-center justify-center px-10 py-3 rounded-xl font-bold text-sm shadow-xl transition-all ${!selectedAsegurado || isProcessing || uploadedFiles.length === 0 ? "bg-slate-800 text-slate-600 cursor-not-allowed" : "bg-fintech-cyan hover:bg-cyan-400 text-slate-900"}`}
                             >
-                                {isProcessing ? (
-                                    <>
-                                        <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
-                                        {jobStatus || "PROCESANDO..."}
-                                    </>
-                                ) : (
-                                    <>
-                                        <Zap className="w-4 h-4 mr-2" />
-                                        GENERAR Y ENVIAR TRÁMITE
-                                    </>
+                                <div className="flex items-center">
+                                    {isProcessing ? (
+                                        <>
+                                            <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                                            {jobStatus || "PROCESANDO..."}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Zap className="w-4 h-4 mr-2" />
+                                            GENERAR Y ENVIAR TRÁMITE
+                                        </>
+                                    )}
+                                </div>
+                                {isProcessing && (
+                                    <div className="flex flex-col items-center mt-1 text-[10px] opacity-80 font-mono">
+                                        <span>Tiempo transcurrido: {formatTime(elapsedTime)}</span>
+                                        {currentJobId && <span className="mt-0.5 tracking-tighter">ID: {currentJobId.split('-')[0]}...</span>}
+                                    </div>
                                 )}
                             </button>
                         </div>

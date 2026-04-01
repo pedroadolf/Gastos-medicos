@@ -7,12 +7,16 @@ import { supabase, getSupabaseService, supabaseUrl } from "@/lib/supabase";
 // Esta ruta ahora actúa como el "Productor" de trabajos
 export async function POST(req: NextRequest) {
     try {
+        console.log("📥 [POST] /api/documentos: Iniciando recepción de archivos...");
         const formData = await req.formData();
         const files = formData.getAll("files") as File[];
         const metadataRaw = formData.get("metadata") as string;
         const metadata = metadataRaw ? JSON.parse(metadataRaw) : {};
 
+        console.log(`📂 [POST] Archivos en el body: ${files.length}, Metadata:`, metadata);
+
         if (!files || files.length === 0) {
+            console.warn("⚠️ [POST] No se detectaron archivos en la petición.");
             return NextResponse.json({ error: "No se recibieron archivos" }, { status: 400 });
         }
 
@@ -34,7 +38,7 @@ export async function POST(req: NextRequest) {
             .single();
 
         if (jobError) {
-            console.error("❌ Error creando Job:", jobError);
+            console.error("❌ [POST] Error creando Job en Supabase:", jobError);
             return NextResponse.json({ 
                 error: "Error al iniciar proceso en Base de Datos", 
                 details: jobError.message,
@@ -45,6 +49,7 @@ export async function POST(req: NextRequest) {
         }
 
         const jobId = job.id;
+        console.log(`✅ [POST] Job creado exitosamente. ID: ${jobId}`);
 
         // 2. Procesar en "Background" (En Node/Next.js sin await el bucle)
         // NOTA: En una arquitectura más robusta, esto lo haría un Worker separado leyendo la tabla.
@@ -75,13 +80,18 @@ interface ExtractedResult {
 
 async function processFilesInBackground(jobId: string, files: File[]) {
     const results: ExtractedResult[] = [];
+    const supabaseService = getSupabaseService();
     console.log(`👷 [WORKER] Iniciando procesamiento para Job: ${jobId}`);
 
     try {
+        let fileIndex = 1;
         for (const file of files) {
+            const fileName = file.name;
+            console.log(`📄 [WORKER] (${fileIndex}/${files.length}) Procesando: ${fileName} ...`);
+            
             const buffer = Buffer.from(await file.arrayBuffer());
             const mimeType = file.type;
-            const name = file.name;
+            const name = fileName;
 
             let extractedData: ExtractedResult = {
                 fileName: name,
@@ -108,14 +118,18 @@ async function processFilesInBackground(jobId: string, files: File[]) {
                     }
                 } 
                 else if (mimeType.includes("image/")) {
-                    console.log(`[OCR] 📸 Tesseract para: ${name}...`);
+                    console.log(`   📸 [OCR] Tesseract INICIADO para: ${name}`);
+                    const startTime = Date.now();
                     const ocrTask = Tesseract.recognize(buffer, "spa");
-                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("OCR_TIMEOUT")), 30000));
+                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("OCR_TIMEOUT")), 45000));
 
                     try {
                         const ocrResult: any = await Promise.race([ocrTask, timeoutPromise]);
+                        const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+                        console.log(`   ✅ [OCR] Tesseract COMPLETADO en ${duration}s para: ${name}`);
                         extractedData.text = ocrResult?.data?.text || "";
                     } catch (e: any) {
+                        console.error(`   ⚠️ [OCR] Tesseract FALLÓ/TIMEOUT para: ${name}`, e.message);
                         extractedData.text = "[ERROR_TIMEOUT]";
                     }
                 } 
@@ -134,10 +148,15 @@ async function processFilesInBackground(jobId: string, files: File[]) {
                 }
 
                 results.push(extractedData);
+                fileIndex++;
             } catch (err: any) {
+                console.error(`   ❌ [WORKER] Error procesando archivo ${name}:`, err);
                 results.push({ fileName: name, error: err.message });
+                fileIndex++;
             }
         }
+
+        console.log(`🧪 [WORKER] Clasificando ${results.length} resultados...`);
 
         // 4. Clasificación Inteligente: primero por contenido (OCR/XML), luego por nombre de archivo
         const enhancedResults = results.map(res => {
@@ -170,9 +189,8 @@ async function processFilesInBackground(jobId: string, files: File[]) {
             return { ...res, classification };
         });
 
-        // 5. Actualizar Job como completado
-        const supabaseService = getSupabaseService();
-        await supabaseService
+        console.log(`💾 [WORKER] Intentando actualizar Job ${jobId} en Supabase...`);
+        const { error: updateError } = await supabaseService
             .from('jobs')
             .update({ 
                 status: 'completed', 
@@ -181,7 +199,12 @@ async function processFilesInBackground(jobId: string, files: File[]) {
             })
             .eq('id', jobId);
 
-        console.log(`✅ [WORKER] Job ${jobId} finalizado y clasificado.`);
+        if (updateError) {
+            console.error(`❌ [WORKER] Error al guardar resultados del Job ${jobId}:`, updateError);
+            throw updateError;
+        }
+
+        console.log(`✅ [WORKER] Job ${jobId} FINALIZADO y actualizado en Supabase.`);
 
         // 6. 🚀 DISPARAR N8N (Opcional pero recomendado)
         const n8nWebhook = process.env.N8N_WEBHOOK_URL;
