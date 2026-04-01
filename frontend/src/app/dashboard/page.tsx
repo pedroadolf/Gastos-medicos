@@ -129,6 +129,11 @@ export default function DashboardPage() {
             throw new Error(res.error || "Error al enviar la petición a n8n");
         }
 
+        if (!jobId) {
+            console.error("❌ Error: No se recibió jobId en triggerFinalGeneration");
+            throw new Error("Error interno: Identificador de proceso (jobId) es nulo.");
+        }
+
         const targetJobId = res.jobId || jobId;
         console.log("✅ Petición recibida por n8n, iniciando polling para el JobId:", targetJobId);
         setJobStatus("Procesando trámite final...");
@@ -260,7 +265,7 @@ export default function DashboardPage() {
                                 setFileClassifications(finalClassifications);
                             }
 
-                            supabase.removeChannel(channel);
+                            // 🔑 Usamos el jobId de la sesión (closure) para evitar problemas de payload truncado
                             await triggerFinalGeneration(fullJob.results || [], jobId);
                         } else if (updatedJob.status === 'failed') {
                             setJobStatus("Error");

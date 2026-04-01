@@ -1,15 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Almacén temporal en memoria (válido para 1 instancia)
-// Si tienes múltiples réplicas, cambiar por Supabase/Redis en el futuro
-const jobStore = new Map<string, JobResult>();
-
-interface JobResult {
-  status: 'processing' | 'completed' | 'failed';
-  result?: any;
-  error?: string;
-  updatedAt: number;
-}
+import { getSupabaseService } from '@/lib/supabase';
 
 // n8n llama este endpoint al terminar
 export async function POST(req: NextRequest) {
@@ -21,20 +11,32 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
+    console.log('[API gmm-callback] Incoming callback:', JSON.stringify(body, null, 2));
+
     const { jobId, status, result, error } = body;
 
     if (!jobId) {
+      console.error('[API gmm-callback] Error: jobId not found in body');
       return NextResponse.json({ error: 'jobId requerido' }, { status: 400 });
     }
 
-    jobStore.set(jobId, {
-      status,
-      result,
-      error,
-      updatedAt: Date.now(),
-    });
+    // Persistencia en Supabase (usando Service Role para bypass RLS)
+    const supabase = getSupabaseService();
+    const { error: dbError } = await supabase
+      .from('jobs')
+      .update({
+        status: status === 'completed' ? 'completed' : (status || 'processing'),
+        results: result,
+        error_message: error,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', jobId);
 
-    console.log(`[API gmm-callback] Status received for Job ${jobId}: ${status}`);
+    if (dbError) {
+      console.error('[API gmm-callback] Database Error update:', dbError);
+    }
+
+    console.log(`[API gmm-callback] Status updated in DB for Job ${jobId}: ${status}`);
 
     return NextResponse.json({ received: true });
   } catch (err: any) {
@@ -51,13 +53,27 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'jobId requerido' }, { status: 400 });
   }
 
-  const job = jobStore.get(jobId);
+  const supabase = getSupabaseService();
+  const { data: job, error } = await supabase
+    .from('jobs')
+    .select('status, results, error_message')
+    .eq('id', jobId)
+    .single();
 
-  if (!job) {
-    // Si no encontramos el job, asumimos que sigue en proceso
-    // (o el servidor se reinició, en cuyo caso debería manejarse con Redis)
-    return NextResponse.json({ status: 'processing', message: 'Job no encontrado temporalmente o sigue en proceso' }); 
+  if (error || !job) {
+    console.warn(`[API gmm-callback] Job ${jobId} not found in DB or error:`, error?.message);
+    return NextResponse.json({ 
+      status: 'processing', 
+      message: 'Esperando respuesta de n8n...' 
+    }); 
   }
 
-  return NextResponse.json(job);
+  // Mapeamos el formato de la DB al formato que espera el Dashboard
+  return NextResponse.json({
+    status: job.status,
+    result: job.results,
+    error: job.error_message,
+    updatedAt: Date.now() // Mock para compatibilidad
+  });
 }
+

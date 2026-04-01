@@ -9,6 +9,8 @@ export async function POST(req: NextRequest) {
     try {
         const { datosExtraidos, webHookUrl_n8n, plantillaSeleccionada, plantillasMultiples, archivosManuales, jobId } = await req.json();
 
+        console.log(`\n🚀 [API generar] Iniciando proceso para JobId: ${jobId || 'NUEVO'}`);
+
         if (!datosExtraidos) {
             return NextResponse.json({ error: "No se enviaron datos para poblar el PDF." }, { status: 400 });
         }
@@ -174,6 +176,7 @@ export async function POST(req: NextRequest) {
             }, { status: 502 });
         }
 
+        console.log(`✅ [DEBUG] Retornando al Dashboard: jobId=${jobId || n8nJobId} (n8nJobId=${n8nJobId})`);
         return NextResponse.json({
             success: true,
             message: `${documentosGenerados.length} PDF(s) generados y enviados a n8n en un solo request.`,
