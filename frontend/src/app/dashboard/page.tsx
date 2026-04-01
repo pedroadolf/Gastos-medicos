@@ -87,6 +87,9 @@ export default function DashboardPage() {
     });
 
     const triggerFinalGeneration = async (ocrResults: any[], jobId: string, preReadFiles: any[]) => {
+        // Nota: Los archivos se leen en Base64 al inicio del proceso para evitar
+        // que el browser invalide los file handles durante procesamiento largo (>2min).
+        // Con 15 PDFs esto representa ~6MB en memoria del cliente.
         console.log("⏱️ Generando PDFs finales basado en análisis...");
         setJobStatus("Generando Expediente Final...");
         
