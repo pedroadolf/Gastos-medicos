@@ -198,7 +198,7 @@ export default function DashboardPage() {
         }
         setIsProcessing(false);
 
-        alert(`✅ ¡Expediente Generado!\n\n- Análisis IA: ${ocrResults.length} archivos procesados.\n- Enviados a n8n exitosamente.\n\nEstructura: n8n creó la carpeta "${selectedAsegurado?.nombre}" en Drive.`);
+        alert(`✅ ¡Expediente Generado!\n\n- Análisis IA: ${ocrResults.length} archivos procesados.\n- Enviados a n8n exitosamente.`);
     };
 
     const handleProcessBtn = async () => {
