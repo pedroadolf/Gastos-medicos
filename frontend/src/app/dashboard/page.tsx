@@ -86,25 +86,14 @@ export default function DashboardPage() {
         accept: { "application/pdf": [".pdf"], "image/*": [".jpeg", ".png", ".jpg"], "text/xml": [".xml"] },
     });
 
-    const triggerFinalGeneration = async (ocrResults: any[], jobId: string) => {
+    const triggerFinalGeneration = async (ocrResults: any[], jobId: string, preReadFiles: any[]) => {
         console.log("⏱️ Generando PDFs finales basado en análisis...");
         setJobStatus("Generando Expediente Final...");
         
         const config = procedureConfigs[procedureType];
         
-        // Convertir archivos para el paso final
-        const filePromises = uploadedFiles.map(file => {
-            return new Promise<{ name: string, base64: string, type: string }>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    const base64 = (reader.result as string).split(',')[1];
-                    resolve({ name: file.name, base64, type: file.type });
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        });
-        const additionalFiles = await Promise.all(filePromises);
+        // Usamos los archivos pre-leídos al inicio (evita handles expirados)
+        const additionalFiles = preReadFiles;
 
         const datosCompartidos = {
             asegurado: { ...selectedAsegurado },
@@ -219,6 +208,25 @@ export default function DashboardPage() {
 
         try {
             console.log("⏱️ Iniciando Job de Procesamiento...");
+
+            // Nota: Los archivos se leen en Base64 al inicio del proceso para evitar
+            // que el browser invalide los file handles durante procesamiento largo (>2min).
+            // Con 15 PDFs esto representa ~6MB en memoria del cliente.
+            // Esto NO resuelve el riesgo de que Traefik/Proxy corte el payload por tamaño al final,
+            // pero sí garantiza que el archivo esté disponible para el intento de envío.
+            const filePromises = uploadedFiles.map(file => {
+                return new Promise<{ name: string, base64: string, type: string }>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const base64 = (reader.result as string).split(',')[1];
+                        resolve({ name: file.name, base64, type: file.type });
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            });
+            const archivosBase64 = await Promise.all(filePromises);
+
             const formData = new FormData();
             uploadedFiles.forEach((file) => formData.append("files", file));
             
@@ -299,7 +307,7 @@ export default function DashboardPage() {
                             }
 
                             // 🔑 Usamos el jobId de la sesión (closure) para evitar problemas de payload truncado
-                            await triggerFinalGeneration(finalResults, jobId);
+                            await triggerFinalGeneration(finalResults, jobId, archivosBase64);
                         } else if (updatedJob.status === 'failed') {
                             setJobStatus("Error");
                              alert("❌ Error en Worker: " + (updatedJob.error_message || "Desconocido"));
