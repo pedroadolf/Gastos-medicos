@@ -12,7 +12,8 @@ type Siniestro = { id: string; aseguradoId: string; titulo: string; numeroSinies
 export default function DashboardPage() {
     const [selectedAsegurado, setSelectedAsegurado] = useState<Asegurado | null>(null);
     const [selectedSiniestro, setSelectedSiniestro] = useState<string | null>(null);
-    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+    const [anexosFiles, setAnexosFiles] = useState<File[]>([]);
+    const [facturasFiles, setFacturasFiles] = useState<File[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [procedureType, setProcedureType] = useState<"reembolso" | "carta-pase">("reembolso");
     const [currentJobId, setCurrentJobId] = useState<string | null>(null);
@@ -50,12 +51,12 @@ export default function DashboardPage() {
     const procedureConfigs = {
         "reembolso": {
             label: "Trámite de Reembolso",
-            autoPDFs: ["3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf"],
+            autoPDFs: ["2_Case_Management-Mar26.pdf", "3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf"],
             manualChecklist: ["Informe médico firmado", "Estudios diagnósticos", "Comprobante domicilio (<3 meses)", "ID Oficial Afectado/Titular", "Facturas desglosadas", "Estado de cuenta (CLABE)"]
         },
         "carta-pase": {
             label: "Carta Pase (Terapias/Cirugías)",
-            autoPDFs: ["3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf", "5_Declaración-jurada-Mar26.pdf"],
+            autoPDFs: ["2_Case_Management-Mar26.pdf", "3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf", "5_Declaración-jurada-Mar26.pdf"],
             manualChecklist: ["Informe médico firmado", "Estudios diagnósticos", "Comprobante domicilio (<3 meses)", "ID Oficial Afectado/Titular"]
         }
     };
@@ -77,12 +78,21 @@ export default function DashboardPage() {
             .catch(() => setIsLoadingData(false));
     }, []);
 
-    const onDrop = useCallback((acceptedFiles: File[]) => {
-        setUploadedFiles((prev) => [...prev, ...acceptedFiles]);
+    const onDropAnexos = useCallback((acceptedFiles: File[]) => {
+        setAnexosFiles((prev) => [...prev, ...acceptedFiles]);
     }, []);
 
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        onDrop,
+    const onDropFacturas = useCallback((acceptedFiles: File[]) => {
+        setFacturasFiles((prev) => [...prev, ...acceptedFiles]);
+    }, []);
+
+    const dropzoneAnexos = useDropzone({
+        onDrop: onDropAnexos,
+        accept: { "application/pdf": [".pdf"], "image/*": [".jpeg", ".png", ".jpg"] },
+    });
+
+    const dropzoneFacturas = useDropzone({
+        onDrop: onDropFacturas,
         accept: { "application/pdf": [".pdf"], "image/*": [".jpeg", ".png", ".jpg"], "text/xml": [".xml"] },
     });
 
@@ -201,125 +211,91 @@ export default function DashboardPage() {
         alert(`✅ ¡Expediente Generado!\n\n- Análisis IA: ${ocrResults.length} archivos procesados.\n- Enviados a n8n exitosamente.`);
     };
 
+    const uploadAndGetSignedUrl = async (file: File, path: string) => {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+        const filePath = `${path}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from('gmm-uploads')
+            .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: signedData, error: signedError } = await supabase.storage
+            .from('gmm-uploads')
+            .createSignedUrl(filePath, 86400); // 24 hours
+
+        if (signedError) throw signedError;
+        return { name: file.name, url: signedData.signedUrl, path: filePath };
+    };
+
     const handleProcessBtn = async () => {
-        if (!selectedAsegurado || uploadedFiles.length === 0) return;
+        if (!selectedAsegurado || (anexosFiles.length === 0 && facturasFiles.length === 0)) return;
         setIsProcessing(true);
         setStartTime(Date.now());
         setLastDriveLink(null);
-        setJobStatus("Enviando archivos...");
+        setJobStatus("Preparando archivos...");
         setFileClassifications({});
 
         try {
-            console.log("⏱️ Iniciando Job de Procesamiento...");
+            console.log("⏱️ Subiendo archivos a Supabase Storage...");
+            const folderId = `job_${Date.now()}`;
+            
+            setJobStatus("Subiendo Anexos...");
+            const anexosUrls = await Promise.all(anexosFiles.map(f => uploadAndGetSignedUrl(f, `${folderId}/anexos`)));
+            
+            setJobStatus("Subiendo Facturas...");
+            const facturasUrls = await Promise.all(facturasFiles.map(f => uploadAndGetSignedUrl(f, `${folderId}/facturas`)));
 
-            // Nota: Los archivos se leen en Base64 al inicio del proceso para evitar
-            // que el browser invalide los file handles durante procesamiento largo (>2min).
-            // Con 15 PDFs esto representa ~6MB en memoria del cliente.
-            // Esto NO resuelve el riesgo de que Traefik/Proxy corte el payload por tamaño al final,
-            // pero sí garantiza que el archivo esté disponible para el intento de envío.
-            const filePromises = uploadedFiles.map(file => {
-                return new Promise<{ name: string, base64: string, type: string }>((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        const base64 = (reader.result as string).split(',')[1];
-                        resolve({ name: file.name, base64, type: file.type });
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
+            setJobStatus("Enviando metadatos a n8n...");
+            
+            const payload = {
+                siniestroId: selectedSiniestro || "SIN_NUEVO",
+                asegurado: selectedAsegurado,
+                tipoTramite: procedureType,
+                grupoA_anexos: anexosUrls,
+                grupoB_facturas: facturasUrls,
+                metadata: {
+                    source: "dashboard_v2.0",
+                    timestamp: new Date().toISOString()
+                }
+            };
+
+            const response = await fetch("/api/documentos", { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload) 
             });
-            const archivosBase64 = await Promise.all(filePromises);
-
-            const formData = new FormData();
-            uploadedFiles.forEach((file) => formData.append("files", file));
             
-            formData.append("metadata", JSON.stringify({
-                asegurado: selectedAsegurado.nombre,
-                tipo_tramite: procedureType
-            }));
-
-            const response = await fetch("/api/documentos", { method: "POST", body: formData });
-            const initialData = await response.json();
+            const result = await response.json();
             
-            if (!initialData.jobId) {
-                const detailMsg = initialData.details ? `\n\nDetalle: ${initialData.details}\nCódigo: ${initialData.code}\nTarget: ${initialData.target}` : "";
-                throw new Error("No se pudo crear el Job de procesamiento." + detailMsg);
+            if (!result.success) {
+                throw new Error(result.error || "Error al iniciar proceso");
             }
 
-            const jobId = initialData.jobId;
+            const jobId = result.jobId;
             setCurrentJobId(jobId);
             setJobStatus("IA analizando documentos...");
 
-            // Escuchar cambios en Supabase Realtime
-            const channel = supabase
-                .channel(`job-updates-${jobId}`)
-                .on(
-                    'postgres_changes',
-                    { event: 'UPDATE', schema: 'public', table: 'jobs', filter: `id=eq.${jobId}` },
-                    async (payload: any) => {
-                        const updatedJob = payload.new;
-                        console.log("🔄 Job Update:", updatedJob);
-                        
-                        if (updatedJob.results && Object.keys(fileClassifications).length === 0) {
-                            const newClassifications: Record<string, string> = {};
-                            const resultsArray2 = Array.isArray(updatedJob.results) 
-                                ? updatedJob.results 
-                                : Object.values(updatedJob.results || {});
-                            
-                            resultsArray2.forEach((res: any) => {
-                                if (res.classification) {
-                                    newClassifications[res.fileName] = res.classification;
-                                }
-                            });
-                            setFileClassifications(newClassifications);
-                        }
+            // Polling result (simplified version for now, using callback or jobId)
+            const maxIntentos = 120;
+            for (let i = 0; i < maxIntentos; i++) {
+                await new Promise(r => setTimeout(r, 5000));
+                const statusRes = await fetch(`/api/gmm-callback?jobId=${jobId}`);
+                if (!statusRes.ok) continue;
 
-                        if (updatedJob.status === 'completed') {
-                            setJobStatus("Completado");
-                            console.log("🚀 Job finalizado. Iniciando RE-FETCH de seguridad...");
-                            
-                            // 🚀 RE-FETCH DE SEGURIDAD: Los payloads de Realtime pueden truncar JSONs grandes
-                            const { data: fullJob, error: fetchError } = await supabase
-                                .from('jobs')
-                                .select('*')
-                                .eq('id', jobId)
-                                .single();
-
-                            if (fetchError || !fullJob) {
-                                console.error("❌ Error re-fetching job details:", fetchError);
-                                alert("Error recuperando resultados del análisis de base de datos.");
-                                setIsProcessing(false);
-                                return;
-                            }
-
-                            const finalResults = Array.isArray(fullJob.results) 
-                                ? fullJob.results 
-                                : Object.values(fullJob.results || {});
-
-                            console.log("📦 Datos completos recuperados:", finalResults.length, "registros.");
-
-                            if (finalResults.length > 0) {
-                                const finalClassifications: Record<string, string> = {};
-                                
-                                finalResults.forEach((res: any) => {
-                                    if (res.classification) {
-                                        finalClassifications[res.fileName] = res.classification;
-                                    }
-                                });
-                                setFileClassifications(finalClassifications);
-                            }
-
-                            // 🔑 Usamos el jobId de la sesión (closure) para evitar problemas de payload truncado
-                            await triggerFinalGeneration(finalResults, jobId, archivosBase64);
-                        } else if (updatedJob.status === 'failed') {
-                            setJobStatus("Error");
-                             alert("❌ Error en Worker: " + (updatedJob.error_message || "Desconocido"));
-                            supabase.removeChannel(channel);
-                            setIsProcessing(false);
-                        }
-                    }
-                )
-                .subscribe();
+                const data = await statusRes.json();
+                if (data.status === 'completed') {
+                    setJobStatus("Completado");
+                    if (data.result?.driveUrl) setLastDriveLink(data.result.driveUrl);
+                    setIsProcessing(false);
+                    return;
+                }
+                if (data.status === 'failed') {
+                    throw new Error(data.error || "El proceso falló.");
+                }
+            }
 
         } catch (error: any) {
             console.error("❌ Error en flujo:", error);
@@ -486,122 +462,141 @@ export default function DashboardPage() {
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center">
                                 <span className="bg-slate-800 text-slate-400 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-[10px]">4</span>
-                                Documentación Manual
+                                Carga de Documentación
                             </h2>
-                            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded font-mono">{uploadedFiles.length} adjuntos</span>
+                            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded font-mono">{anexosFiles.length + facturasFiles.length} adjuntos</span>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div className="bg-slate-900/30 border border-slate-800 p-4 rounded-xl">
-                                <p className="text-[11px] text-slate-500 font-bold uppercase mb-3">Checklist del Trámite:</p>
-                                <div className="space-y-2">
-                                    {procedureConfigs[procedureType].manualChecklist.map((item, idx) => {
-                                        const isChecked = Object.values(fileClassifications).some(cls => {
-                                            if (item.toLowerCase().includes("id oficial") && cls === "ine") return true;
-                                            if (item.toLowerCase().includes("factura") && (cls === "factura_xml" || cls === "posible_factura")) return true;
-                                            if (item.toLowerCase().includes("receta") && cls === "receta_medica") return true;
-                                            if (item.toLowerCase().includes("informe") && cls === "informe_medico") return true;
-                                            if (item.toLowerCase().includes("domicilio") && cls === "comprobante_domicilio") return true;
-                                            if (item.toLowerCase().includes("estudio") && cls === "estudios_diagnosticos") return true;
-                                            return false;
-                                        });
-
-                                        const isJobFinished = jobStatus === "Completado" || (!isProcessing && Object.keys(fileClassifications).length > 0);
-                                        const isMissing = isJobFinished && !isChecked;
-
-                                        return (
-                                            <div key={idx} className={`flex items-center text-xs transition-colors ${isChecked ? "text-fintech-emerald font-bold" : isMissing ? "text-rose-400" : "text-slate-400"}`}>
-                                                <div className={`w-3.5 h-3.5 border rounded mr-2 flex items-center justify-center transition-all ${isChecked ? "bg-fintech-emerald border-fintech-emerald" : isMissing ? "bg-rose-500/20 border-rose-500" : "border-slate-700"}`}>
-                                                    {isChecked ? (
-                                                        <CheckCircle2 className="w-2.5 h-2.5 text-white" />
-                                                    ) : isMissing ? (
-                                                        <span className="text-[10px] font-bold leading-none">✕</span>
-                                                    ) : null}
-                                                </div>
-                                                {item}
-                                                {isChecked && <Sparkles className="w-2.5 h-2.5 ml-2 text-fintech-cyan animate-pulse" />}
-                                                {isMissing && <span className="ml-2 text-[9px] font-bold uppercase tracking-tighter opacity-70">No detectado</span>}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                        {/* Dropzones Duales */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div
+                                {...dropzoneFacturas.getRootProps()}
+                                className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 transition-all cursor-pointer ${dropzoneFacturas.isDragActive ? "border-fintech-cyan bg-fintech-cyan/5" : "border-slate-800 hover:border-fintech-cyan bg-slate-900/20"}`}
+                            >
+                                <input {...dropzoneFacturas.getInputProps()} />
+                                <Zap className={`w-8 h-8 mb-2 ${dropzoneFacturas.isDragActive ? "text-fintech-cyan" : "text-slate-600"}`} />
+                                <p className="text-xs text-slate-300 font-bold text-center">GRUPO B: Facturas y Honorarios</p>
+                                <p className="text-[10px] text-slate-500 text-center">(Pasan por IA / OCR)</p>
                             </div>
 
                             <div
-                                {...getRootProps()}
-                                className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 transition-all cursor-pointer ${isDragActive ? "border-fintech-emerald bg-fintech-emerald/5" : "border-slate-800 hover:border-fintech-cyan bg-slate-900/20"}`}
+                                {...dropzoneAnexos.getRootProps()}
+                                className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 transition-all cursor-pointer ${dropzoneAnexos.isDragActive ? "border-amber-500 bg-amber-500/5" : "border-slate-800 hover:border-amber-500 bg-slate-900/20"}`}
                             >
-                                <input {...getInputProps()} />
-                                <UploadCloud className={`w-8 h-8 mb-2 ${isDragActive ? "text-fintech-emerald" : "text-slate-600"}`} />
-                                <p className="text-xs text-slate-300 font-medium text-center">Suelta facturas, informes o IDs aquí</p>
+                                <input {...dropzoneAnexos.getInputProps()} />
+                                <UploadCloud className={`w-8 h-8 mb-2 ${dropzoneAnexos.isDragActive ? "text-amber-500" : "text-slate-600"}`} />
+                                <p className="text-xs text-slate-300 font-bold text-center">GRUPO A: Anexos Generales</p>
+                                <p className="text-[10px] text-slate-500 text-center">(INE, Recetas, Domicilio)</p>
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto max-h-[220px] space-y-2 mb-6">
-                            {uploadedFiles.map((file, i) => {
-                                const classification = fileClassifications[file.name];
-                                return (
-                                    <div key={i} className="flex items-center p-3 bg-slate-900/50 border border-slate-800 rounded-lg">
-                                        {isProcessing && !classification ? (
-                                            <Loader2 className="w-4 h-4 text-fintech-cyan mr-3 animate-spin" />
-                                        ) : (
-                                            <FileText className={`w-4 h-4 mr-3 ${classification ? "text-fintech-emerald" : "text-slate-500"}`} />
-                                        )}
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <p className="text-xs font-medium text-white truncate">{file.name}</p>
-                                                {classification && (
-                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded border uppercase font-bold ${
-                                                        classification === "desconocido" 
-                                                            ? "bg-amber-500/10 text-amber-400 border-amber-500/30" 
-                                                            : "bg-fintech-emerald/10 text-fintech-emerald border-fintech-emerald/30"
-                                                    }`}>
-                                                        {classification === "ine" ? "ID Oficial (INE)" 
-                                                         : classification === "factura_xml" ? "Factura XML" 
-                                                         : classification === "receta_medica" ? "Receta Médica"
-                                                         : classification === "informe_medico" ? "Informe Médico"
-                                                         : classification === "comprobante_domicilio" ? "Comp. Domicilio"
-                                                         : classification === "estudios_diagnosticos" ? "Estudios Dx"
-                                                         : classification === "posible_factura" ? "Posible Factura"
-                                                         : classification.replace("_", " ")}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <button onClick={() => setUploadedFiles(uploadedFiles.filter((_, idx) => idx !== i))} className="text-slate-600 hover:text-rose-400 p-2">✕</button>
+                        {/* Lista de Archivos Unificada */}
+                        <div className="flex-1 overflow-y-auto max-h-[300px] space-y-2 mb-6 pr-2 custom-scrollbar">
+                            {/* Visualización Facturas */}
+                            {facturasFiles.map((file, i) => (
+                                <div key={`f-${i}`} className="flex items-center p-3 bg-slate-900/50 border border-slate-705/50 rounded-lg group hover:border-fintech-cyan/30 transition-colors">
+                                    <div className="w-1 h-8 bg-fintech-cyan rounded-full mr-3 shadow-[0_0_8px_rgba(6,182,212,0.5)]"></div>
+                                    <FileText className="w-4 h-4 mr-3 text-fintech-cyan" />
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-white truncate">{file.name}</p>
+                                        <p className="text-[9px] text-fintech-cyan/70 uppercase font-bold tracking-tighter">Grupo B · Procesamiento IA</p>
                                     </div>
-                                );
-                            })}
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); setFacturasFiles(facturasFiles.filter((_, idx) => idx !== i)); }} 
+                                        className="text-slate-600 hover:text-rose-400 p-2 transition-colors opacity-0 group-hover:opacity-100"
+                                    >✕</button>
+                                </div>
+                            ))}
+                            
+                            {/* Visualización Anexos */}
+                            {anexosFiles.map((file, i) => (
+                                <div key={`a-${i}`} className="flex items-center p-3 bg-slate-900/50 border border-slate-700/50 rounded-lg group hover:border-amber-500/30 transition-colors">
+                                    <div className="w-1 h-8 bg-amber-500 rounded-full mr-3 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
+                                    <UploadCloud className="w-4 h-4 mr-3 text-amber-500" />
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium text-white truncate">{file.name}</p>
+                                        <p className="text-[9px] text-amber-500/70 uppercase font-bold tracking-tighter">Grupo A · Anexo Directo</p>
+                                    </div>
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); setAnexosFiles(anexosFiles.filter((_, idx) => idx !== i)); }} 
+                                        className="text-slate-600 hover:text-rose-400 p-2 transition-colors opacity-0 group-hover:opacity-100"
+                                    >✕</button>
+                                </div>
+                            ))}
+
+                            {(anexosFiles.length === 0 && facturasFiles.length === 0) && (
+                                <div className="h-full flex flex-col items-center justify-center text-slate-600 py-10 grayscale opacity-50">
+                                    <FileText className="w-12 h-12 mb-2 stroke-[1px]" />
+                                    <p className="text-sm font-medium">Sin archivos seleccionados</p>
+                                    <p className="text-[10px]">Arrastra documentos a las zonas superiores</p>
+                                </div>
+                            )}
                         </div>
 
+                        {/* Checklist Informativo */}
+                        <div className="bg-slate-900/30 border border-slate-800 p-4 rounded-xl mb-6">
+                            <p className="text-[11px] text-slate-500 font-bold uppercase mb-3">Checklist del Trámite:</p>
+                            <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                                {procedureConfigs[procedureType].manualChecklist.map((item, idx) => {
+                                    const isChecked = Object.values(fileClassifications).some(cls => {
+                                        if (item.toLowerCase().includes("id oficial") && cls === "ine") return true;
+                                        if (item.toLowerCase().includes("factura") && (cls === "factura_xml" || cls === "posible_factura")) return true;
+                                        if (item.toLowerCase().includes("receta") && cls === "receta_medica") return true;
+                                        if (item.toLowerCase().includes("informe") && cls === "informe_medico") return true;
+                                        if (item.toLowerCase().includes("domicilio") && cls === "comprobante_domicilio") return true;
+                                        if (item.toLowerCase().includes("estudio") && cls === "estudios_diagnosticos") return true;
+                                        return false;
+                                    });
+
+                                    const isJobFinished = jobStatus === "Completado" || (!isProcessing && Object.keys(fileClassifications).length > 0);
+                                    const isMissing = isJobFinished && !isChecked;
+
+                                    return (
+                                        <div key={idx} className={`flex items-center text-[11px] transition-colors ${isChecked ? "text-fintech-emerald font-bold" : isMissing ? "text-rose-400" : "text-slate-500"}`}>
+                                            <div className={`w-3 h-3 border rounded mr-2 flex items-center justify-center transition-all ${isChecked ? "bg-fintech-emerald border-fintech-emerald" : isMissing ? "bg-rose-500/20 border-rose-500" : "border-slate-700"}`}>
+                                                {isChecked ? (
+                                                    <CheckCircle2 className="w-2 h-2 text-white" />
+                                                ) : isMissing ? (
+                                                    <span className="text-[8px] font-bold leading-none">✕</span>
+                                                ) : null}
+                                            </div>
+                                            <span className="truncate">{item}</span>
+                                            {isChecked && <Sparkles className="w-2.5 h-2.5 ml-2 text-fintech-cyan animate-pulse flex-shrink-0" />}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Acciones Finales */}
                         <div className="pt-5 border-t border-slate-800/80 flex items-center justify-end gap-3">
                             {lastDriveLink && (
-                                <a href={lastDriveLink} target="_blank" rel="noopener noreferrer" className="flex items-center px-6 py-3 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 border border-slate-700">
+                                <a href={lastDriveLink} target="_blank" rel="noopener noreferrer" className="flex items-center px-6 py-3 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-all">
                                     <ExternalLink className="w-4 h-4 mr-2" /> VER EN DRIVE
                                 </a>
                             )}
                             <button
                                 onClick={handleProcessBtn}
-                                disabled={!selectedAsegurado || isProcessing || uploadedFiles.length === 0}
-                                className={`flex flex-col items-center justify-center px-10 py-3 rounded-xl font-bold text-sm shadow-xl transition-all ${!selectedAsegurado || isProcessing || uploadedFiles.length === 0 ? "bg-slate-800 text-slate-600 cursor-not-allowed" : "bg-fintech-cyan hover:bg-cyan-400 text-slate-900"}`}
+                                disabled={!selectedAsegurado || isProcessing || (anexosFiles.length === 0 && facturasFiles.length === 0)}
+                                className={`flex flex-col items-center justify-center px-10 py-3 rounded-xl font-bold text-sm shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all ${!selectedAsegurado || isProcessing || (anexosFiles.length === 0 && facturasFiles.length === 0) ? "bg-slate-800 text-slate-600 cursor-not-allowed" : "bg-fintech-emerald hover:bg-emerald-400 text-slate-900 transform active:scale-95"}`}
                             >
                                 <div className="flex items-center">
                                     {isProcessing ? (
                                         <>
-                                            <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
-                                            {jobStatus || "PROCESANDO..."}
+                                            <RefreshCw className="w-5 h-5 mr-2 animate-spin text-slate-900" />
+                                            <span className="animate-pulse">{jobStatus || "PROCESANDO..."}</span>
                                         </>
                                     ) : (
                                         <>
-                                            <Zap className="w-4 h-4 mr-2" />
+                                            <Zap className="w-4 h-4 mr-2 fill-current" />
                                             GENERAR Y ENVIAR TRÁMITE
                                         </>
                                     )}
                                 </div>
-                                {isProcessing && (
-                                    <div className="flex flex-col items-center mt-1 text-[10px] opacity-80 font-mono">
+                                {isProcessing && startTime && (
+                                    <div className="flex flex-col items-center mt-1 text-[10px] opacity-80 font-mono text-slate-800">
                                         <span>Tiempo transcurrido: {formatTime(elapsedTime)}</span>
-                                        {currentJobId && <span className="mt-0.5 tracking-tighter">ID: {currentJobId.split('-')[0]}...</span>}
+                                        {currentJobId && <span className="mt-0.5 tracking-tighter opacity-60">ID: {currentJobId.split('-')[0]}...</span>}
                                     </div>
                                 )}
                             </button>
