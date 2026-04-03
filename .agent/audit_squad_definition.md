@@ -4,15 +4,15 @@ Este documento define la estructura y responsabilidades del squad encargado de l
 
 ## Estructura del Squad
 
-| Agente | Rol | Responsabilidad | Herramientas Clave |
+| Agente | Rol | Responsabilidad | Definición (Brain) |
 | :--- | :--- | :--- | :--- |
-| **QA (#6)** | **Lead Auditor** | Coordinación de auditorías, pruebas E2E, validación visual en Dashboard. | Playwright, Browser Subagent |
-| **Workflow Specialist (#4)** | **Logic Guard** | Validación de lógica n8n, manejo de errores, nombrado de nodos y performance. | n8n-MCP, Validator MCP |
-| **Filesystem (#9)** | **Data Auditor** | Verificación de integridad en Drive, Sheets y estructura de archivos ZIP. | Drive/Sheets API, FS tools |
-| **Backend (#3)** | **Sync Monitor** | Monitoreo de logs en Supabase y sincronización de estados de tareas. | Supabase MCP |
-| **Manager (#1)** | **Quality Control** | Revisión final de best practices y reporte de cumplimiento. | Communication, Artifacts |
+| **Auditor (#06)** | **Lead Auditor** | Auditorías, pruebas E2E, validación Dashboard. | `/.agent/agent/06_auditor_agent.md` |
+| **Workflow (#04)** | **Logic Guard** | Lógica n8n, manejo de errores, performance. | `/.agent/agent/04_workflow_agent.md` |
+| **Filesystem (#09)** | **Data Auditor** | Integridad Drive, Sheets y ZIP. | `/.agent/agent/09_filesystem_agent.md` |
+| **Backend (#03)** | **Sync Monitor** | Logs en Supabase y estados de tareas. | `/.agent/agent/03_backend_agent.md` |
+| **Manager (#01)** | **Quality Control** | Best practices y cumplimiento. | `/.agent/agent/01_manager_agent.md` |
 
-## Protocolo de Auditoría (Skill: GMM Auditor)
+## Protocolo de Auditoría (Skill: 06_auditor_qa_skill)
 
 Cada vez que se active el trigger **"Audita GMM workflows"**, el squad realizará los siguientes pasos:
 

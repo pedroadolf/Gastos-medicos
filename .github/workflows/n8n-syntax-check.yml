@@ -1,0 +1,13 @@
+name: n8n Syntax Check
+on: push
+jobs:
+  audit-n8n:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: sonarsource/sonarqube-quality-gate-action@v1
+      with:
+        args: >-
+          -Dsonar.projectKey=GMM-n8n
+          -Dsonar.sources=.agent/
+          -Dsonar.n8n.workflowIds=eLPePdBS1utfjed0
