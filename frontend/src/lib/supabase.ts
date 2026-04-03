@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-const FALLBACK_URL = 'http://antigravity-supabase-da8a50-193-43-134-161.traefik.me';
+const FALLBACK_URL = 'https://supabase.pash.uno';
 const envUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';

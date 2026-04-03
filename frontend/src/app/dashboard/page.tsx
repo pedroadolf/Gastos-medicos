@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Search, UploadCloud, FileText, Zap, RefreshCw, CheckCircle2, Loader2, Sparkles, ExternalLink } from "lucide-react";
 import { useDropzone } from "react-dropzone";
-import { supabase } from "@/lib/supabase";
+
 
 // Tipos basados en Google Sheets (Ampliado)
 type Asegurado = { id: string; nombre: string; poliza: string; plan: string; rfc: string;[key: string]: any };
@@ -211,23 +211,34 @@ export default function DashboardPage() {
         alert(`✅ ¡Expediente Generado!\n\n- Análisis IA: ${ocrResults.length} archivos procesados.\n- Enviados a n8n exitosamente.`);
     };
 
-    const uploadAndGetSignedUrl = async (file: File, path: string) => {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
-        const filePath = `${path}/${fileName}`;
+    /**
+     * Sube un grupo de archivos al server-side API route que usa Service Role
+     * para bypasear RLS en Supabase Storage.
+     */
+    const uploadFilesViaServer = async (
+        files: File[], 
+        folder: string, 
+        group: string
+    ): Promise<Array<{ name: string; url: string; path: string }>> => {
+        if (files.length === 0) return [];
 
-        const { error: uploadError } = await supabase.storage
-            .from('gmm-uploads')
-            .upload(filePath, file);
+        const formData = new FormData();
+        formData.append("folder", folder);
+        formData.append("group", group);
+        files.forEach(file => formData.append("files", file));
 
-        if (uploadError) throw uploadError;
+        const response = await fetch("/api/upload-storage", {
+            method: "POST",
+            body: formData,
+        });
 
-        const { data: signedData, error: signedError } = await supabase.storage
-            .from('gmm-uploads')
-            .createSignedUrl(filePath, 86400); // 24 hours
+        const result = await response.json();
 
-        if (signedError) throw signedError;
-        return { name: file.name, url: signedData.signedUrl, path: filePath };
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || result.details || `Error subiendo ${group}`);
+        }
+
+        return result.files;
     };
 
     const handleProcessBtn = async () => {
@@ -239,14 +250,14 @@ export default function DashboardPage() {
         setFileClassifications({});
 
         try {
-            console.log("⏱️ Subiendo archivos a Supabase Storage...");
+            console.log("⏱️ Subiendo archivos a Supabase Storage (via server)...");
             const folderId = `job_${Date.now()}`;
             
             setJobStatus("Subiendo Anexos...");
-            const anexosUrls = await Promise.all(anexosFiles.map(f => uploadAndGetSignedUrl(f, `${folderId}/anexos`)));
+            const anexosUrls = await uploadFilesViaServer(anexosFiles, folderId, "anexos");
             
             setJobStatus("Subiendo Facturas...");
-            const facturasUrls = await Promise.all(facturasFiles.map(f => uploadAndGetSignedUrl(f, `${folderId}/facturas`)));
+            const facturasUrls = await uploadFilesViaServer(facturasFiles, folderId, "facturas");
 
             setJobStatus("Enviando metadatos a n8n...");
             
