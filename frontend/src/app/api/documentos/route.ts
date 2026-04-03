@@ -7,17 +7,18 @@ export async function POST(req: NextRequest) {
         
         // El frontend ahora envía JSON directamente, no FormData multipart
         const payload = await req.json();
-        const { siniestroId, asegurado, tipoTramite, grupoA_anexos, grupoB_facturas, metadata } = payload;
+        const { siniestroId, asegurado, tipoTramite, grupoA_anexos = [], grupoB_facturas = [], metadata } = payload;
         
-        const totalFiles = (grupoA_anexos?.length || 0) + (grupoB_facturas?.length || 0);
-        console.log(`📂 [POST] Payload recibido. Total archivos: ${totalFiles}. Metadata:`, metadata);
+        const totalFiles = grupoA_anexos.length + grupoB_facturas.length;
+        
+        console.log(`📂 [POST] Payload recibido. Total archivos: ${totalFiles}. Metadata:`, JSON.stringify(metadata, null, 2));
 
         if (totalFiles === 0) {
             console.warn("⚠️ [POST] No se detectaron archivos en el payload.");
             return NextResponse.json({ error: "No se recibieron archivos" }, { status: 400 });
         }
 
-        console.log(`🚀 [QUEUE] Creando Job en Supabase ${supabaseUrl}...`);
+        console.log(`🚀 [QUEUE] Creando Job en Supabase para: ${asegurado?.nombre || "Usuario Desconocido"}...`);
 
         // 1. Crear el Job en Supabase usando Service Role centralizado
         const supabaseService = getSupabaseService();

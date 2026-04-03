@@ -475,7 +475,10 @@ export default function DashboardPage() {
                                 <span className="bg-slate-800 text-slate-400 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-[10px]">4</span>
                                 Carga de Documentación
                             </h2>
-                            <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded font-mono">{anexosFiles.length + facturasFiles.length} adjuntos</span>
+                            <div className="flex gap-4">
+                                <span className="text-[10px] bg-fintech-cyan/10 text-fintech-cyan border border-fintech-cyan/20 px-2 py-1 rounded font-bold uppercase">Grupo B: {facturasFiles.length}</span>
+                                <span className="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-1 rounded font-bold uppercase">Grupo A: {anexosFiles.length}</span>
+                            </div>
                         </div>
 
                         {/* Dropzones Duales */}
@@ -501,47 +504,59 @@ export default function DashboardPage() {
                             </div>
                         </div>
 
-                        {/* Lista de Archivos Unificada */}
-                        <div className="flex-1 overflow-y-auto max-h-[300px] space-y-2 mb-6 pr-2 custom-scrollbar">
-                            {/* Visualización Facturas */}
-                            {facturasFiles.map((file, i) => (
-                                <div key={`f-${i}`} className="flex items-center p-3 bg-slate-900/50 border border-slate-705/50 rounded-lg group hover:border-fintech-cyan/30 transition-colors">
-                                    <div className="w-1 h-8 bg-fintech-cyan rounded-full mr-3 shadow-[0_0_8px_rgba(6,182,212,0.5)]"></div>
-                                    <FileText className="w-4 h-4 mr-3 text-fintech-cyan" />
-                                    <div className="flex-1">
-                                        <p className="text-xs font-medium text-white truncate">{file.name}</p>
-                                        <p className="text-[9px] text-fintech-cyan/70 uppercase font-bold tracking-tighter">Grupo B · Procesamiento IA</p>
+                        {/* Listas de Archivos Separadas */}
+                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 pr-2 custom-scrollbar overflow-y-auto max-h-[350px]">
+                            {/* Columna Grupo B: Facturas */}
+                            <div className="space-y-2">
+                                <p className="text-[10px] font-bold text-fintech-cyan uppercase tracking-tighter mb-2 flex justify-between">
+                                    <span>📂 Grupo B (Facturas)</span>
+                                    <span>{facturasFiles.length} docs</span>
+                                </p>
+                                {facturasFiles.map((file, i) => (
+                                    <div key={`f-${i}`} className="flex items-center p-2.5 bg-fintech-cyan/5 border border-fintech-cyan/20 rounded-lg group hover:border-fintech-cyan/40 transition-colors">
+                                        <FileText className="w-4 h-4 mr-2 text-fintech-cyan shrink-0" />
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[11px] font-medium text-white truncate">{file.name}</p>
+                                        </div>
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); setFacturasFiles(facturasFiles.filter((_, idx) => idx !== i)); }} 
+                                            className="text-slate-500 hover:text-rose-400 p-1 transition-colors group-hover:scale-110"
+                                        >✕</button>
                                     </div>
-                                    <button 
-                                        onClick={(e) => { e.stopPropagation(); setFacturasFiles(facturasFiles.filter((_, idx) => idx !== i)); }} 
-                                        className="text-slate-600 hover:text-rose-400 p-2 transition-colors opacity-0 group-hover:opacity-100"
-                                    >✕</button>
-                                </div>
-                            ))}
-                            
-                            {/* Visualización Anexos */}
-                            {anexosFiles.map((file, i) => (
-                                <div key={`a-${i}`} className="flex items-center p-3 bg-slate-900/50 border border-slate-700/50 rounded-lg group hover:border-amber-500/30 transition-colors">
-                                    <div className="w-1 h-8 bg-amber-500 rounded-full mr-3 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
-                                    <UploadCloud className="w-4 h-4 mr-3 text-amber-500" />
-                                    <div className="flex-1">
-                                        <p className="text-xs font-medium text-white truncate">{file.name}</p>
-                                        <p className="text-[9px] text-amber-500/70 uppercase font-bold tracking-tighter">Grupo A · Anexo Directo</p>
+                                ))}
+                                {facturasFiles.length === 0 && (
+                                    <div className="py-8 border border-dashed border-slate-800 rounded-lg flex flex-col items-center justify-center opacity-40">
+                                        <Zap className="w-6 h-6 text-slate-600 mb-1" />
+                                        <p className="text-[10px] text-slate-500">Sin facturas</p>
                                     </div>
-                                    <button 
-                                        onClick={(e) => { e.stopPropagation(); setAnexosFiles(anexosFiles.filter((_, idx) => idx !== i)); }} 
-                                        className="text-slate-600 hover:text-rose-400 p-2 transition-colors opacity-0 group-hover:opacity-100"
-                                    >✕</button>
-                                </div>
-                            ))}
+                                )}
+                            </div>
 
-                            {(anexosFiles.length === 0 && facturasFiles.length === 0) && (
-                                <div className="h-full flex flex-col items-center justify-center text-slate-600 py-10 grayscale opacity-50">
-                                    <FileText className="w-12 h-12 mb-2 stroke-[1px]" />
-                                    <p className="text-sm font-medium">Sin archivos seleccionados</p>
-                                    <p className="text-[10px]">Arrastra documentos a las zonas superiores</p>
-                                </div>
-                            )}
+                            {/* Columna Grupo A: Anexos */}
+                            <div className="space-y-2">
+                                <p className="text-[10px] font-bold text-amber-500 uppercase tracking-tighter mb-2 flex justify-between">
+                                    <span>📂 Grupo A (Anexos)</span>
+                                    <span>{anexosFiles.length} docs</span>
+                                </p>
+                                {anexosFiles.map((file, i) => (
+                                    <div key={`a-${i}`} className="flex items-center p-2.5 bg-amber-500/5 border border-amber-500/20 rounded-lg group hover:border-amber-500/40 transition-colors">
+                                        <UploadCloud className="w-4 h-4 mr-2 text-amber-500 shrink-0" />
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[11px] font-medium text-white truncate">{file.name}</p>
+                                        </div>
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); setAnexosFiles(anexosFiles.filter((_, idx) => idx !== i)); }} 
+                                            className="text-slate-500 hover:text-rose-400 p-1 transition-colors group-hover:scale-110"
+                                        >✕</button>
+                                    </div>
+                                ))}
+                                {anexosFiles.length === 0 && (
+                                    <div className="py-8 border border-dashed border-slate-800 rounded-lg flex flex-col items-center justify-center opacity-40">
+                                        <FileText className="w-6 h-6 text-slate-600 mb-1" />
+                                        <p className="text-[10px] text-slate-500">Sin anexos</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Checklist Informativo */}
@@ -594,8 +609,11 @@ export default function DashboardPage() {
                                 <div className="flex items-center">
                                     {isProcessing ? (
                                         <>
-                                            <RefreshCw className="w-5 h-5 mr-2 animate-spin text-slate-900" />
-                                            <span className="animate-pulse">{jobStatus || "PROCESANDO..."}</span>
+                                            <Loader2 className="w-5 h-5 mr-3 animate-spin text-slate-900" />
+                                            <div className="flex flex-col items-start leading-none">
+                                                <span className="text-[10px] uppercase tracking-widest font-black opacity-60">PROCESANDO</span>
+                                                <span className="text-lg font-black">{formatTime(elapsedTime)}</span>
+                                            </div>
                                         </>
                                     ) : (
                                         <>
@@ -604,10 +622,9 @@ export default function DashboardPage() {
                                         </>
                                     )}
                                 </div>
-                                {isProcessing && startTime && (
-                                    <div className="flex flex-col items-center mt-1 text-[10px] opacity-80 font-mono text-slate-800">
-                                        <span>Tiempo transcurrido: {formatTime(elapsedTime)}</span>
-                                        {currentJobId && <span className="mt-0.5 tracking-tighter opacity-60">ID: {currentJobId.split('-')[0]}...</span>}
+                                {isProcessing && (
+                                    <div className="flex flex-col items-center mt-1 text-[9px] uppercase font-bold text-slate-800 opacity-60">
+                                        <span>{jobStatus || "Iniciando..."}</span>
                                     </div>
                                 )}
                             </button>
