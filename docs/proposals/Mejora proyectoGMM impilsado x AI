@@ -1,0 +1,769 @@
+Aquí tienes un **Markdown ampliado y estructurado** con **agentes adicionales, arquitectura profesional, estándares de ingeniería, observabilidad, seguridad y gobierno de IA**, para que tu **Sistema de Gestión de Siniestros de GMM con IA** pueda escalar con **calidad, eficiencia y buenas prácticas enterprise**.
+
+---
+
+# 🏥 Sistema de Gestión de Siniestros GMM impulsado por IA
+
+### Arquitectura de agentes, estándares de ingeniería y mejores prácticas
+
+Este documento describe una **arquitectura de agentes de IA y servicios especializados** para construir un **sistema moderno de gestión de siniestros médicos (GMM)** utilizando **IA, automatización y arquitectura cloud**.
+
+El diseño está optimizado para stacks basados en:
+
+* **n8n**
+* **Dokploy**
+* **Google Cloud**
+
+El objetivo es lograr:
+
+* ⚡ Alta eficiencia operativa
+* 🧠 Automatización inteligente
+* 🔒 Seguridad de datos médicos
+* 📈 Escalabilidad
+* 🧪 Observabilidad y calidad de software
+
+---
+
+# 🤖 Agentes de IA Especializados
+
+## 1️⃣ Agente de Captura y Clasificación Inteligente
+
+### Función
+
+Recibe documentos médicos y los **clasifica automáticamente** según su tipo.
+
+### Documentos soportados
+
+* Facturas hospitalarias
+* Recetas médicas
+* Estudios de laboratorio
+* Informes médicos
+* EOB (Explanation of Benefits)
+* XML fiscales
+* Identificaciones
+* Pólizas
+
+### Capacidades
+
+* Clasificación automática con LLM o modelos de visión
+* Identificación de estructura documental
+* Extracción de metadatos básicos
+
+### Salida
+
+```json
+{
+"type": "factura_hospital",
+"patient_name": "Juan Perez",
+"provider": "Hospital ABC",
+"date": "2026-03-12"
+}
+```
+
+### Tecnologías recomendadas
+
+* **Google Document AI**
+* **AWS Textract**
+* Modelos multimodales (Vision + OCR)
+
+---
+
+# 2️⃣ Agente de Extracción de Datos Médicos (OCR Inteligente)
+
+### Función
+
+Convierte documentos médicos no estructurados en **datos estructurados listos para análisis**.
+
+### Datos extraídos
+
+| Campo           | Ejemplo      |
+| --------------- | ------------ |
+| Paciente        | Juan Pérez   |
+| Diagnóstico     | J18.9        |
+| Procedimiento   | 71020        |
+| Monto facturado | $12,400      |
+| Copago          | $1,200       |
+| Proveedor       | Hospital ABC |
+| Fecha           | 2026-03-12   |
+
+### Estándares médicos soportados
+
+* ICD-10
+* CPT
+* HCPCS
+* NPI
+
+### Validaciones automáticas
+
+* Procedimiento válido para diagnóstico
+* Montos fuera de rango
+* Duplicidad de facturas
+* Proveedor inexistente
+
+---
+
+# 3️⃣ Agente de Orquestación de Flujos
+
+### Función
+
+Coordina todos los agentes y servicios del sistema.
+
+### Plataforma
+
+* **n8n**
+
+### Responsabilidades
+
+* Automatización de pipelines
+* Reglas de negocio
+* Manejo de errores
+* Integración con APIs
+
+### Ejemplo de flujo
+
+```
+Upload documento
+      ↓
+Clasificación
+      ↓
+OCR
+      ↓
+Validación
+      ↓
+Motor de reglas
+      ↓
+Generación expediente
+      ↓
+Archivo en Drive
+      ↓
+Actualización de base
+```
+
+---
+
+# 4️⃣ Agente de Generación de Expedientes
+
+### Función
+
+Construye el **expediente digital completo del siniestro**.
+
+### Salidas generadas
+
+* Carpeta estructurada
+* ZIP del expediente
+* Resumen médico
+* Metadatos estructurados
+
+### Estructura recomendada
+
+```
+/siniestro_12345
+   /documentos
+      factura.pdf
+      receta.pdf
+      informe_medico.pdf
+
+   metadata.json
+   resumen.pdf
+```
+
+---
+
+# 5️⃣ Agente de Sincronización y Archivo
+
+### Función
+
+Gestiona almacenamiento y sincronización documental.
+
+### Servicios
+
+* **Google Drive**
+* **Google Sheets**
+
+### Tareas
+
+* Crear carpetas
+* Subir documentos
+* Control de versiones
+* Permisos de acceso
+* Enlaces a expedientes
+
+---
+
+# 🧠 Agentes Avanzados Recomendados (MUY IMPORTANTES)
+
+Estos agentes marcan la diferencia entre **automatización simple y sistema enterprise**.
+
+---
+
+# 6️⃣ Agente de Validación Médica
+
+### Función
+
+Verifica coherencia médica entre documentos.
+
+### Ejemplos
+
+| Diagnóstico | Procedimiento válido |
+| ----------- | -------------------- |
+| Neumonía    | Radiografía          |
+| Fractura    | Rayos X              |
+
+### Detecta
+
+* Procedimientos innecesarios
+* Facturación incorrecta
+* Inconsistencias médicas
+
+---
+
+# 7️⃣ Agente de Detección de Fraude
+
+### Función
+
+Detecta patrones sospechosos.
+
+### Señales de fraude
+
+* Facturas duplicadas
+* Proveedores repetidos
+* Procedimientos inflados
+* Montos fuera de rango
+
+### Técnicas
+
+* anomaly detection
+* graph analysis
+* ML scoring
+
+---
+
+# 8️⃣ Agente de Evaluación Automática de Siniestros
+
+### Función
+
+Decide si un caso puede aprobarse automáticamente.
+
+### Salidas
+
+```
+APROBACIÓN AUTOMÁTICA
+REVISIÓN HUMANA
+RECHAZO
+```
+
+### Basado en
+
+* cobertura de póliza
+* monto reclamado
+* diagnóstico
+* historial
+
+---
+
+# 9️⃣ Agente de Auditoría y Compliance
+
+### Función
+
+Garantiza cumplimiento legal.
+
+### Normativas
+
+* HIPAA
+* GDPR
+* regulaciones de seguros
+
+### Capacidades
+
+* logs auditables
+* trazabilidad completa
+* historial de decisiones IA
+
+---
+
+# 🔎 10️⃣ Agente de Observabilidad y Monitoreo
+
+### Función
+
+Monitorea salud del sistema.
+
+### Métricas
+
+* tiempo de procesamiento
+* tasa de errores
+* precisión OCR
+* costos de IA
+
+### Herramientas
+
+* **Prometheus**
+* **Grafana**
+
+---
+
+# 🧩 11️⃣ Agente de Data Engineering
+
+### Función
+
+Normaliza datos para analytics.
+
+### Construye
+
+* Data warehouse
+* datasets analíticos
+* pipelines ETL
+
+### Tecnologías
+
+* **BigQuery**
+* **Apache Airflow**
+
+---
+
+# 🏗 Arquitectura Recomendada
+
+```
+Usuarios
+   │
+Upload portal / API
+   │
+n8n Orchestrator
+   │
+┌─────────────┬──────────────┬──────────────┐
+│Clasificación│OCR Médico    │Validación    │
+└─────────────┴──────────────┴──────────────┘
+   │
+Motor de Reglas
+   │
+Fraud Detection
+   │
+Generación Expediente
+   │
+Storage + DB
+   │
+Notificaciones
+```
+
+---
+
+# ☁ Infraestructura
+
+### Contenedores
+
+* Docker
+* **Dokploy**
+
+### Proxy
+
+* Traefik
+
+### Cloud
+
+* **Google Cloud**
+
+### Componentes recomendados
+
+| Componente | Tecnología    |
+| ---------- | ------------- |
+| API        | FastAPI       |
+| Workers    | Python        |
+| Queue      | Redis         |
+| Storage    | Cloud Storage |
+| DB         | PostgreSQL    |
+
+---
+
+# 🔐 Seguridad
+
+### Requisitos clave
+
+* Encriptación AES-256
+* OAuth2
+* JWT
+* control RBAC
+
+### Protección de datos
+
+* PII masking
+* cifrado en reposo
+* cifrado en tránsito
+
+---
+
+# 🧪 Calidad de Software
+
+### Prácticas recomendadas
+
+* CI/CD
+* tests automáticos
+* versionado de modelos
+* feature flags
+
+### Herramientas
+
+* **GitHub Actions**
+* **Docker**
+
+---
+
+# 📊 KPIs del sistema
+
+| Métrica                 | Objetivo    |
+| ----------------------- | ----------- |
+| Tiempo de procesamiento | < 2 minutos |
+| Precisión OCR           | > 95%       |
+| Automatización          | > 70%       |
+| Fraude detectado        | +30%        |
+
+---
+
+# 🚀 Roadmap recomendado
+
+### Fase 1
+
+Automatización básica
+
+* OCR
+* clasificación
+* expediente digital
+
+### Fase 2
+
+Inteligencia
+
+* validación médica
+* motor de reglas
+* aprobaciones automáticas
+
+### Fase 3
+
+AI avanzada
+
+* fraude
+* analytics
+* predicción de costos
+
+---
+
+# 🎯 Resultado esperado
+
+Un sistema capaz de:
+
+* procesar siniestros en minutos
+* reducir revisión manual
+* detectar fraude temprano
+* generar expedientes automáticos
+* escalar a miles de casos
+
+---
+
+VER IMAGENES DE MAS O MENOS COMO ESTAMOS Y  COMO PUEDE QUEDAR
+ proposals_PASH/gmm_stack_diagnosis.svg
+proposals_PASH/gmm_proposed_architecture.svg
+
+
+
+
+______________________
+
+ESTE ES UN EJEMPLO DE OTRAS EMPRESAAS:
+
+
+Te voy a mostrar **una arquitectura estilo Stripe/Uber para workers**, pero **adaptada exactamente a tu stack**:
+
+* **Next.js**
+* **Supabase**
+* **n8n**
+* **Dokploy**
+* **Tesseract**
+
+La idea es que el sistema tenga **3 capas claras**:
+
+1️⃣ **API Layer** (recibe requests)
+2️⃣ **Queue Layer** (maneja jobs)
+3️⃣ **Worker Layer** (procesa tareas)
+
+Esto evita bloqueos, mejora la escalabilidad y hace el sistema **mucho más resiliente**. 🚀
+
+---
+
+# 🏗 Arquitectura estilo Stripe/Uber (adaptada a tu proyecto)
+
+```
+                          Internet
+                              │
+                          Traefik
+                              │
+                    Next.js Dashboard / API
+                              │
+                ┌─────────────┴─────────────┐
+                │                           │
+        Upload documentos             Consultar estado
+                │                           │
+                ▼                           │
+        Object Storage (Supabase)           │
+                │                           │
+                ▼                           │
+          Supabase Jobs Table ◄─────────────┘
+                │
+        (SELECT FOR UPDATE SKIP LOCKED)
+                │
+        ┌───────┴────────┬───────────────┐
+        │                │               │
+   Worker OCR       Worker Parsing    Worker Packaging
+   (Tesseract)      (XML/PDF data)    (PDF + ZIP)
+        │                │               │
+        └───────────┬────┴─────┬────────┘
+                    │          │
+                    ▼          ▼
+             Metadata JSON   Expediente ZIP
+                    │          │
+                    └──────┬───┘
+                           ▼
+                         n8n
+                           │
+          Drive / Sheets / Email / Integraciones
+```
+
+---
+
+# 📦 Containers en Dokploy
+
+Con **Dokploy** podrías correr algo así:
+
+```
+dokploy VPS
+│
+├── traefik
+│
+├── app
+│   Next.js dashboard + API
+│
+├── worker-ocr
+│   Tesseract + procesamiento imágenes
+│
+├── worker-parser
+│   xml2js + pdfreader
+│
+├── worker-expediente
+│   docxtemplater + pdf-lib + zip
+│
+└── n8n
+    automatizaciones
+```
+
+Ventajas:
+
+* cada worker **escala independiente**
+* OCR no afecta generación de expedientes
+* puedes añadir más workers si aumenta el volumen
+
+---
+
+# ⚙️ Flujo completo del sistema
+
+### 1️⃣ Usuario sube documentos
+
+Next.js recibe:
+
+```
+POST /api/procesar-expediente
+```
+
+Sube archivos a storage:
+
+* **Supabase Storage**
+
+---
+
+### 2️⃣ Se crea un job
+
+Tabla `jobs`
+
+```
+id
+status
+files
+metadata
+created_at
+```
+
+Ejemplo:
+
+```json
+{
+"id": "exp_1021",
+"status": "pending",
+"files": [
+"storage/exp_1021/factura.pdf",
+"storage/exp_1021/receta.jpg"
+]
+}
+```
+
+---
+
+### 3️⃣ Workers toman trabajos
+
+Cada worker ejecuta:
+
+```
+SELECT * FROM jobs
+WHERE status = 'pending'
+FOR UPDATE SKIP LOCKED
+LIMIT 1
+```
+
+Esto evita que dos workers procesen el mismo job.
+
+---
+
+# 🧠 Worker OCR
+
+Container dedicado a:
+
+**Tesseract**
+
+Pipeline:
+
+```
+download file
+→ preprocess image
+→ OCR
+→ structured text
+→ guardar resultado
+```
+
+---
+
+# 📄 Worker Parsing
+
+Procesa:
+
+* XML facturas
+* PDF texto
+* datos médicos
+
+Librerías:
+
+```
+xml2js
+pdfreader
+regex medical parsing
+```
+
+Genera:
+
+```
+metadata.json
+```
+
+---
+
+# 📦 Worker Expediente
+
+Arma el expediente final.
+
+Herramientas:
+
+* docxtemplater
+* pdf-lib
+* archiver
+
+Resultado:
+
+```
+expediente.zip
+```
+
+---
+
+# 🔄 Integración con automatización
+
+Se envía webhook a:
+
+**n8n**
+
+n8n se encarga de:
+
+* subir a Drive
+* actualizar Sheets
+* enviar email
+
+---
+
+# 📊 Ventajas de esta arquitectura
+
+### ⚡ No bloquea el frontend
+
+El dashboard nunca espera OCR.
+
+---
+
+### ⚡ Escala fácil
+
+Si tienes más carga:
+
+```
+worker-ocr x3
+```
+
+---
+
+### ⚡ Más resiliente
+
+Si falla OCR:
+
+```
+solo reinicia ese worker
+```
+
+---
+
+### ⚡ Procesamiento paralelo real
+
+Puedes procesar **muchos expedientes al mismo tiempo**.
+
+---
+
+# 🔒 Bonus: arquitectura con observabilidad
+
+Si quieres hacerlo **muy profesional**, añade:
+
+* **Grafana**
+* **Prometheus**
+* **Sentry**
+
+Para monitorear:
+
+* tiempo OCR
+* errores parsing
+* workers caídos
+* jobs atascados
+
+---
+
+# 🎯 Resultado esperado
+
+Con esta arquitectura:
+
+Antes:
+
+```
+1 expediente
+20 archivos
+3-4 minutos
+UI congelada
+```
+
+Después:
+
+```
+1 expediente
+20 archivos
+20-40 segundos
+UI fluida
+```
+
+---
+

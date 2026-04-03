@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* 🎨 Paleta de Colores - Claridad Profesional (2026) */
+    --color-primary: #0F172A;
+    --color-income: #10B981;
+    --color-expense: #F43F5E;
+    --color-saving: #8B5CF6;
+    --color-amber: #F59E0B;
+    --color-danger: #E11D48;
+
+    /* Fondos y Superficies */
+    --color-bg: #F8FAFC;
+    --color-bg-muted: #F1F5F9;
+    --color-surface: #FFFFFF;
+
+    /* Texto */
+    --color-text: #0F172A;
+    --color-text-muted: #64748B;
+    --color-text-placeholder: #94A3B8;
+
+    /* Bordes */
+    --color-border: #E2E8F0;
+
+    /* 📐 Design Tokens - Geometría y Sombras */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10);
+
+    /* Animaciones */
+    --transition-fast: 150ms ease-in-out;
+    --transition-base: 200ms ease-in-out;
+    --transition-slow: 300ms ease-in-out;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-primary: #F8FAFC;
+      --color-income: #34D399;
+      --color-expense: #FB7185;
+      --color-saving: #A78BFA;
+
+      --color-bg: #020617;
+      --color-bg-muted: #0F172A;
+      --color-surface: #111827;
+
+      --color-text: #F8FAFC;
+      --color-text-muted: #94A3B8;
+      --color-text-placeholder: #475569;
+
+      --color-border: #1E293B;
+    }
+  }
+
+  html {
+    scroll-behavior: smooth; /* */
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ⌨️ Accesibilidad: Foco visible claro */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* 🃏 Card base con Glassmorphism moderado */
+  .glass-card {
+    @apply backdrop-blur-md bg-white/40 dark:bg-slate-900/40 
+           border border-white/20 rounded-2xl shadow-sm;
+    transition: all var(--transition-base);
+  }
+
+  @supports not (backdrop-filter: blur(12px)) {
+    .glass-card {
+      @apply bg-white dark:bg-slate-800;
+    }
+  }
+
+  .glass-card:hover {
+    transform: scale(1.01); /* */
+    box-shadow: var(--shadow-md);
+  }
+
+  /* 🔘 Botón Base */
+  .btn-base {
+    @apply inline-flex items-center justify-center font-medium 
+           transition-all duration-150 rounded-lg;
+    min-height: 44px; /* Tap target mínimo */
+    padding: 0.75rem 1.5rem;
+  }
+
+  .btn-primary {
+    @apply btn-base bg-[var(--color-primary)] text-white 
+           hover:bg-[var(--color-primary-hover)];
+  }
+
+  /* 🏷️ Badges de estado */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+}
+
+/* 🏃 Animaciones y Reducción de movimiento */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
