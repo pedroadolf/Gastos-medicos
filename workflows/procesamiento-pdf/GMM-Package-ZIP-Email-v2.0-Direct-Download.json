@@ -1,0 +1,314 @@
+{
+  "id": "niTxNaK2iazIV6Ku",
+  "name": "GMM-Package-ZIP-Email-v2.0-Direct-Download",
+  "nodes": [
+    {
+      "id": "trigger-workflow-v2-zip-id-101",
+      "name": "ExecuteWorkflowTrigger",
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "position": [
+        16,
+        -288
+      ],
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "prep-files-id-101",
+      "name": "PrepFiles",
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst input = items[0].json;\nconst result = [];\n\nconst getFiles = (field) => {\n  if (!field) return [];\n  if (Array.isArray(field)) return field;\n  try { return JSON.parse(field); } catch (e) { return []; }\n};\n\nconst anexos = getFiles(input.grupoA_anexos);\nconst facturas = getFiles(input.grupoB_facturas);\n\nanexos.forEach(f => result.push({ json: { ...input, fileUrl: f.url, fileName: f.name, group: 'A' } }));\nfacturas.forEach(f => result.push({ json: { ...input, fileUrl: f.url, fileName: f.name, group: 'B' } }));\n\nreturn result;"
+      },
+      "position": [
+        208,
+        -288
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "dl-anexos-id-101",
+      "name": "DlpAnexos",
+      "parameters": {
+        "options": {
+          "responseFormat": "file"
+        },
+        "url": "={{ $json.fileUrl }}"
+      },
+      "position": [
+        448,
+        -416
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1
+    },
+    {
+      "id": "dl-facturas-id-101",
+      "name": "DlpFacturas",
+      "parameters": {
+        "options": {
+          "responseFormat": "file"
+        },
+        "url": "={{ $json.fileUrl }}"
+      },
+      "position": [
+        448,
+        -192
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1
+    },
+    {
+      "id": "compression-1-v201",
+      "name": "GeneradorZip",
+      "parameters": {
+        "action": "compress",
+        "binaryPropertyName": "data",
+        "outputFormat": "zip",
+        "outputPropertyName": "zip_data"
+      },
+      "position": [
+        736,
+        -288
+      ],
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1
+    },
+    {
+      "id": "prepare-email-data-v201",
+      "name": "PrepareEmailData-Metlife-Final",
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst siniestro = item.siniestroId || \"SIN_NUMERO\";\nconst asegurado = item.asegurado || \"ASEGURADO\";\nconst supportEmail = \"soporte.gmm@pash.mx\";\n\nreturn {\n  json: {\n    ...item,\n    emailSubject: `📦 Expediente GMM - ${siniestro} - ${asegurado}`,\n    email_recipient: supportEmail,\n    emailBody: `\n      <h2>Expediente GMM Procesado - v2.0</h2>\n      <p>Se ha generado el paquete ZIP para el siniestro <b>${siniestro}</b>.</p>\n      <p><b>Asegurado:</b> ${asegurado}</p>\n      <p>Se incluyeron archivos de Anexos y Facturas descargados desde Supabase Storage.</p>\n    `\n  }\n};"
+      },
+      "position": [
+        1008,
+        -288
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "if-has-zip-data-v201",
+      "name": "IfHasZipData",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check_zip_v201",
+              "leftValue": "={{ !!$binary.zip_data }}",
+              "operator": {
+                "operation": "true",
+                "singleValue": true,
+                "type": "boolean"
+              }
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        }
+      },
+      "position": [
+        1264,
+        -288
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3
+    },
+    {
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "z7Kwj4yb0xDNh40G",
+          "name": "Gmail account"
+        }
+      },
+      "id": "gmail-send-v201",
+      "name": "GmailEnviarExpediente",
+      "parameters": {
+        "message": "={{ $json.emailBody }}",
+        "operation": "send",
+        "resource": "message",
+        "sendTo": "={{ $json.email_recipient }}",
+        "subject": "={{ $json.emailSubject }}"
+      },
+      "position": [
+        1568,
+        -400
+      ],
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "webhookId": "5cc6ddb4-cad8-4f28-ad37-4bdead61e1d2"
+    },
+    {
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "z7Kwj4yb0xDNh40G",
+          "name": "Gmail account"
+        }
+      },
+      "id": "gmail-sin-adjunto-v201",
+      "name": "Gmail-Sin-Adjunto",
+      "parameters": {
+        "message": "={{ $json.emailBody }}",
+        "operation": "send",
+        "resource": "message",
+        "sendTo": "={{ $json.email_recipient }}",
+        "subject": "=[SIN ADJUNTO] {{ $json.emailSubject }}"
+      },
+      "position": [
+        1568,
+        -160
+      ],
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "webhookId": "35c3d274-f64b-4486-8e13-50afe2bdbdf0"
+    },
+    {
+      "id": "noop-end-v201",
+      "name": "WorkflowEnd",
+      "parameters": {},
+      "position": [
+        1824,
+        -288
+      ],
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "DlpAnexos": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "GeneradorZip",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "DlpFacturas": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "GeneradorZip",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "ExecuteWorkflowTrigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "PrepFiles",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "GeneradorZip": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "PrepareEmailData-Metlife-Final",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "Gmail-Sin-Adjunto": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "WorkflowEnd",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "GmailEnviarExpediente": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "WorkflowEnd",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "IfHasZipData": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "GmailEnviarExpediente",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "Gmail-Sin-Adjunto",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "PrepFiles": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "DlpAnexos",
+            "type": "main"
+          },
+          {
+            "index": 0,
+            "node": "DlpFacturas",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "PrepareEmailData-Metlife-Final": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "IfHasZipData",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "America/Mexico_City",
+    "executionTimeout": 300,
+    "errorWorkflow": "BqCVGVZqSbmaJMfq"
+  },
+  "staticData": null,
+  "tags": [],
+  "meta": null
+}

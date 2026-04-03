@@ -1,0 +1,252 @@
+{
+  "id": "BqCVGVZqSbmaJMfq",
+  "name": "GMM-Error-Handler-Proactive",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "ErrorTrigger",
+      "name": "ErrorTrigger",
+      "position": [
+        304,
+        112
+      ],
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "// ARQUITECTURA DE RESPALDO - NORMALIZADOR DLO\nconst errorData = $json;\nconst workflowInfo = $workflow;\n\nreturn [{\n  json: {\n    fecha_error: new Date().toLocaleString('es-MX'),\n    workflow_name: workflowInfo.name,\n    workflow_id: workflowInfo.id,\n    execution_id: errorData.execution ? errorData.execution.id : \"N/A\",\n    error_message: errorData.message || \"Error desconocido\",\n    siniestro_afectado: errorData.item?.json?.[\"2_Case_Management_Numero_Siniestro\"] || \"DESCONOCIDO\",\n    datos_crudos: JSON.stringify(errorData.item?.json || {}),\n    url_reparacion: `https://n8n.pash.uno/execution/${errorData.execution?.id}`\n  }\n}];"
+      },
+      "id": "NormalizarErrorDLO",
+      "name": "NormalizarErrorDLO",
+      "position": [
+        752,
+        112
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $node[\\\"InitConfig-Shared\\\"].json.SHEETS_GMM_ID }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "DB_GMM_LOG_ERRORES"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "AppendErrorLogGSheets",
+      "name": "AppendErrorLogGSheets",
+      "position": [
+        976,
+        112
+      ],
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "q3dwRw3CpAZKZxM1",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "condition_critical_name",
+              "leftValue": "={{ $json.workflow_name }}",
+              "operator": {
+                "operation": "contains",
+                "type": "string"
+              },
+              "rightValue": "Orchestrator"
+            }
+          ],
+          "options": {
+            "version": 3,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "combinator": "and"
+          }
+        },
+        "options": {}
+      },
+      "id": "IfCritical",
+      "name": "IfCritical",
+      "position": [
+        1424,
+        112
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3
+    },
+    {
+      "parameters": {
+        "sendTo": "pash.mx@gmail.com",
+        "subject": "=[CRITICAL GMM ERROR] {{ $json.workflow_name }} Failed",
+        "emailType": "text",
+        "message": "=Workflow Name: {{ $json.workflow_name }}\\nExecution ID: {{ $json.execution_id }}\\nError Message: {{ $json.error_message }}\\n\\nLink to execution: {{ $json.url_reparacion }}",
+        "options": {}
+      },
+      "id": "GmailAlert",
+      "name": "GmailAlert",
+      "position": [
+        1648,
+        112
+      ],
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "webhookId": "4aa8b70b-723e-4529-b45e-a3b1e58b5df3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "z7Kwj4yb0xDNh40G",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "equipo.soporte@pash.mx",
+        "subject": "=🚨 FALLO CRÍTICO DETECTADO: {{ $json.workflow_name }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; color: #333; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;\">\n  <h2 style=\"color: #d32f2f; margin-top: 0;\">🚨 Fallo Crítico Detectado</h2>\n  <p><strong>Ecosistema GMM</strong> - Se ha interceptado un error no controlado en el siguiente flujo:</p>\n  <table style=\"width: 100%; border-collapse: collapse; margin: 20px 0;\">\n    <tr style=\"background-color: #f8f9fa;\">\n      <td style=\"padding: 10px; border: 1px solid #dee2e6;\"><strong>Workflow:</strong></td>\n      <td style=\"padding: 10px; border: 1px solid #dee2e6;\">{{ $json.workflow_name }} (ID: {{ $json.workflow_id }})</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; border: 1px solid #dee2e6;\"><strong>Siniestro:</strong></td>\n      <td style=\"padding: 10px; border: 1px solid #dee2e6;\">{{ $json.siniestro_afectado }}</td>\n    </tr>\n    <tr style=\"background-color: #f8f9fa;\">\n      <td style=\"padding: 10px; border: 1px solid #dee2e6;\"><strong>Error:</strong></td>\n      <td style=\"padding: 10px; border: 1px solid #dee2e6; color: #d32f2f;\">{{ $json.error_message }}</td>\n    </tr>\n  </table>\n  <hr style=\"border: 0; border-top: 1px solid #eee; margin: 20px 0;\">\n  <p><strong>Acción Realizada:</strong> Los datos del siniestro han sido insertados automáticamente en la pestaña <em>Historial</em> de la DB_GMM para su análisis.</p>\n  <p style=\"margin-top: 30px;\">\n    <a href=\"{{ $json.url_reparacion }}\" style=\"background-color: #1a73e8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold;\">🔍 Ver ejecución en n8n</a>\n  </p>\n</div>",
+        "options": {}
+      },
+      "id": "GmailErrorAlert",
+      "name": "GmailErrorAlert",
+      "position": [
+        1200,
+        112
+      ],
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "webhookId": "3d1fcf68-55c1-49fc-ac81-1bd1409d118e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "z7Kwj4yb0xDNh40G",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "SHEETS_GMM_ID",
+              "value": "1aHust80ArTzLxr_n1s9XSFdTvNopCYRmvoU75MJmsHA"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "InitConfig-Shared",
+      "name": "InitConfig-Shared",
+      "position": [
+        528,
+        112
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "AppendErrorLogGSheets": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "GmailErrorAlert",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "ErrorTrigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "InitConfig-Shared",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "GmailErrorAlert": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "IfCritical",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "IfCritical": {
+      "main": [
+        [
+          {
+            "branch": "true",
+            "index": 0,
+            "node": "GmailAlert",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "InitConfig-Shared": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "NormalizarErrorDLO",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "NormalizarErrorDLO": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "AppendErrorLogGSheets",
+            "type": "main"
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "tags": [],
+  "meta": null
+}
