@@ -35,19 +35,16 @@ RUN adduser --system --uid 1001 nextjs
 # Set the correct permission for prerender cache
 RUN mkdir -p .next && chown nextjs:nodejs .next
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
+# Leverage output traces to reduce image size (standalone mode)
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 USER nextjs
 
 EXPOSE 3000
 
 ENV PORT=3000
-# set hostname to localhost
 ENV HOSTNAME=0.0.0.0
 
-# In monorepo standalone mode, the server is at apps/web/server.js
-CMD ["node", "apps/web/server.js"]
+CMD ["node", "server.js"]
