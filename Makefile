@@ -1,19 +1,21 @@
-.PHONY: init run test clean status
+.PHONY: init dev build test clean status
 
-init: scripts/install.sh
-	./scripts/install.sh
+init:
+	npm install && cd apps/agent && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
 
-run:
-	source venv/bin/activate && python src/main.py
+dev:
+	npm run dev
+
+build:
+	npm run build
 
 test:
-	source venv/bin/activate && pytest src/ -v
+	npm test
 
 status:
-	git status && tree -L 2
+	git status && ls -R apps/ workflows/ supabase/
 
 clean:
-	rm -rf venv/ artifacts/ .env
-
-# Secuencia completa
-full: init run test
+	npm run clean
+	rm -rf apps/agent/venv
+	rm -rf artifacts/
