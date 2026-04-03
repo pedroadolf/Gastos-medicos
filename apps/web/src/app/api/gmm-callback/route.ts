@@ -4,9 +4,19 @@ import { getSupabaseService } from '@/services/supabase';
 // n8n llama este endpoint al terminar
 export async function POST(req: NextRequest) {
   // Verificación de seguridad básica (Secret compartido con n8n)
-  const secret = req.headers.get('x-callback-secret');
-  if (process.env.GMM_CALLBACK_SECRET && secret !== process.env.GMM_CALLBACK_SECRET) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  const secret = req.headers.get('x-callback-secret')?.trim();
+  const expected = process.env.GMM_CALLBACK_SECRET?.trim();
+
+  if (expected && secret !== expected) {
+    console.error(`[API gmm-callback] Authorization failed. Secret length: ${secret?.length || 0}, Expected length: ${expected.length}`);
+    return NextResponse.json({ 
+      error: 'No autorizado', 
+      debug: { 
+        receivedLen: secret?.length || 0,
+        expectedLen: expected.length,
+        isDiff: secret !== expected
+      } 
+    }, { status: 401 });
   }
 
   try {
