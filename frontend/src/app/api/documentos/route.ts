@@ -64,33 +64,39 @@ export async function POST(req: NextRequest) {
         if (n8nWebhook) {
             console.log(`🔗 [NOTIFY] Enviando payload a webhook n8n: ${n8nWebhook}`);
             
-            // Hacemos el llamado a n8n en el background pero capturamos errores si los hay temprano
-            fetch(n8nWebhook, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    jobId: jobId,
-                    siniestroId,
-                    asegurado,
-                    tipoTramite,
-                    grupoA_anexos,
-                    grupoB_facturas,
-                    metadata
-                })
-            }).then(resp => {
+            try {
+                // AWAIT el llamado para asegurar que llegue a n8n antes de que el proceso termine
+                const resp = await fetch(n8nWebhook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jobId: jobId,
+                        siniestroId,
+                        asegurado,
+                        tipoTramite,
+                        grupoA_anexos,
+                        grupoB_facturas,
+                        metadata
+                    })
+                });
+
                 if (!resp.ok) {
                     console.error("⚠️ [NOTIFY] El webhook de n8n devolvió un error:", resp.status);
+                    // Opcional: Marcar como failed si el orquestador no responde 200
+                    await supabaseService
+                        .from('jobs')
+                        .update({ status: 'failed', error_message: `Fallo al contactar orquestador (HTTP ${resp.status})` })
+                        .eq('id', jobId);
                 } else {
                     console.log("✅ [NOTIFY] Webhook de n8n disparado exitosamente.");
                 }
-            }).catch(e => {
+            } catch (e: any) {
                 console.error("❌ [NOTIFY] Error al contactar webhook de n8n:", e);
-                // Si falla el webhook inmediato, podríamos marcar el job como failed
-                supabaseService
+                await supabaseService
                     .from('jobs')
-                    .update({ status: 'failed', error_message: 'Error de conexión con orchestrador n8n' })
+                    .update({ status: 'failed', error_message: 'Error de red con orchestrador n8n: ' + e.message })
                     .eq('id', jobId);
-            });
+            }
         } else {
             console.warn("⚠️ [NOTIFY] N8N_WEBHOOK_URL no está definido en .env");
         }
