@@ -6,6 +6,16 @@ import http from "http";
 import https from "https";
 
 export async function POST(req: NextRequest) {
+    // ⚠️ DEPRECATED: This endpoint is deprecated as of 2026-04-03.
+    // Use POST /api/documentos instead (n8n-based, no local PDF generation).
+    // This endpoint will be REMOVED in v2.0 (estimated June 2026).
+    // Migration: replace fetch("/api/generar", ...) with fetch("/api/documentos", ...)
+    console.warn(
+        '[DEPRECATED] POST /api/_legacy/generar is deprecated as of 2026-04-03. ' +
+        'Use POST /api/documentos instead. ' +
+        'Removal scheduled for v2.0 (est. June 2026).'
+    );
+
     try {
         const { datosExtraidos, webHookUrl_n8n, plantillaSeleccionada, plantillasMultiples, archivosManuales, jobId } = await req.json();
 

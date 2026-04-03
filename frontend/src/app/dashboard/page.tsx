@@ -96,6 +96,8 @@ export default function DashboardPage() {
         accept: { "application/pdf": [".pdf"], "image/*": [".jpeg", ".png", ".jpg"], "text/xml": [".xml"] },
     });
 
+    // @deprecated as of 2026-04-03 — use handleProcessBtn flow instead (via /api/documentos → n8n)
+    // This function is no longer called in the active audit flow. Do NOT remove until v2.0 cleanup.
     const triggerFinalGeneration = async (ocrResults: any[], jobId: string, preReadFiles: any[]) => {
         // Nota: Los archivos se leen en Base64 al inicio del proceso para evitar
         // que el browser invalide los file handles durante procesamiento largo (>2min).
