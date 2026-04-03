@@ -43,3 +43,14 @@ supabase_diagnostic.js
 *test_payload*
 *updated_workflow*
 temp.json
+
+# Monorepo
+.turbo/
+node_modules/
+
+# Apps
+apps/*/node_modules/
+apps/*/.next/
+apps/agent/venv/
+apps/agent/__pycache__/
+*.pyc

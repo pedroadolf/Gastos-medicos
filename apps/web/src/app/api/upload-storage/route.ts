@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseService } from "@/lib/supabase";
+import { getSupabaseService } from "@/services/supabase";
 
 /**
  * API Route: /api/upload-storage

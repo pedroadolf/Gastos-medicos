@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseService } from '@/lib/supabase';
+import { getSupabaseService } from '@/services/supabase';
 
 // n8n llama este endpoint al terminar
 export async function POST(req: NextRequest) {

@@ -1,0 +1,9 @@
+{
+  "name": "gmm-agent",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "python3 main.py",
+    "start": "python3 main.py"
+  }
+}
