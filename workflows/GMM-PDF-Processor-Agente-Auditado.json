@@ -289,54 +289,9 @@
       "typeVersion": 3,
       "onError": "continueRegularOutput"
     },
-    {
-      "id": "auditor-fiscal-1",
-      "name": "AuditorFiscal Tool",
-      "parameters": {
-        "jsCode": "// Auditor Fiscal: Validates RFC and math\nconst { rfc, subtotal, iva, total } = $input.item.json;\nconst rfcRegex = /^[A-Z&Ñ]{3,4}[0-9]{2}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])[A-Z0-9]{2}[0-9A]$/;\nconst isRfcValid = rfcRegex.test(rfc || '');\nconst isArithmeticValid = Math.abs(((subtotal || 0) + (iva || 0)) - (total || 0)) < 0.01;\nreturn { isRfcValid, isArithmeticValid, fiscal_status: isRfcValid && isArithmeticValid ? 'VALID' : 'INVALID' };",
-        "language": "javascript",
-        "name": "Mexican_Fiscal_Auditor",
-        "toolDescription": "Validates Mexican RFC format and invoice arithmetic. Ensures (Subtotal + IVA = Total) matching typical medical receipt requirements."
-      },
-      "position": [
-        944,
-        -16
-      ],
-      "type": "@n8n/n8n-nodes-langchain.toolCode",
-      "typeVersion": 1.3
-    },
-    {
-      "id": "validador-medico-1",
-      "name": "ValidadorMedico Tool",
-      "parameters": {
-        "jsCode": "// Validador Medico: Cross-check specialty vs procedure\nconst { procedure, specialty } = $input.item.json;\nconst isSurgery = (procedure || '').toLowerCase().includes('surgery');\nconst isSurgeon = (specialty || '').toLowerCase().includes('surgeon');\nconst isValid = (isSurgery && isSurgeon) || !isSurgery; // Simplified logic\nreturn { medical_valid: isValid, medical_status: isValid ? 'MATCH' : 'MISMATCH' };",
-        "language": "javascript",
-        "name": "Medical_Logic_Validator",
-        "toolDescription": "Analyzes if the medical procedure matches the doctor's specialty. Cross-checks medical logic for GMM coverage."
-      },
-      "position": [
-        1584,
-        -32
-      ],
-      "type": "@n8n/n8n-nodes-langchain.toolCode",
-      "typeVersion": 1.3
-    },
-    {
-      "id": "resumen-generador-1",
-      "name": "ResumenGenerador Tool",
-      "parameters": {
-        "jsCode": "// Resumen: Final audit decision\nconst items = $input.all();\nconst fiscal = items.find(i => i.json.fiscal_status)?.json.fiscal_status;\nconst medical = items.find(i => i.json.medical_status)?.json.medical_status;\nconst finalStatus = (fiscal === 'VALID' && medical === 'MATCH') ? 'APPROVED' : 'MANUAL_REVIEW_REQUIRED';\nreturn { finalStatus, auditDate: new Date().toISOString() };",
-        "language": "javascript",
-        "name": "Final_Audit_Summarizer",
-        "toolDescription": "Compiles final audit status ('APPROVED' or 'MANUAL_REVIEW_REQUIRED') based on fiscal and medical results."
-      },
-      "position": [
-        1456,
-        -32
-      ],
-      "type": "@n8n/n8n-nodes-langchain.toolCode",
-      "typeVersion": 1.3
-    },
+
+
+
     {
       "id": "0ff3a2fc-de14-4d5d-a7fe-a6c3b2875243",
       "name": "Test-Webhook-GMM-Audit",
@@ -435,17 +390,7 @@
   ],
   "connections": {
     "AlOCR": {},
-    "AuditorFiscal Tool": {
-      "ai_tool": [
-        [
-          {
-            "index": 0,
-            "node": "AlOCR",
-            "type": "ai_tool"
-          }
-        ]
-      ]
-    },
+
     "ChatModelOCR": {
       "ai_languageModel": [
         [
@@ -594,17 +539,7 @@
         ]
       ]
     },
-    "ResumenGenerador Tool": {
-      "ai_tool": [
-        [
-          {
-            "index": 0,
-            "node": "AlOCR",
-            "type": "ai_tool"
-          }
-        ]
-      ]
-    },
+
     "Search Siniestros Folder": {
       "main": [
         [
@@ -677,17 +612,6 @@
             "index": 0,
             "node": "Supabase-Check-Register",
             "type": "main"
-          }
-        ]
-      ]
-    },
-    "ValidadorMedico Tool": {
-      "ai_tool": [
-        [
-          {
-            "index": 0,
-            "node": "AlOCR",
-            "type": "ai_tool"
           }
         ]
       ]

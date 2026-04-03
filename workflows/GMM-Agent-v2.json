@@ -148,8 +148,8 @@
     {
       "parameters": {
         "authentication": "none",
-        "jsonBody": "={{ { jobId: ($node[\"WebhookTrigger\"].json.body.metadata && $node[\"WebhookTrigger\"].json.body.metadata.jobId) ? $node[\"WebhookTrigger\"].json.body.metadata.jobId : null, status: \"completed\", result: $json.output } }}",
-        "jsonHeaders": "={ \"x-callback-secret\": \"gmm_secure_callback_2026_x1y2z3\" }",
+        "jsonBody": "={{ { jobId: $node[\"Set JobId\"].json.jobId, status: \"completed\", result: $json.output } }}",
+        "jsonHeaders": "={ \"x-callback-secret\": \"gmm_prod_auth_k3y_2026_v1\" }",
         "method": "POST",
         "options": {},
         "sendBody": true,
@@ -181,8 +181,8 @@
     {
       "parameters": {
         "authentication": "none",
-        "jsonBody": "={{ { jobId: ($node[\"WebhookTrigger\"].json.body.metadata && $node[\"WebhookTrigger\"].json.body.metadata.jobId) ? $node[\"WebhookTrigger\"].json.body.metadata.jobId : null, status: \"error\", message: $json.message || \"Unknown Error\" } }}",
-        "jsonHeaders": "={ \"x-callback-secret\": \"gmm_secure_callback_2026_x1y2z3\" }",
+        "jsonBody": "={{ { jobId: $node[\"Set JobId\"].json.jobId, status: \"error\", message: $json.message || \"Unknown Error\" } }}",
+        "jsonHeaders": "={ \"x-callback-secret\": \"gmm_prod_auth_k3y_2026_v1\" }",
         "method": "POST",
         "options": {},
         "sendBody": true,
@@ -234,8 +234,29 @@
           "responseCode": 200
         },
         "respondWith": "text",
-        "responseBody": "={\"success\": true, \"jobId\": \"{{ $node[\\\"WebhookTrigger\\\"].json.body.metadata?.jobId || $json.body.metadata?.jobId || $execution.id }}\"}"
+        "responseBody": "={\"success\": true, \"jobId\": \"{{ $node[\\\"Set JobId\\\"].json.jobId }}\"}"
       }
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "jobId",
+              "value": "={{ $node[\"WebhookTrigger\"].json.body.metadata?.jobId || $json.body.metadata?.jobId || $execution.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-jobid-id",
+      "name": "Set JobId",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        -48,
+        112
+      ]
     }
   ],
   "connections": {
@@ -339,6 +360,17 @@
       ]
     },
     "WebhookTrigger": {
+      "main": [
+        [
+          {
+            "node": "Set JobId",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set JobId": {
       "main": [
         [
           {
