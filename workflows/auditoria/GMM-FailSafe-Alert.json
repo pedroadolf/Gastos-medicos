@@ -1,0 +1,65 @@
+{
+  "id": "HXsQabpNnpV3Ntmp",
+  "name": "GMM-FailSafe-Alert",
+  "nodes": [
+    {
+      "id": "ErrorTrigger",
+      "name": "ErrorTrigger",
+      "parameters": {},
+      "position": [
+        400,
+        300
+      ],
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1
+    },
+    {
+      "id": "GmailFailSafeAlert",
+      "name": "GmailFailSafeAlert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        600,
+        300
+      ],
+      "parameters": {
+        "emailType": "html",
+        "message": "=<div style=\"font-family: Arial, sans-serif; color: #333; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;\">\n  <h2 style=\"color: #ff5252; margin-top: 0;\">🚨 EMERGENCIA GMM: Fallo en Sistema de Errores</h2>\n  <p><strong>Alerta Fail-Safe</strong> - El manejador de errores proactivo ha fallado al procesar un evento. <strong>Este es un fallo de nivel crítico en la capa de auditoría.</strong></p>\n  <table style=\"width: 100%; border-collapse: collapse; margin: 20px 0;\">\n    <tr style=\"background-color: #ffebee;\">\n      <td style=\"padding: 10px; border: 1px solid #ffcdd2;\"><strong>Workflow de origen:</strong></td>\n      <td style=\"padding: 10px; border: 1px solid #ffcdd2;\">{{ $json.workflow.name }} (ID: {{ $json.workflow.id }})</td>\n    </tr>\n    <tr>\n      <td style=\"padding: 10px; border: 1px solid #ffcdd2;\"><strong>Mensaje de Error:</strong></td>\n      <td style=\"padding: 10px; border: 1px solid #ffcdd2; color: #d32f2f; font-family: monospace;\">{{ $json.message }}</td>\n    </tr>\n  </table>\n  <hr style=\"border: 0; border-top: 1px solid #eee; margin: 20px 0;\">\n  <p style=\"color: #666;\"><strong>Acción requerida:</strong> Verificar el estado de la instancia n8n y las credenciales de los servicios (GSheets/Slack/Gmail) inmediatamente.</p>\n</div>",
+        "operation": "send",
+        "resource": "message",
+        "sendTo": "equipo.soporte@pash.mx",
+        "subject": "=🚨 EMERGENCIA GMM: {{ $json.workflow.name }}"
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "z7Kwj4yb0xDNh40G",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "ErrorTrigger": {
+      "main": [
+        [
+          {
+            "node": "GmailFailSafeAlert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "tags": [],
+  "meta": null
+}

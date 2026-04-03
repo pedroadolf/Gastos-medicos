@@ -1,0 +1,306 @@
+{
+  "id": "iWDi0Oizh4tpnihN",
+  "name": "GMM-Data-Register-Auditado",
+  "nodes": [
+    {
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "q3dwRw3CpAZKZxM1",
+          "name": "Google Sheets account"
+        }
+      },
+      "id": "sheets-1",
+      "name": "GoogleSheetsAfectados",
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $node[\"InitConfig-Shared\"].json.SHEETS_GMM_ID }}"
+        },
+        "options": {},
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Asegurados"
+        }
+      },
+      "position": [
+        672,
+        -136
+      ],
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7
+    },
+    {
+      "id": "code-1",
+      "name": "CodeAgent1ValidarAfectado",
+      "parameters": {
+        "jsCode": "const nodeTrigger = $('ExecuteWorkflowTrigger').first();\nconst rawData = nodeTrigger?.json?.DATA || nodeTrigger?.json || {};\nconst triggerData = rawData.body || rawData;\n\nconst siniestro = String(\n  triggerData['2_Case_Management_Numero_Siniestro'] || \n  triggerData.ticket_id || \n  rawData['2_Case_Management_Numero_Siniestro'] ||\n  'ERR-NO-ID'\n).trim();\n\nconst nombres = (\n  triggerData['2_Case_Management_Nombres'] || \n  triggerData.Nombres || \n  rawData['2_Case_Management_Nombres'] ||\n  'SIN NOMBRE'\n).toUpperCase().trim();\n\nconst formatDate = (d) => {\n  const date = new Date(d);\n  return isNaN(date.getTime()) ? new Date().toLocaleDateString('es-MX') : date.toLocaleDateString('es-MX');\n};\n\nreturn [{\n  json: {\n    '2_Case_Management_Numero_Siniestro': siniestro,\n    '2_Case_Management_Nombres': nombres,\n    'From email': (triggerData['From email'] || rawData['From email'] || 'pash.mx@gmail.com').toLowerCase().trim(),\n    'TO Email': (triggerData['TO Email'] || rawData['TO Email'] || 'pash.kondrat@gmail.com').toLowerCase().trim(),\n    'STATUS_PROCESO': 'EN_REGISTRO',\n    'fecha': formatDate(new Date()),\n    metadata: {\n      source: 'GMM_Canonical_Reg_Flow_V2',\n      execution_id: $executionId,\n      processedAt: new Date().toISOString()\n    }\n  }\n}];"
+      },
+      "position": [
+        1120,
+        -136
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "if-1",
+      "name": "SwitchAfectadoOk",
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "check_afectado_v4",
+              "leftValue": "={{ $json.afectado_encontrado }}",
+              "operator": {
+                "operation": "equals",
+                "type": "string"
+              },
+              "rightValue": "SI"
+            }
+          ],
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          }
+        },
+        "options": {}
+      },
+      "position": [
+        1344,
+        -152
+      ],
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3
+    },
+    {
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "q3dwRw3CpAZKZxM1",
+          "name": "Google Sheets account"
+        }
+      },
+      "id": "sheets-2",
+      "name": "SheetsLogHistorial",
+      "parameters": {
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $node[\"InitConfig-Shared\"].json.SHEETS_GMM_ID }}"
+        },
+        "operation": "append",
+        "options": {},
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Historial"
+        }
+      },
+      "position": [
+        1568,
+        -208
+      ],
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7
+    },
+    {
+      "id": "respond-1",
+      "name": "AddTicketId",
+      "parameters": {
+        "jsCode": "const items = $input.all();\nreturn items.map(item => {\n    return {\n        json: {\n            ...item.json,\n            \"2_Case_Management_Numero_Siniestro\": item.json[\"2_Case_Management_Numero_Siniestro\"] || item.json.ticket_id || \"SIN_SINIESTRO\"\n        }\n    };\n});"
+      },
+      "position": [
+        1792,
+        -136
+      ],
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2
+    },
+    {
+      "id": "set-vars",
+      "name": "PrepareVariables",
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id_sheet",
+              "name": "sheetId",
+              "type": "string",
+              "value": "={{ ($(\"ExecuteWorkflowTrigger\").first().json.SHEETS_GMM_ID) || ($(\"ExecuteWorkflowTrigger\").first().json.DATA?.SHEETS_GMM_ID) || $node[\"InitConfig-Shared\"].json.SHEETS_GMM_ID }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "position": [
+        448,
+        -136
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4
+    },
+    {
+      "id": "fdfbc668-a45f-4b4f-aae8-dbc730d85efb",
+      "name": "InitConfig-Shared",
+      "parameters": {
+        "options": {}
+      },
+      "position": [
+        224,
+        -136
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3
+    },
+    {
+      "id": "final-respond-1",
+      "name": "RespondToAgent_Final",
+      "parameters": {
+        "options": {}
+      },
+      "position": [
+        2000,
+        -136
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1
+    },
+    {
+      "id": "trigger-workflow-v2-reg",
+      "name": "ExecuteWorkflowTrigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        -136
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    }
+  ],
+  "connections": {
+    "AddTicketId": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "RespondToAgent_Final",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "CodeAgent1ValidarAfectado": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "SwitchAfectadoOk",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "GoogleSheetsAfectados": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "CodeAgent1ValidarAfectado",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "InitConfig-Shared": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "PrepareVariables",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "PrepareVariables": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "GoogleSheetsAfectados",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "SheetsLogHistorial": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "AddTicketId",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "SwitchAfectadoOk": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "SheetsLogHistorial",
+            "type": "main"
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "node": "AddTicketId",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "ExecuteWorkflowTrigger": {
+      "main": [
+        [
+          {
+            "node": "InitConfig-Shared",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "binaryMode": "separate",
+    "timezone": "America/Mexico_City",
+    "errorWorkflow": "BqCVGVZqSbmaJMfq"
+  },
+  "staticData": null,
+  "tags": [],
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
