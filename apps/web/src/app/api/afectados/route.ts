@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getGoogleSheetsClient } from "@/lib/googleSheets";
+import { getGoogleSheetsClient } from "@/services/googleSheets";
 
 // Sin caché — datos en tiempo real desde Google Sheets
 export const dynamic = 'force-dynamic';

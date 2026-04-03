@@ -1,0 +1,20 @@
+{
+  "name": "gmm-monorepo",
+  "version": "1.0.0",
+  "description": "Gastos Médicos Móvil - Monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "apps/agent"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --filter=web",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  }
+}

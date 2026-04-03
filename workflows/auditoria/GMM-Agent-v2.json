@@ -11,38 +11,26 @@
       "id": "d5c3d072-52f9-4f2e-81dc-ed626758be08",
       "name": "WebhookTrigger",
       "position": [
-        -208,
-        112
+        -200,
+        150
       ],
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "webhookId": "db40c9b2-6ae9-47bc-8494-86ce313e5d4e",
-      "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {},
-      "id": "manual-id-1",
-      "name": "ManualTrigger",
-      "position": [
-        16,
-        304
-      ],
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1
+      "webhookId": "db40c9b2-6ae9-47bc-8494-86ce313e5d4e"
     },
     {
       "parameters": {
         "options": {
-          "systemMessage": "Eres el agente autónomo de GMM. Tu objetivo es gestionar el registro y procesamiento de siniestros médicos.\nCuentas con herramientas para: register_siniestro, monitor_expediente, process_pdfs, zip_and_email."
+          "systemMessage": "Eres el Agente de Auditoría GMM (Gastos Médicos Móviles). \n\nOBJETIVO: Procesar solicitudes de siniestros de principio a fin de manera autónoma.\nMODO DE OPERACIÓN:\n1. Registra el siniestro usando ToolDataRegister.\n2. Si hay PDFs, procésalos con ToolPDFProcessor.\n3. Monitorea el progreso con ToolMonitor si es necesario.\n4. Finaliza empaquetando todo con ToolZIPEmail.\n\nREGLAS:\n- Sé conciso. No expliques tus razonamientos internos a menos que sea necesario.\n- Si ocurre un error crítico, informa a través de las herramientas disponibles.\n- Siempre usa el jobId proporcionado en el contexto."
         },
         "promptType": "define",
-        "text": "=NUEVA SOLICITUD DE SINIESTRO RECIBIDA: {{ JSON.stringify($json.body) }}\n\nPor favor, inicia el registro y procesamiento correspondiente."
+        "text": "=SOLICITUD RECIBIDA: {{ JSON.stringify($json.body) }}\n\nInicia el procesamiento para el JobId: {{ $node[\"Set JobId\"].json.jobId }}"
       },
       "id": "agent-id-1",
       "name": "AlAgenteGMM",
       "position": [
-        496,
-        208
+        600,
+        250
       ],
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1
@@ -50,13 +38,13 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $json.body.metadata?.siniestroId ?? $json.body.ticket_id ?? $execution.id }}"
+        "sessionKey": "={{ $node[\"Set JobId\"].json.jobId }}"
       },
       "id": "memory-id-1",
       "name": "MemoryGMM",
       "position": [
-        368,
-        432
+        450,
+        450
       ],
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3
@@ -68,16 +56,15 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "jobId": "={{ $fromAI(\"jobId\", \"El ID del job de procesamiento\", \"string\") }}"
+            "jobId": "={{ $node[\"Set JobId\"].json.jobId }}"
           }
-        },
-        "toolDescription": "Procesa los archivos PDF para extraer información médica y fiscal."
+        }
       },
       "id": "tool-pdf-id-1",
       "name": "ToolPDFProcessor",
       "position": [
-        752,
-        432
+        750,
+        450
       ],
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2
@@ -89,16 +76,16 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "siniestroId": "={{ $fromAI(\"siniestroId\", \"El ID del siniestro para el cual generar el paquete\", \"string\") }}"
+            "siniestroId": "={{ $fromAI(\"siniestroId\", \"ID del siniestro\", \"string\") }}",
+            "jobId": "={{ $node[\"Set JobId\"].json.jobId }}"
           }
-        },
-        "toolDescription": "Genera el archivo ZIP final y envía el correo de confirmación."
+        }
       },
       "id": "tool-zip-id-1",
       "name": "ToolZIPEmail",
       "position": [
-        880,
-        432
+        850,
+        450
       ],
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2
@@ -110,16 +97,15 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "siniestroId": "={{ $fromAI(\"siniestroId\", \"El ID del siniestro si está disponible\", \"string\") }}"
+            "jobId": "={{ $node[\"Set JobId\"].json.jobId }}"
           }
-        },
-        "toolDescription": "Registra el siniestro en la base de datos de n8n y Google Sheets."
+        }
       },
       "id": "tool-data-id-1",
       "name": "ToolDataRegister",
       "position": [
-        496,
-        432
+        550,
+        450
       ],
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2
@@ -131,16 +117,15 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "jobId": "={{ $fromAI(\"jobId\", \"El ID del job a monitorear\", \"string\") }}"
+            "jobId": "={{ $node[\"Set JobId\"].json.jobId }}"
           }
-        },
-        "toolDescription": "Monitorea el estado del expediente y actualiza el dashboard."
+        }
       },
       "id": "tool-monitor-id-1",
       "name": "ToolMonitor",
       "position": [
-        624,
-        432
+        650,
+        450
       ],
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2
@@ -149,13 +134,8 @@
       "parameters": {
         "authentication": "none",
         "jsonBody": "={{ { jobId: $node[\"Set JobId\"].json.jobId, status: \"completed\", result: $json.output } }}",
-        "jsonHeaders": "={ \"x-callback-secret\": \"gmm_prod_auth_k3y_2026_v1\" }",
+        "jsonHeaders": "={ \"x-callback-secret\": \"{{ $env[\"GMM_CALLBACK_SECRET\"] }}\" }",
         "method": "POST",
-        "options": {},
-        "sendBody": true,
-        "sendHeaders": true,
-        "specifyBody": "json",
-        "specifyHeaders": "json",
         "url": "https://gmm.pash.uno/api/gmm-callback"
       },
       "id": "578563c5-5e5b-458a-bc74-91a74bfa0309",
@@ -163,8 +143,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        1088,
-        208
+        900,
+        250
       ]
     },
     {
@@ -174,21 +154,16 @@
       "type": "n8n-nodes-base.errorTrigger",
       "typeVersion": 1,
       "position": [
-        -208,
-        544
+        -200,
+        600
       ]
     },
     {
       "parameters": {
         "authentication": "none",
-        "jsonBody": "={{ { jobId: $node[\"Set JobId\"].json.jobId, status: \"error\", message: $json.message || \"Unknown Error\" } }}",
-        "jsonHeaders": "={ \"x-callback-secret\": \"gmm_prod_auth_k3y_2026_v1\" }",
+        "jsonBody": "={{ { jobId: $node[\"Set JobId\"].json.jobId, status: \"error\", message: $json.message || \"Fallo en ejecución de Orquestador\" } }}",
+        "jsonHeaders": "={ \"x-callback-secret\": \"{{ $env[\"GMM_CALLBACK_SECRET\"] }}\" }",
         "method": "POST",
-        "options": {},
-        "sendBody": true,
-        "sendHeaders": true,
-        "specifyBody": "json",
-        "specifyHeaders": "json",
         "url": "https://gmm.pash.uno/api/gmm-callback"
       },
       "id": "11517bad-e1eb-4d35-8fa3-579a0132fd59",
@@ -196,8 +171,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        16,
-        544
+        100,
+        600
       ]
     },
     {
@@ -210,15 +185,9 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        240,
-        432
-      ],
-      "credentials": {
-        "openRouterApi": {
-          "id": "xqgVyR8B4ckqJpvH",
-          "name": "OpenRouter API Key"
-        }
-      }
+        250,
+        450
+      ]
     },
     {
       "id": "7f3c8d07-651a-4c6f-85a6-62ef0322b21e",
@@ -226,15 +195,15 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        144,
-        160
+        300,
+        50
       ],
       "parameters": {
         "options": {
           "responseCode": 200
         },
-        "respondWith": "text",
-        "responseBody": "={\"success\": true, \"jobId\": \"{{ $node[\\\"Set JobId\\\"].json.jobId }}\"}"
+        "respondWith": "json",
+        "responseBody": "={ \"success\": true, \"jobId\": \"{{ $node[\"Set JobId\"].json.jobId }}\", \"status\": \"processing\" }"
       }
     },
     {
@@ -243,23 +212,49 @@
           "string": [
             {
               "name": "jobId",
-              "value": "={{ $node[\"WebhookTrigger\"].json.body.metadata?.jobId || $json.body.metadata?.jobId || $execution.id }}"
+              "value": "={{ $node[\"WebhookTrigger\"].json.body.jobId || $node[\"WebhookTrigger\"].json.body.metadata?.jobId || \"MISSING_JOB_ID_\" + $execution.id }}"
             }
           ]
-        },
-        "options": {}
+        }
       },
       "id": "set-jobid-id",
       "name": "Set JobId",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.2,
       "position": [
-        -48,
-        112
+        50,
+        150
       ]
     }
   ],
   "connections": {
+    "WebhookTrigger": {
+      "main": [
+        [
+          {
+            "node": "Set JobId",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set JobId": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AlAgenteGMM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "AlAgenteGMM": {
       "main": [
         [
@@ -267,72 +262,6 @@
             "node": "Callback Dashboard",
             "type": "main",
             "index": 0
-          }
-        ]
-      ]
-    },
-    "ManualTrigger": {
-      "main": [
-        [
-          {
-            "index": 0,
-            "node": "AlAgenteGMM",
-            "type": "main"
-          }
-        ]
-      ]
-    },
-    "MemoryGMM": {
-      "ai_memory": [
-        [
-          {
-            "index": 0,
-            "node": "AlAgenteGMM",
-            "type": "ai_memory"
-          }
-        ]
-      ]
-    },
-    "ToolDataRegister": {
-      "ai_tool": [
-        [
-          {
-            "index": 0,
-            "node": "AlAgenteGMM",
-            "type": "ai_tool"
-          }
-        ]
-      ]
-    },
-    "ToolMonitor": {
-      "ai_tool": [
-        [
-          {
-            "index": 0,
-            "node": "AlAgenteGMM",
-            "type": "ai_tool"
-          }
-        ]
-      ]
-    },
-    "ToolPDFProcessor": {
-      "ai_tool": [
-        [
-          {
-            "index": 0,
-            "node": "AlAgenteGMM",
-            "type": "ai_tool"
-          }
-        ]
-      ]
-    },
-    "ToolZIPEmail": {
-      "ai_tool": [
-        [
-          {
-            "index": 0,
-            "node": "AlAgenteGMM",
-            "type": "ai_tool"
           }
         ]
       ]
@@ -359,34 +288,56 @@
         ]
       ]
     },
-    "WebhookTrigger": {
-      "main": [
-        [
-          {
-            "node": "Set JobId",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Set JobId": {
-      "main": [
-        [
-          {
-            "node": "Respond to Webhook",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Respond to Webhook": {
-      "main": [
+    "MemoryGMM": {
+      "ai_memory": [
         [
           {
             "node": "AlAgenteGMM",
-            "type": "main",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ToolDataRegister": {
+      "ai_tool": [
+        [
+          {
+            "node": "AlAgenteGMM",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ToolMonitor": {
+      "ai_tool": [
+        [
+          {
+            "node": "AlAgenteGMM",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ToolPDFProcessor": {
+      "ai_tool": [
+        [
+          {
+            "node": "AlAgenteGMM",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ToolZIPEmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AlAgenteGMM",
+            "type": "ai_tool",
             "index": 0
           }
         ]
@@ -396,8 +347,6 @@
   "settings": {
     "executionOrder": "v1",
     "saveDataErrorExecution": "all",
-    "saveDataSuccessExecution": "all",
-    "saveManualExecutions": true,
-    "saveExecutionProgress": true
+    "saveDataSuccessExecution": "all"
   }
 }

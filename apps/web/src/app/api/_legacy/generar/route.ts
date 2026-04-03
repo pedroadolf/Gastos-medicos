@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { llenarFormatoGMM } from "@/lib/pdfGenerator";
+import { llenarFormatoGMM } from "@/services/pdfGenerator";
 import fs from "fs";
 import path from "path";
 import http from "http";
