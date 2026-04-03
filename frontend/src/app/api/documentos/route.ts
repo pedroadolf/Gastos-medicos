@@ -81,11 +81,16 @@ export async function POST(req: NextRequest) {
                 });
 
                 if (!resp.ok) {
-                    console.error("⚠️ [NOTIFY] El webhook de n8n devolvió un error:", resp.status);
-                    // Opcional: Marcar como failed si el orquestador no responde 200
+                    const errorBody = await resp.text().catch(() => "Cuerpo de error ilegible");
+                    console.error(`⚠️ [NOTIFY] El webhook de n8n devolvió un error ${resp.status}:`, errorBody);
+                    
+                    // Guardamos el detalle del error en Supabase para que el usuario pueda reportarlo con precisión
                     await supabaseService
                         .from('jobs')
-                        .update({ status: 'failed', error_message: `Fallo al contactar orquestador (HTTP ${resp.status})` })
+                        .update({ 
+                            status: 'failed', 
+                            error_message: `Fallo HTTP ${resp.status} al contactar orquestador. Detalle: ${errorBody.substring(0, 200)}`
+                        })
                         .eq('id', jobId);
                 } else {
                     console.log("✅ [NOTIFY] Webhook de n8n disparado exitosamente.");
@@ -94,7 +99,7 @@ export async function POST(req: NextRequest) {
                 console.error("❌ [NOTIFY] Error al contactar webhook de n8n:", e);
                 await supabaseService
                     .from('jobs')
-                    .update({ status: 'failed', error_message: 'Error de red con orchestrador n8n: ' + e.message })
+                    .update({ status: 'failed', error_message: 'Error de red con orchestrador n8n (revisa N8N_WEBHOOK_URL): ' + e.message })
                     .eq('id', jobId);
             }
         } else {
