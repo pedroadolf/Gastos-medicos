@@ -1,57 +1,63 @@
 FROM node:22-bullseye-slim AS base
 
-# Install dependencies only when needed
+# Stage 1: Dependencies
 FROM base AS deps
-# In Debian, we don't need libc6-compat, it's standard.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libc6 \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Set Turbo package manager explicitly
+# Disable Corepack and explicitly set Turbo's package manager
+ENV COREPACK_ENABLE=0
 ENV TURBO_PACKAGE_MANAGER=npm
 
-# Copy the monorepo configuration files
+# Copy root configurations
 COPY package.json package-lock.json* ./
+
+# Copy all workspace package.json files (required for workspace resolution)
 COPY apps/web/package.json ./apps/web/
 COPY apps/agent/package.json ./apps/agent/
 
-# Install all dependencies (handles workspaces)
-# Force inclusion of optional dependencies for native modules
+# Install dependencies including optional native binaries for Linux
 RUN npm install --include=optional
 
-# Rebuild the source code only when needed
+# Stage 2: Builder
 FROM base AS builder
 WORKDIR /app
 
-# Copy all node_modules from deps stage (root and workspace levels)
+# Inherit node_modules and pre-installed dependencies
 COPY --from=deps /app ./
 
-# Copy all source files
+# Copy the rest of the source code
 COPY . .
 
-# Next.js telemetry is disabled
+# Environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV TURBO_PACKAGE_MANAGER=npm
 
-# Build the project using turbo (from root)
+# Execute the build via turbo
 RUN npm run build
 
-# Production image, copy all the files and run next
+# Stage 3: Runner
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Set the correct permission for prerender cache
-RUN mkdir -p .next && chown nextjs:nodejs .next
+# Set correct permissions
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
 
-# Copy the standalone build and static files
-# In a monorepo, next build (standalone) is in apps/web/.next/standalone
+# Copy the standalone build result
+# Next.js puts the bundled server.js and node_modules here
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
@@ -60,8 +66,5 @@ USER nextjs
 
 EXPOSE 3000
 
-ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
-
-# When using standalone, we run server.js from the apps/web directory
+# Standalone server is entrypoint
 CMD ["node", "apps/web/server.js"]

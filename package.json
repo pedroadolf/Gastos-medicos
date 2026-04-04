@@ -1,6 +1,7 @@
 {
   "name": "gmm-monorepo",
   "version": "1.0.0",
+  "packageManager": "npm@10.8.2",
   "description": "Gastos Médicos Móvil - Monorepo",
   "private": true,
   "workspaces": [
