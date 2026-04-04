@@ -23,29 +23,59 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    console.log('[API gmm-callback] Incoming callback:', JSON.stringify(body, null, 2));
+    
+    console.log('[API gmm-callback] Incoming callback request:', {
+      headers: Object.fromEntries(req.headers.entries()),
+      body
+    });
 
     const { jobId, status, result, error } = body;
 
     if (!jobId) {
-      console.error('[API gmm-callback] Error: jobId not found in body');
-      return NextResponse.json({ error: 'jobId requerido' }, { status: 400 });
+      console.error('[API gmm-callback] Error: jobId not found in body. Received:', body);
+      return NextResponse.json({ 
+        error: 'jobId requerido',
+        receivedBody: body 
+      }, { status: 400 });
     }
 
     // Persistencia en Supabase (usando Service Role para bypass RLS)
     const supabase = getSupabaseService();
-    const { error: dbError } = await supabase
+    
+    // Si el jobId no es un UUID válido (ej: es un id de ejecución de n8n), 
+    // lo registramos pero no fallará el endpoint, para poder ver qué está pasando.
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId);
+    
+    if (!isUUID) {
+      console.warn(`[API gmm-callback] jobId ${jobId} is not a valid UUID. It might be an n8n execution ID.`);
+    }
+
+    const { error: dbError, data } = await supabase
       .from('jobs')
       .update({
-        status: status === 'completed' ? 'completed' : (status || 'processing'),
-        results: result,
-        error_message: error,
-        updated_at: new Date().toISOString()
+        status: status === 'completed' ? 'ready' : (status === 'error' ? 'error' : status),
+        result: result || error || null,
+        updated_at: new Date().toISOString(),
       })
-      .eq('id', jobId);
+      .eq('id', jobId)
+      .select();
 
     if (dbError) {
       console.error('[API gmm-callback] Database Error update:', dbError);
+      return NextResponse.json({ 
+        error: 'Error al actualizar base de datos', 
+        details: dbError,
+        jobId 
+      }, { status: 500 });
+    }
+
+    if (!data || data.length === 0) {
+      console.warn(`[API gmm-callback] Job with ID ${jobId} not found in Supabase.`);
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Job ID no encontrado en Supabase, pero callback recibido',
+        jobId 
+      });
     }
 
     console.log(`[API gmm-callback] Status updated in DB for Job ${jobId}: ${status}`);
