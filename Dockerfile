@@ -9,14 +9,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
+# Set Turbo package manager explicitly
+ENV TURBO_PACKAGE_MANAGER=npm
+
 # Copy the monorepo configuration files
 COPY package.json package-lock.json* ./
 COPY apps/web/package.json ./apps/web/
 COPY apps/agent/package.json ./apps/agent/
 
 # Install all dependencies (handles workspaces)
-# Using --include=dev to ensure build tools (turbo, etc) are available
-RUN npm install
+# Force inclusion of optional dependencies for native modules
+RUN npm install --include=optional
 
 # Rebuild the source code only when needed
 FROM base AS builder
