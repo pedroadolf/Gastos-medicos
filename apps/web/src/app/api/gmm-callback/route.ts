@@ -3,8 +3,12 @@ import { getSupabaseService } from '@/services/supabase';
 
 // n8n llama este endpoint al terminar
 export async function POST(req: NextRequest) {
-  // Verificación de seguridad básica (Secret compartido con n8n)
-  const secret = req.headers.get('x-callback-secret')?.trim();
+  // Verificación de seguridad básica (Soporta x-callback-secret o Authorization Bearer)
+  const authHeader = req.headers.get('authorization');
+  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7).trim() : null;
+  const xSecret = req.headers.get('x-callback-secret')?.trim();
+  const secret = (bearerToken || xSecret || '').trim();
+
   const expectedEnv = process.env.GMM_CALLBACK_SECRET?.trim();
   // Fallback hardcodeado para estabilidad si el env falla en Dokploy
   const fallback = "gmm_prod_auth_k3y_2026_v1";
@@ -16,7 +20,8 @@ export async function POST(req: NextRequest) {
       debug: { 
         receivedLen: secret?.length || 0,
         expectedEnvLen: expectedEnv?.length || 0,
-        isDiff: true
+        isDiff: true,
+        method: bearerToken ? 'Bearer' : (xSecret ? 'X-Secret' : 'None')
       } 
     }, { status: 401 });
   }
@@ -24,12 +29,17 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     
-    console.log('[API gmm-callback] Incoming callback request:', {
-      headers: Object.fromEntries(req.headers.entries()),
-      body
+    console.log('[API gmm-callback] Pro Max Callback Received:', {
+      executionId: body.executionId || 'N/A',
+      jobId: body.jobId,
+      status: body.status,
+      headers: {
+        authType: bearerToken ? 'Bearer' : (xSecret ? 'X-Secret' : 'None'),
+        userAgent: req.headers.get('user-agent')
+      }
     });
 
-    const { jobId, status, result, error } = body;
+    const { jobId, status, result, error, executionId } = body;
 
     if (!jobId) {
       console.error('[API gmm-callback] Error: jobId not found in body. Received:', body);
@@ -53,8 +63,9 @@ export async function POST(req: NextRequest) {
     const { error: dbError, data } = await supabase
       .from('jobs')
       .update({
-        status: status === 'completed' ? 'ready' : (status === 'error' ? 'error' : status),
-        result: result || error || null,
+        status: status === 'completed' ? 'ready' : (status || 'error'),
+        results: result || null,
+        error_message: error || null,
         updated_at: new Date().toISOString(),
       })
       .eq('id', jobId)
