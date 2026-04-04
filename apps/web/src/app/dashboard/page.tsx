@@ -366,27 +366,49 @@ export default function DashboardPage() {
                                     (a.empresa || "").toLowerCase().includes(q)
                                 );
                                 
-                                // Deduplicar por ID (RFC) para que la persona solo salga una vez
-                                const uniqueMatches = matches.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+                                // No deduplicar por RFC para permitir ver múltiples padecimientos de la misma persona
+                                const dropdownMatches = matches;
 
-                                return uniqueMatches.length > 0 ? (
+                                return dropdownMatches.length > 0 ? (
                                     <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl z-50 max-h-56 overflow-y-auto">
-                                        {uniqueMatches.map((a) => (
-                                            <button
-                                                key={a.id}
-                                                type="button"
-                                                className="w-full text-left px-3 py-2.5 hover:bg-slate-700 transition-colors border-b border-slate-700/50 last:border-0"
-                                                onMouseDown={() => {
-                                                    setSelectedAsegurado(a);
-                                                    setSearchQuery(a.nombre);
-                                                    setShowDropdown(false);
-                                                    setSelectedSiniestro(null);
-                                                }}
-                                            >
-                                                <p className="text-sm font-semibold text-white truncate">{a.nombre}</p>
-                                                <p className="text-[10px] text-slate-400 font-mono">{a.rfc} · {a.empresa}</p>
-                                            </button>
-                                        ))}
+                                        {dropdownMatches.map((a, idx) => {
+                                            const displayName = a.nombre && a.padecimiento ? `${a.nombre} / ${a.padecimiento}` : a.nombre;
+                                            return (
+                                                <button
+                                                    key={`${a.id}-${a.padecimiento}-${idx}`}
+                                                    type="button"
+                                                    className="w-full text-left px-4 py-3 hover:bg-slate-700/80 transition-all border-b border-slate-700/50 last:border-0 group"
+                                                    onMouseDown={() => {
+                                                        setSelectedAsegurado(a);
+                                                        setSearchQuery(displayName);
+                                                        setShowDropdown(false);
+                                                        // Auto-seleccionar siniestro si existe en el registro
+                                                        if (a.siniestroNum) {
+                                                            const sMatch = siniestrosBD.find(s => s.numeroSiniestro === a.siniestroNum);
+                                                            setSelectedSiniestro(sMatch?.id || null);
+                                                        } else {
+                                                            setSelectedSiniestro(null);
+                                                        }
+                                                    }}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="text-sm font-semibold text-white truncate group-hover:text-fintech-cyan transition-colors">
+                                                                {a.nombre}
+                                                            </p>
+                                                            <p className="text-[11px] text-slate-400 font-medium truncate flex items-center mt-0.5">
+                                                                <span className="text-fintech-cyan/80 mr-1.5">◆</span>
+                                                                {a.padecimiento || "Padecimiento no especificado"}
+                                                            </p>
+                                                        </div>
+                                                        <div className="ml-3 text-right shrink-0">
+                                                            <p className="text-[10px] text-slate-500 font-mono">{a.siniestroNum || "Siniestro Nuevo"}</p>
+                                                            <p className="text-[9px] text-slate-600 uppercase font-bold tracking-tighter">{a.empresa}</p>
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 ) : (
                                     <div className="absolute top-full left-0 right-0 mt-1 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl z-50 px-3 py-2.5">
@@ -478,8 +500,18 @@ export default function DashboardPage() {
                                 Carga de Documentación
                             </h2>
                             <div className="flex gap-4">
-                                <span className="text-[10px] bg-fintech-cyan/10 text-fintech-cyan border border-fintech-cyan/20 px-2 py-1 rounded font-bold uppercase">Grupo B: {facturasFiles.length}</span>
-                                <span className="text-[10px] bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2 py-1 rounded font-bold uppercase">Grupo A: {anexosFiles.length}</span>
+                                <div className="flex flex-col items-end">
+                                    <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Auditables (XML/PDF)</span>
+                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black bg-fintech-cyan/20 text-fintech-cyan border border-fintech-cyan/30 shadow-[0_0_15px_rgba(34,211,238,0.1)]">
+                                        GRUPO B: {facturasFiles.length}
+                                    </span>
+                                </div>
+                                <div className="flex flex-col items-end">
+                                    <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">Documentación Soporte</span>
+                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-500 border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+                                        GRUPO A: {anexosFiles.length}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -487,22 +519,34 @@ export default function DashboardPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                             <div
                                 {...dropzoneFacturas.getRootProps()}
-                                className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 transition-all cursor-pointer ${dropzoneFacturas.isDragActive ? "border-fintech-cyan bg-fintech-cyan/5" : "border-slate-800 hover:border-fintech-cyan bg-slate-900/20"}`}
+                                className={`group relative border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-8 transition-all cursor-pointer ${dropzoneFacturas.isDragActive ? "border-fintech-cyan bg-fintech-cyan/10 scale-[1.02]" : "border-slate-800 bg-slate-900/40 hover:border-fintech-cyan/50 hover:bg-slate-900/60"}`}
                             >
+                                <div className="absolute top-3 right-3">
+                                    <span className="bg-fintech-cyan text-slate-900 text-[8px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase">Obligatorio</span>
+                                </div>
                                 <input {...dropzoneFacturas.getInputProps()} />
-                                <Zap className={`w-8 h-8 mb-2 ${dropzoneFacturas.isDragActive ? "text-fintech-cyan" : "text-slate-600"}`} />
-                                <p className="text-xs text-slate-300 font-bold text-center">GRUPO B: Facturas y Honorarios</p>
-                                <p className="text-[10px] text-slate-500 text-center">(Pasan por IA / OCR)</p>
+                                <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-colors ${dropzoneFacturas.isDragActive ? "bg-fintech-cyan text-slate-900" : "bg-slate-800 text-fintech-cyan"}`}>
+                                    <Zap className="w-7 h-7" />
+                                </div>
+                                <p className="text-xs font-black text-white text-center uppercase tracking-widest mb-1">GRUPO B: Facturas</p>
+                                <p className="text-[10px] text-slate-400 text-center max-w-[180px]">Sube aquí tus <span className="text-fintech-cyan font-bold">XML</span> y <span className="text-fintech-cyan font-bold">PDF</span> para análisis IA.</p>
+                                <p className="mt-4 text-[9px] text-slate-600 font-bold uppercase">Solo archivos fiscales</p>
                             </div>
 
                             <div
                                 {...dropzoneAnexos.getRootProps()}
-                                className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 transition-all cursor-pointer ${dropzoneAnexos.isDragActive ? "border-amber-500 bg-amber-500/5" : "border-slate-800 hover:border-amber-500 bg-slate-900/20"}`}
+                                className={`group relative border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-8 transition-all cursor-pointer ${dropzoneAnexos.isDragActive ? "border-amber-500 bg-amber-500/10 scale-[1.02]" : "border-slate-800 bg-slate-900/40 hover:border-amber-500/50 hover:bg-slate-900/60"}`}
                             >
+                                <div className="absolute top-3 right-3">
+                                    <span className="bg-amber-500 text-slate-900 text-[8px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase">Soporte</span>
+                                </div>
                                 <input {...dropzoneAnexos.getInputProps()} />
-                                <UploadCloud className={`w-8 h-8 mb-2 ${dropzoneAnexos.isDragActive ? "text-amber-500" : "text-slate-600"}`} />
-                                <p className="text-xs text-slate-300 font-bold text-center">GRUPO A: Anexos Generales</p>
-                                <p className="text-[10px] text-slate-500 text-center">(INE, Recetas, Domicilio)</p>
+                                <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-colors ${dropzoneAnexos.isDragActive ? "bg-amber-500 text-slate-900" : "bg-slate-800 text-amber-500"}`}>
+                                    <UploadCloud className="w-7 h-7" />
+                                </div>
+                                <p className="text-xs font-black text-white text-center uppercase tracking-widest mb-1">GRUPO A: Anexos</p>
+                                <p className="text-[10px] text-slate-400 text-center max-w-[180px]">INE, Informe Médico, <span className="text-amber-500 font-bold">Recetas</span>, Comprobantes de domicilio.</p>
+                                <p className="mt-4 text-[9px] text-slate-600 font-bold uppercase">Documentación General</p>
                             </div>
                         </div>
 
