@@ -1,66 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseService } from '@/services/supabase';
 
-// n8n llama este endpoint al terminar
+/**
+ * OBJETIVO: Sincronización robusta GMM-n8n-Supabase
+ * Mejoras: Auth Dual, Validación UUID, Trazabilidad ExecutionId y Mapeo de Estados.
+ */
+
 export async function POST(req: NextRequest) {
-  // Verificación de seguridad básica (Soporta x-callback-secret o Authorization Bearer)
-  const authHeader = req.headers.get('authorization');
-  const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7).trim() : null;
-  const xSecret = req.headers.get('x-callback-secret')?.trim();
-  const secret = (bearerToken || xSecret || '').trim();
-
-  const expectedEnv = process.env.GMM_CALLBACK_SECRET?.trim();
-  // Fallback hardcodeado para estabilidad si el env falla en Dokploy
-  const fallback = "gmm_prod_auth_k3y_2026_v1";
-
-  if (secret !== expectedEnv && secret !== fallback) {
-    console.error(`[API gmm-callback] Authorization failed. Secret mismatch.`);
-    return NextResponse.json({ 
-      error: 'No autorizado', 
-      debug: { 
-        receivedLen: secret?.length || 0,
-        expectedEnvLen: expectedEnv?.length || 0,
-        isDiff: true,
-        method: bearerToken ? 'Bearer' : (xSecret ? 'X-Secret' : 'None')
-      } 
-    }, { status: 401 });
-  }
-
   try {
-    const body = await req.json();
-    
-    console.log('[API gmm-callback] Pro Max Callback Received:', {
-      executionId: body.executionId || 'N/A',
-      jobId: body.jobId,
-      status: body.status,
-      headers: {
-        authType: bearerToken ? 'Bearer' : (xSecret ? 'X-Secret' : 'None'),
-        userAgent: req.headers.get('user-agent')
-      }
-    });
+    // 1. Verificación de Seguridad Profesional (Soporta x-callback-secret o Authorization Bearer)
+    const authHeader = req.headers.get('authorization');
+    const xSecret = req.headers.get('x-callback-secret');
+    const secret = (authHeader?.replace('Bearer ', '') || xSecret || '').trim();
 
-    const { jobId, status, result, error, executionId } = body;
+    const expectedEnv = process.env.GMM_CALLBACK_SECRET?.trim();
+    // Fallback hardcodeado para estabilidad si el env falla en Dokploy
+    const fallback = "gmm_prod_auth_k3y_2026_v1";
 
-    if (!jobId) {
-      console.error('[API gmm-callback] Error: jobId not found in body. Received:', body);
+    if (!secret || (secret !== expectedEnv && secret !== fallback)) {
+      console.error(`[API gmm-callback] Authorization failed. Secret mismatch.`);
       return NextResponse.json({ 
-        error: 'jobId requerido',
-        receivedBody: body 
-      }, { status: 400 });
+        error: 'No autorizado', 
+        debug: { 
+          received: secret.length > 0 ? `${secret.substring(0, 3)}...` : 'empty',
+          method: authHeader ? 'Bearer' : (xSecret ? 'X-Secret' : 'None')
+        } 
+      }, { status: 401 });
     }
 
-    // Persistencia en Supabase (usando Service Role para bypass RLS)
-    const supabase = getSupabaseService();
-    
-    // Si el jobId no es un UUID válido (ej: es un id de ejecución de n8n), 
-    // lo registramos pero no fallará el endpoint, para poder ver qué está pasando.
+    // 2. Obtención y Validación de Datos
+    const body = await req.json();
+    const { jobId, status, result, error, executionId } = body;
+
+    console.log('[API gmm-callback] Pro Max Callback Received:', { executionId, jobId, status });
+
+    if (!jobId) {
+      console.error('[API gmm-callback] Error: jobId requerido', { body });
+      return NextResponse.json({ error: 'jobId requerido', receivedBody: body }, { status: 400 });
+    }
+
+    // 3. Validación de integridad (ID debe ser UUID)
+    // n8n a veces envía IDs de ejecución numéricos para pruebas, Supabase fallaría con ellos.
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId);
     
     if (!isUUID) {
-      console.warn(`[API gmm-callback] jobId ${jobId} is not a valid UUID. It might be an n8n execution ID.`);
+      console.warn(`[API gmm-callback] ID no-UUID (${jobId}). TraceId: ${executionId || 'N/A'}`);
+      return NextResponse.json({ 
+        success: true, 
+        message: 'El ID no es un UUID válido de Supabase, ignorando actualización de tabla.',
+        jobId 
+      });
     }
 
-    const { error: dbError, data } = await supabase
+    // 4. Actualización en Supabase (usando Service Role para bypass RLS)
+    const supabase = getSupabaseService();
+    const { data, error: dbError } = await supabase
       .from('jobs')
       .update({
         status: status === 'completed' ? 'ready' : (status || 'error'),
@@ -73,28 +67,24 @@ export async function POST(req: NextRequest) {
 
     if (dbError) {
       console.error('[API gmm-callback] Database Error update:', dbError);
-      return NextResponse.json({ 
-        error: 'Error al actualizar base de datos', 
-        details: dbError,
-        jobId 
-      }, { status: 500 });
+      throw dbError;
     }
 
     if (!data || data.length === 0) {
       console.warn(`[API gmm-callback] Job with ID ${jobId} not found in Supabase.`);
       return NextResponse.json({ 
         success: true, 
-        message: 'Job ID no encontrado en Supabase, pero callback recibido',
+        message: 'ID no encontrado en DB, pero callback recibido con éxito.',
         jobId 
       });
     }
 
-    console.log(`[API gmm-callback] Status updated in DB for Job ${jobId}: ${status}`);
+    console.log(`[API gmm-callback] Job ${jobId} actualizado a ${status}. TraceId: ${executionId}`);
+    return NextResponse.json({ success: true, updated: true });
 
-    return NextResponse.json({ received: true });
   } catch (err: any) {
-    console.error('[API gmm-callback] Error procesando body:', err);
-    return NextResponse.json({ error: 'Body inválido o error interno' }, { status: 500 });
+    console.error('[API gmm-callback] Error procesando callback:', err.message);
+    return NextResponse.json({ error: 'Error interno de procesamiento' }, { status: 500 });
   }
 }
 
@@ -126,7 +116,6 @@ export async function GET(req: NextRequest) {
     status: job.status,
     result: job.results,
     error: job.error_message,
-    updatedAt: Date.now() // Mock para compatibilidad
+    updatedAt: Date.now()
   });
 }
-
