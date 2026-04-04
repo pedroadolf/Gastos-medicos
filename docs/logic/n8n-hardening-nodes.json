@@ -1,0 +1,60 @@
+[
+  {
+    "id": "validate_contract_v1",
+    "name": "🛡️ VALIDATE_CONTRACT",
+    "type": "n8n-nodes-base.if",
+    "parameters": {
+      "conditions": {
+        "boolean": [
+          {
+            "value1": "={{$json.body?.jobId || $json.jobId}}",
+            "operation": "notEmpty"
+          }
+        ]
+      }
+    },
+    "notes": "Bloquea el flujo si falta el jobId universal."
+  },
+  {
+    "id": "normalize_data_v1",
+    "name": "🏗️ NORMALIZE_PAYLOAD",
+    "type": "n8n-nodes-base.set",
+    "parameters": {
+      "values": {
+        "string": [
+          {
+            "name": "jobId",
+            "value": "={{$json.body?.jobId || $json.jobId}}"
+          },
+          {
+            "name": "agent",
+            "value": "workflow-agent-v1"
+          }
+        ]
+      }
+    },
+    "notes": "Asegura que el contrato de salida sea consistente."
+  },
+  {
+    "id": "error_handler_v1",
+    "name": "🚨 LOG_AND_NOTIFY",
+    "type": "n8n-nodes-base.httpRequest",
+    "parameters": {
+      "url": "={{$env.SUPABASE_URL}}/rest/v1/system_logs",
+      "method": "POST",
+      "bodyParametersUi": {
+        "parameter": [
+          {
+            "name": "status",
+            "value": "error"
+          },
+          {
+            "name": "message",
+            "value": "={{$json.error?.message}}"
+          }
+        ]
+      }
+    },
+    "notes": "Registra el error en Supabase para el Dashboard."
+  }
+]
