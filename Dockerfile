@@ -3,10 +3,12 @@ FROM node:22-bullseye-slim AS base
 # Install dependencies only when needed
 FROM base AS deps
 # In Debian, we don't need libc6-compat, it's standard.
-# We might need some build tools for certain native deps if they compile from source.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libc6 \
     && rm -rf /var/lib/apt/lists/*
+
+# Enable Corepack (recommended for Next.js and custom packageManager settings)
+RUN corepack enable
 
 WORKDIR /app
 
