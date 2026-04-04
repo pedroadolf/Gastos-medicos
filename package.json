@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Gastos Médicos Móvil - Monorepo",
   "private": true,
-  "packageManager": "npm@11.1.2",
   "workspaces": [
     "apps/web",
     "apps/agent"

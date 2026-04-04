@@ -7,9 +7,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libc6 \
     && rm -rf /var/lib/apt/lists/*
 
-# Enable Corepack (recommended for Next.js and custom packageManager settings)
-RUN corepack enable
-
 WORKDIR /app
 
 # Copy the monorepo configuration files
