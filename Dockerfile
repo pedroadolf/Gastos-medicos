@@ -1,8 +1,13 @@
-FROM node:22-alpine AS base
+FROM node:22-bullseye-slim AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+# In Debian, we don't need libc6-compat, it's standard.
+# We might need some build tools for certain native deps if they compile from source.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libc6 \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # Copy the monorepo configuration files
@@ -11,6 +16,7 @@ COPY apps/web/package.json ./apps/web/
 COPY apps/agent/package.json ./apps/agent/
 
 # Install all dependencies (handles workspaces)
+# Using --include=dev to ensure build tools (turbo, etc) are available
 RUN npm install
 
 # Rebuild the source code only when needed
@@ -56,6 +62,4 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
 # When using standalone, we run server.js from the apps/web directory
-# Standalone mode in monorepos might have a slightly different path
-# Usually it is /app/apps/web/server.js if not properly handled
 CMD ["node", "apps/web/server.js"]
