@@ -4,33 +4,41 @@
     {
       "parameters": {
         "httpMethod": "POST",
-        "options": {},
         "path": "gmm-new-request-prod",
-        "responseMode": "responseNode"
+        "responseMode": "responseNode",
+        "options": {}
       },
       "id": "d5c3d072-52f9-4f2e-81dc-ed626758be08",
-      "name": "WebhookTrigger",
+      "name": "webhook_trigger",
       "position": [
-        -200,
-        150
+        -208,
+        112
       ],
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "webhookId": "db40c9b2-6ae9-47bc-8494-86ce313e5d4e"
+      "webhookId": "db40c9b2-6ae9-47bc-8494-86ce313e5d4e",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "id": "manual-id-1",
+      "name": "manual_trigger",
+      "position": [
+        16,
+        304
+      ],
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1
     },
     {
       "parameters": {
-        "options": {
-          "systemMessage": "Eres el Agente de Auditoría GMM (Gastos Médicos Móviles). \n\nOBJETIVO: Procesar solicitudes de siniestros de principio a fin de manera autónoma.\nMODO DE OPERACIÓN:\n1. Registra el siniestro usando ToolDataRegister.\n2. Si hay PDFs, procésalos con ToolPDFProcessor.\n3. Monitorea el progreso con ToolMonitor si es necesario.\n4. Finaliza empaquetando todo con ToolZIPEmail.\n\nREGLAS:\n- Sé conciso. No expliques tus razonamientos internos a menos que sea necesario.\n- Si ocurre un error crítico, informa a través de las herramientas disponibles.\n- Siempre usa el jobId proporcionado en el contexto."
-        },
-        "promptType": "define",
-        "text": "=SOLICITUD RECIBIDA: {{ JSON.stringify($json.body) }}\n\nInicia el procesamiento para el JobId: {{ $node[\"Set JobId\"].json.jobId }}"
+        "text": "=NUEVA SOLICITUD DE SINIESTRO RECIBIDA: {{ JSON.stringify($node[\"webhook_trigger\"].json.body) }}\\n\\nPor favor, inicia el procesamiento."
       },
       "id": "agent-id-1",
-      "name": "AlAgenteGMM",
+      "name": "agent_gmm",
       "position": [
-        600,
-        250
+        496,
+        208
       ],
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1
@@ -38,142 +46,149 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $node[\"Set JobId\"].json.jobId }}"
+        "sessionKey": "={{ $json.jobId || $json.body?.jobId || $execution.id }}"
       },
       "id": "memory-id-1",
-      "name": "MemoryGMM",
+      "name": "memory_gmm",
       "position": [
-        450,
-        450
+        352,
+        512
       ],
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3
     },
     {
       "parameters": {
-        "description": "Procesa los archivos PDF para extraer información médica y fiscal.",
+        "description": "Procesa los archivos PDF para extraer información médica y fiscal. Requiere jobId.",
         "workflowId": "M5yz5irHURXv0wl0",
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "jobId": "={{ $node[\"Set JobId\"].json.jobId }}"
+            "jobId": "={{ $fromAI(\"jobId\", \"El ID del job de procesamiento\", \"string\") }}"
           }
         }
       },
       "id": "tool-pdf-id-1",
-      "name": "ToolPDFProcessor",
+      "name": "process_pdfs",
       "position": [
-        750,
-        450
+        800,
+        448
       ],
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2
     },
     {
       "parameters": {
-        "description": "Genera el archivo ZIP final y envía el correo de confirmación.",
+        "description": "Genera el archivo ZIP final y envía el correo de confirmación. Requiere siniestroId.",
         "workflowId": "niTxNaK2iazIV6Ku",
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "siniestroId": "={{ $fromAI(\"siniestroId\", \"ID del siniestro\", \"string\") }}",
-            "jobId": "={{ $node[\"Set JobId\"].json.jobId }}"
+            "siniestroId": "={{ $fromAI(\"siniestroId\", \"El ID del siniestro para el cual generar el paquete\", \"string\") }}"
           }
         }
       },
       "id": "tool-zip-id-1",
-      "name": "ToolZIPEmail",
+      "name": "zip_and_email",
       "position": [
-        850,
-        450
+        960,
+        432
       ],
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2
     },
     {
       "parameters": {
-        "description": "Registra el siniestro en la base de datos de n8n y Google Sheets.",
+        "description": "Registra el siniestro en la base de datos de n8n y Google Sheets. Retorna el jobId.",
         "workflowId": "iWDi0Oizh4tpnihN",
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "jobId": "={{ $node[\"Set JobId\"].json.jobId }}"
+            "siniestroId": "={{ $fromAI(\"siniestroId\", \"El ID del siniestro si está disponible\", \"string\") }}"
           }
         }
       },
       "id": "tool-data-id-1",
-      "name": "ToolDataRegister",
+      "name": "register_siniestro",
       "position": [
-        550,
-        450
+        512,
+        432
       ],
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2
     },
     {
       "parameters": {
-        "description": "Monitorea el estado del expediente y actualiza el dashboard.",
+        "description": "Monitorea el estado del expediente y actualiza el dashboard. Requiere jobId.",
         "workflowId": "Y0Ed5qmai3sDSbyi",
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "jobId": "={{ $node[\"Set JobId\"].json.jobId }}"
+            "jobId": "={{ $fromAI(\"jobId\", \"El ID del job a monitorear\", \"string\") }}"
           }
         }
       },
       "id": "tool-monitor-id-1",
-      "name": "ToolMonitor",
+      "name": "monitor_expediente",
       "position": [
-        650,
-        450
+        656,
+        528
       ],
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2
     },
     {
       "parameters": {
-        "authentication": "none",
-        "jsonBody": "={{ { jobId: $node[\"Set JobId\"].json.jobId, status: \"completed\", result: $json.output } }}",
-        "jsonHeaders": "={ \"x-callback-secret\": \"{{ $env[\"GMM_CALLBACK_SECRET\"] }}\" }",
         "method": "POST",
-        "url": "https://gmm.pash.uno/api/gmm-callback"
+        "url": "https://gmm.pash.uno/api/gmm-callback",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={ \"Authorization\": \"Bearer gmm_prod_auth_k3y_2026_v1\", \"Content-Type\": \"application/json\" }",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"jobId\": $node[\"set_jobid\"].json.jobId || $node[\"webhook_trigger\"].json.body.jobId || $execution.id, \"status\": \"ready\", \"result\": $json.output, \"executionId\": $execution.id } }}",
+        "options": {}
       },
       "id": "578563c5-5e5b-458a-bc74-91a74bfa0309",
-      "name": "Callback Dashboard",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
+      "name": "callback_dashboard",
       "position": [
-        900,
-        250
-      ]
+        1088,
+        208
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4
     },
     {
       "parameters": {},
       "id": "0d341dbb-0374-4002-8798-cf1d11f8167b",
-      "name": "Error Trigger",
-      "type": "n8n-nodes-base.errorTrigger",
-      "typeVersion": 1,
+      "name": "error_trigger",
       "position": [
-        -200,
-        600
-      ]
+        -208,
+        544
+      ],
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1
     },
     {
       "parameters": {
-        "authentication": "none",
-        "jsonBody": "={{ { jobId: $node[\"Set JobId\"].json.jobId, status: \"error\", message: $json.message || \"Fallo en ejecución de Orquestador\" } }}",
-        "jsonHeaders": "={ \"x-callback-secret\": \"{{ $env[\"GMM_CALLBACK_SECRET\"] }}\" }",
         "method": "POST",
-        "url": "https://gmm.pash.uno/api/gmm-callback"
+        "url": "https://gmm.pash.uno/api/gmm-callback",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={ \"Authorization\": \"Bearer gmm_prod_auth_k3y_2026_v1\", \"Content-Type\": \"application/json\" }",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"jobId\": $node[\"set_jobid\"].json.jobId || $node[\"webhook_trigger\"].json.body.jobId || $execution.id, \"status\": \"error\", \"error\": $error.message, \"executionId\": $execution.id } }}",
+        "options": {}
       },
       "id": "11517bad-e1eb-4d35-8fa3-579a0132fd59",
-      "name": "Callback Dashboard Error",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.4,
+      "name": "callback_dashboard_error",
       "position": [
-        100,
-        600
-      ]
+        16,
+        544
+      ],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4
     },
     {
       "parameters": {
@@ -181,164 +196,184 @@
         "options": {}
       },
       "id": "openrouter-id-1",
-      "name": "CLAUDE",
-      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
-      "typeVersion": 1,
+      "name": "claude_llm",
       "position": [
-        250,
-        450
-      ]
+        240,
+        432
+      ],
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1
     },
     {
-      "id": "7f3c8d07-651a-4c6f-85a6-62ef0322b21e",
-      "name": "Respond to Webhook",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.5,
-      "position": [
-        300,
-        50
-      ],
       "parameters": {
+        "enableResponseOutput": true,
         "options": {
           "responseCode": 200
         },
         "respondWith": "json",
-        "responseBody": "={ \"success\": true, \"jobId\": \"{{ $node[\"Set JobId\"].json.jobId }}\", \"status\": \"processing\" }"
-      }
+        "responseBody": "={{ { \"success\": true, \"jobId\": $node[\"set_jobid\"].json.jobId } }}",
+        "responseMode": null
+      },
+      "id": "7f3c8d07-651a-4c6f-85a6-62ef0322b21e",
+      "name": "respond_to_webhook",
+      "position": [
+        144,
+        160
+      ],
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5
     },
     {
       "parameters": {
-        "values": {
-          "string": [
+        "fields": {
+          "values": [
             {
               "name": "jobId",
-              "value": "={{ $node[\"WebhookTrigger\"].json.body.jobId || $node[\"WebhookTrigger\"].json.body.metadata?.jobId || \"MISSING_JOB_ID_\" + $execution.id }}"
+              "stringValue": "= {{ $node[\"webhook_trigger\"].json.body.jobId || $node[\"webhook_trigger\"].json.body.metadata?.jobId || \"MISSING_\" + $execution.id }}"
             }
           ]
-        }
+        },
+        "options": {}
       },
-      "id": "set-jobid-id",
-      "name": "Set JobId",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.2,
+      "id": "set_jobid_id",
+      "name": "set_jobid",
       "position": [
-        50,
-        150
-      ]
+        -48,
+        112
+      ],
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2
     }
   ],
   "connections": {
-    "WebhookTrigger": {
+    "agent_gmm": {
       "main": [
         [
           {
-            "node": "Set JobId",
-            "type": "main",
-            "index": 0
+            "index": 0,
+            "node": "callback_dashboard",
+            "type": "main"
           }
         ]
       ]
     },
-    "Set JobId": {
-      "main": [
-        [
-          {
-            "node": "Respond to Webhook",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "AlAgenteGMM",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "AlAgenteGMM": {
-      "main": [
-        [
-          {
-            "node": "Callback Dashboard",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Error Trigger": {
-      "main": [
-        [
-          {
-            "node": "Callback Dashboard Error",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "CLAUDE": {
+    "claude_llm": {
       "ai_languageModel": [
         [
           {
-            "node": "AlAgenteGMM",
-            "type": "ai_languageModel",
-            "index": 0
+            "index": 0,
+            "node": "agent_gmm",
+            "type": "ai_languageModel"
           }
         ]
       ]
     },
-    "MemoryGMM": {
+    "error_trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "callback_dashboard_error",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "manual_trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "agent_gmm",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "memory_gmm": {
       "ai_memory": [
         [
           {
-            "node": "AlAgenteGMM",
-            "type": "ai_memory",
-            "index": 0
+            "index": 0,
+            "node": "agent_gmm",
+            "type": "ai_memory"
           }
         ]
       ]
     },
-    "ToolDataRegister": {
+    "monitor_expediente": {
       "ai_tool": [
         [
           {
-            "node": "AlAgenteGMM",
-            "type": "ai_tool",
-            "index": 0
+            "index": 0,
+            "node": "agent_gmm",
+            "type": "ai_tool"
           }
         ]
       ]
     },
-    "ToolMonitor": {
+    "process_pdfs": {
       "ai_tool": [
         [
           {
-            "node": "AlAgenteGMM",
-            "type": "ai_tool",
-            "index": 0
+            "index": 0,
+            "node": "agent_gmm",
+            "type": "ai_tool"
           }
         ]
       ]
     },
-    "ToolPDFProcessor": {
+    "register_siniestro": {
       "ai_tool": [
         [
           {
-            "node": "AlAgenteGMM",
-            "type": "ai_tool",
-            "index": 0
+            "index": 0,
+            "node": "agent_gmm",
+            "type": "ai_tool"
           }
         ]
       ]
     },
-    "ToolZIPEmail": {
+    "respond_to_webhook": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "agent_gmm",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "set_jobid": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "respond_to_webhook",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "webhook_trigger": {
+      "main": [
+        [
+          {
+            "index": 0,
+            "node": "set_jobid",
+            "type": "main"
+          }
+        ]
+      ]
+    },
+    "zip_and_email": {
       "ai_tool": [
         [
           {
-            "node": "AlAgenteGMM",
-            "type": "ai_tool",
-            "index": 0
+            "index": 0,
+            "node": "agent_gmm",
+            "type": "ai_tool"
           }
         ]
       ]
@@ -347,6 +382,8 @@
   "settings": {
     "executionOrder": "v1",
     "saveDataErrorExecution": "all",
-    "saveDataSuccessExecution": "all"
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
   }
 }

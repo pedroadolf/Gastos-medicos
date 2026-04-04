@@ -44,11 +44,14 @@ export async function POST(req: NextRequest) {
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId);
     
     if (!isUUID) {
-      console.warn(`[API gmm-callback] ID no-UUID (${jobId}). TraceId: ${executionId || 'N/A'}`);
+      console.warn(`[API gmm-callback] ⚠️ ID recibido NO es un UUID válido (${jobId}). TraceId: ${executionId || 'N/A'}`);
+      console.warn(`[API gmm-callback] Sugerencia: El orquestador n8n debe mapear 'jobId' al valor recibido en el webhook inicial.`);
+      
       return NextResponse.json({ 
         success: true, 
-        message: 'El ID no es un UUID válido de Supabase, ignorando actualización de tabla.',
-        jobId 
+        warning: 'ID_NOT_UUID',
+        received: jobId,
+        message: 'Ping recibido correctamente pero el ID de trabajo no es compatible con la Base de Datos.'
       });
     }
 

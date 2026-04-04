@@ -8,6 +8,8 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
+COPY apps/web/package.json ./apps/web/
+COPY apps/agent/package.json ./apps/agent/
 RUN npm install
 
 # Rebuild the source code only when needed
