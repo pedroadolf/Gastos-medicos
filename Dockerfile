@@ -2,26 +2,31 @@ FROM node:22-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
+# Copy the monorepo configuration files
 COPY package.json package-lock.json* ./
 COPY apps/web/package.json ./apps/web/
 COPY apps/agent/package.json ./apps/agent/
+
+# Install all dependencies (handles workspaces)
 RUN npm install
 
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+
+# Copy all node_modules from deps stage (root and workspace levels)
+COPY --from=deps /app ./
+
+# Copy all source files
 COPY . .
 
 # Next.js telemetry is disabled
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# If there's an issue with memory limits during build, this helps
+# Build the project using turbo (from root)
 RUN npm run build
 
 # Production image, copy all the files and run next
@@ -37,10 +42,11 @@ RUN adduser --system --uid 1001 nextjs
 # Set the correct permission for prerender cache
 RUN mkdir -p .next && chown nextjs:nodejs .next
 
-# Leverage output traces to reduce image size (standalone mode)
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+# Copy the standalone build and static files
+# In a monorepo, next build (standalone) is in apps/web/.next/standalone
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
 USER nextjs
 
@@ -49,4 +55,7 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-CMD ["node", "server.js"]
+# When using standalone, we run server.js from the apps/web directory
+# Standalone mode in monorepos might have a slightly different path
+# Usually it is /app/apps/web/server.js if not properly handled
+CMD ["node", "apps/web/server.js"]
