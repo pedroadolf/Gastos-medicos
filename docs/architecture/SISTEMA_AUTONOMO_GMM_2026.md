@@ -1,66 +1,70 @@
-# 🏗️ SISTEMA AUTÓNOMO GMM - ARQUITECTURA 2026
+# 🏗️ SISTEMA AUTÓNOMO GMM - ARQUITECTURA INTEGRAL 2026
 **Manual de Referencia para Sistemas de IA Auto-Evolutivos**
 
-Este documento detalla los 5 pilares arquitectónicos implementados en GMM, diseñados para ser replicables en cualquier aplicación que requiera autonomía, diagnóstico y evolución automática.
+Este documento es la recopilación definitiva de la arquitectura GMM, diseñada para ser replicable en cualquier sistema que requiera resiliencia, diagnosis y autonomía total.
 
 ---
 
-## 🚀 1. AUTO-BUILDER (Constructor Autónomo)
-**Objetivo**: Transformar requerimientos de negocio en código (n8n JSON) blindado y listo para producción.
+## 🏛️ PARTE 1: CIMIENTOS DE LA ARQUITECTURA (Foundation)
 
-*   **Pipeline**: `Input -> Planner -> Architect -> Builder -> Auditor`.
-*   **Hardening (Blindaje)**: Cada workflow generado incluye automáticamente:
-    *   Manejo de reintentos (Retries 3x).
-    *   Logging estructurado en cada nodo.
-    *   Validación de esquemas de entrada/salida.
-    *   Optional chaining para evitar errores de null/undefined.
-*   **Uso**: Generar automatizaciones dinámicas sin intervención humana.
+Antes de la autonomía, construimos la base de control y validación:
 
----
+### ✈️ 1. WORKFLOW COPILOT (AI AGENT)
+Un agente de IA (OpenAI/Anthropic) que reside en n8n como un nodo "Consultor".
+*   **Prompt**: "Analiza este JSON de workflow y dime si cumple con el Contrato Universal y si tiene riesgos de seguridad o performance".
+*   **Output**: Sugerencias de código listas para copiar y pegar.
 
-## 🧠 2. MASTER ORCHESTRATOR (Orquestador Maestro)
-**Objetivo**: Controlar el ciclo de vida de los procesos y coordinar múltiples agentes/workflows.
+### 🛡️ 2. CONTRATO UNIVERSAL DE DATOS
+Protocolo estricto donde cada nodo de n8n DEBE recibir y entregar un esquema JSON estandarizado. 
+*   **Ventaja**: Permite cambiar cualquier nodo sin romper los siguientes.
 
-*   **Estado Centralizado**: Gestiona una tabla de `jobs` (Status: PENDING, RUNNING, COMPLETED, FAILED).
-*   **Lógica de Reasignación**: Si un sub-proceso falla, el orquestador decide si reintenta, escala a un agente humano o aplica una ruta alternativa.
-*   **Trazabilidad**: Todo proceso hereda un `trace_id` único que vincula logs, auditorías y resultados.
+### 📊 3. MONITORIZACIÓN DE SALUD (Health Check)
+Sistema que reporta el estado de salud de cada workflow en tiempo real al Dashboard.
+*   **Métrica**: Tiempo de respuesta, tasa de error y memoria consumida.
 
 ---
 
-## 🧬 3. SYSTEM INTELLIGENCE (Inteligencia de Observabilidad)
-**Objetivo**: El "Sistema Nervioso" que monitorea fallos y detecta patrones de inestabilidad.
+## 🚀 PARTE 2: MOTORES DE AUTONOMÍA (The Evolution)
 
-*   **Error Fingerprinting**: Agrupa logs por firma de error (`AGENT_NODE_ERROR`).
-*   **Fragility Detection**: Si un patrón se repite >N veces, el sistema lo marca como "Frágil".
-*   **Trigger de Evolución**: Dispara propuestas de refactorización cuando la tasa de fallos supera el umbral de seguridad.
+Estos son los 5 motores que permiten que el sistema opere y evolucione sin intervención humana:
 
----
+### 🧬 1. AUTO-BUILDER (Constructor Autónomo)
+*   **Función**: Transforma requerimientos de negocio en workflows n8n JSON blindados.
+*   **Hardening**: Incluye automáticamente reintentos (3x), logging y validación de esquemas.
 
-## 💠 4. SINGULARITY BRAIN (Debate Multi-Agente)
-**Objetivo**: Añadir una capa de "pensamiento crítico" antes de realizar cambios estructurales.
+### 🧠 2. MASTER ORCHESTRATOR (Orquestador Maestro)
+*   **Función**: Controla el ciclo de vida de los procesos (`jobs`) y coordina agentes.
+*   **Estado**: Gestiona la tabla centralizada de estados (PENDING -> RUNNING -> DONE).
 
-*   **Debate Interno**:
-    *   `Proposer`: Propone el cambio técnico.
-    *   `Critic`: Actúa como auditor, buscando fallos en la propuesta.
-    *   `Refiner`: Consolida el consenso en un plan de acción definitivo.
-*   **Seguridad**: Evita que una automatización "pache" un sistema de forma errática mediante la validación dialéctica.
+### 🔍 3. SYSTEM INTELLIGENCE (Inteligencia de Observabilidad)
+*   **Función**: El "Sistema Nervioso" que detecta patrones de error (`fingerprinting`) y fragilidad.
+*   **Evolución**: Propone mejoras al detectar fallos recurrentes.
 
----
+### 💠 4. SINGULARITY BRAIN (Debate Multi-Agente)
+*   **Función**: Añade una capa de "pensamiento crítico" mediante el debate (Proposer vs Critic vs Refiner) antes de ejecutar cambios estructurales.
 
-## 📚 5. PERSISTENT VECTOR MEMORY (Memoria de Experiencia)
-**Objetivo**: Permitir que los agentes "recuerden" fallos pasados y soluciones exitosas.
-
-*   **Embeddings (`pgvector`)**: Convierte logs y heurísticas en vectores matemáticos.
-*   **Búsqueda Semántica**: Antes de resolver un problema, el sistema busca: *"¿Cómo resolvieron los agentes este problema antes?"*.
-*   **Base de Conocimiento Evolutiva**: A medida que el sistema opera, la memoria se vuelve más rica, reduciendo el tiempo de resolución de incidentes.
+### 📚 5. PERSISTENT VECTOR MEMORY (Memoria de Experiencia)
+*   **Función**: Usa `pgvector` para que los agentes "recuerden" soluciones exitosas a problemas pasados mediante búsqueda semántica.
 
 ---
 
-## 🛠️ STACK RECOMENDADO PARA RÉPLICA
-1.  **Orquestación**: n8n (o plataformas similares de workflows).
-2.  **Base de Datos**: Supabase / PostgreSQL con extensión `pgvector`.
-3.  **Motores de LLM**: Claude 3.5 Sonnet / GPT-4o.
-4.  **Backend de Control**: Node.js (scripts de orquestación y debate).
+## 📂 PARTE 3: ESTRUCTURA DE ARCHIVOS Y STACK
+
+```text
+/project
+  ├── .agent/           # Prompts y lógica de agentes
+  ├── docs/             # Arquitectura y manuales
+  ├── scripts/          # Motores de auditoría, decisión y autonomía (.js)
+  ├── apps/             # Frontend (Dashboard) y Backend
+  └── workflows/        # Exports de n8n validados y endurecidos
+```
+
+### 🛠️ STACK RECOMENDADO PARA RÉPLICA
+1.  **Orquestación**: n8n.io
+2.  **Base de Datos**: Supabase (PostgreSQL + pgvector).
+3.  **Motores de IA**: Claude 3.5 Sonnet / GPT-4o.
+4.  **Capa Lógica**: Node.js scripts coordinando el "Debate" y "Auto-Builder".
 
 ---
-*Este sistema marca el fin del software estático. Cualquier aplicación construida bajo esta arquitectura dejará de depender de mantenimiento humano constante para empezar a aprender y reparase sola.*
+
+> **MEMORIA DEL PROYECTO GMM:** Esta arquitectura fue implementada para resolver la fragilidad de los workflows de seguros médicos, permitiendo procesar siniestros de forma 100% autónoma y segura. Este manual es ahora el estándar para cualquier aplicación de la "Era de la Autonomía".
