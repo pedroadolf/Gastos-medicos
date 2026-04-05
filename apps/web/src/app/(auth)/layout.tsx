@@ -15,28 +15,11 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { SidebarLink } from "@/components/layout/SidebarLink";
 import { Copilot } from "@/components/layout/Copilot";
 
-// Client Component Wrapper for Active Links
-function SidebarLink({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) {
-    // In a real app we'd use usePathname(), but since this is a server layout,
-    // we'll keep it simple or use a client component if needed.
-    // For now, let's stick to standard links with good hover states.
-    return (
-        <Link 
-            href={href} 
-            className="flex items-center justify-between px-4 py-3 text-slate-400 hover:text-white hover:bg-white/[0.03] rounded-xl transition-all duration-200 group border border-transparent hover:border-white/5"
-        >
-            <div className="flex items-center space-x-3">
-                <span className="w-5 h-5 transition-transform group-hover:scale-110 group-hover:text-medical-cyan">
-                    {icon}
-                </span>
-                <span className="text-sm font-medium tracking-tight">{label}</span>
-            </div>
-            <ChevronRight className="w-3.5 h-3.5 opacity-0 -translate-x-2 group-hover:opacity-40 group-hover:translate-x-0 transition-all text-medical-cyan" />
-        </Link>
-    );
-}
+// Removed local SidebarLink as we now use the imported client component version
+
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
     const session = await getServerSession(authOptions);
@@ -68,14 +51,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 <nav className="flex-1 p-6 space-y-1 overflow-y-auto custom-scrollbar">
                     <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] mb-4 mt-2 px-3 opacity-50 italic">Core Systems</p>
                     
-                    <Link 
-                        href="/dashboard" 
-                        className="flex items-center space-x-3 px-4 py-3 bg-medical-cyan/10 text-medical-cyan rounded-xl font-bold border border-medical-cyan/20 transition-all shadow-lg shadow-medical-cyan/5 group mb-2"
-                    >
-                        <LayoutDashboard className="w-5 h-5 transition-transform group-hover:scale-110" />
-                        <span className="text-sm tracking-tight text-glow-cyan">Centro de Control</span>
-                    </Link>
-
+                    <SidebarLink href="/dashboard" icon={<LayoutDashboard />} label="Centro de Control" />
                     <SidebarLink href="/siniestros" icon={<FileText />} label="Siniestros" />
                     <SidebarLink href="/asegurados" icon={<Users />} label="Asegurados" />
                     <SidebarLink href="/documentos" icon={<FolderOpen />} label="Documentos" />
