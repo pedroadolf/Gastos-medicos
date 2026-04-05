@@ -133,7 +133,7 @@ export default function Home() {
       {/* Footer minimalista */}
       <div className="py-6 border-t border-slate-800/50 relative z-10 w-full bg-fintech-navy/50 backdrop-blur-md text-center shrink-0">
         <p className="text-xs text-slate-500 tracking-wide uppercase font-semibold">
-          Confidencial &bull; Acceso Restringido &bull; PASH Automation v1.0
+          Confidencial &bull; Acceso Restringido &bull; PASH Automation v2.0
         </p>
       </div>
     </main>

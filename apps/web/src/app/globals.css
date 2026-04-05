@@ -1,11 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --color-fintech-navy: #0A1128;
-  --color-fintech-navy-light: #121E40;
-  --color-fintech-surface: #1E293B;
-  --color-fintech-emerald: #10B981;
-  --color-fintech-cyan: #00F0FF;
+  /* Fondo y Superficies */
+  --color-slate-950: #0f172a;
+  --color-slate-900: #0f172a; /* Mapeado para consistencia */
+  --color-slate-800: #1e293b;
+  --color-slate-700: #334155;
+
+  /* Acentos Médicos */
+  --color-medical-cyan: #06b6d4;
+  --color-medical-violet: #8b5cf6;
+  --color-medical-emerald: #10b981;
+  --color-medical-amber: #f59e0b;
+  --color-medical-red: #ef4444;
+
+  /* Fuentes custom */
+  --font-plus-jakarta: var(--font-plus-jakarta-sans);
+  --font-inter: var(--font-inter);
 }
 
 @layer utilities {

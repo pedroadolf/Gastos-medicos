@@ -1,87 +1,117 @@
-import { ShieldCheck, LayoutDashboard, Users, HeartPulse, Settings, FileText, Bell } from "lucide-react";
+import { ShieldCheck, LayoutDashboard, Users, HeartPulse, Settings, FileText, Bell, Menu, Plus } from "lucide-react";
 import Link from "next/link";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { cn } from "@/lib/utils";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="min-h-screen bg-fintech-navy flex">
-            {/* Sidebar */}
-            <aside className="w-64 bg-fintech-navy-light border-r border-slate-800/80 flex flex-col hidden md:flex shrink-0 relative z-20">
-                <div className="p-6 border-b border-slate-800/80">
-                    <Link href="/dashboard" className="flex items-center space-x-3 group">
-                        <ShieldCheck className="w-8 h-8 text-fintech-emerald transition-transform group-hover:scale-110" />
+        <div className="min-h-screen bg-slate-950 flex font-sans selection:bg-medical-cyan/30 text-slate-200">
+            {/* Desktop Sidebar */}
+            <aside className="w-72 bg-slate-900 border-r border-slate-800 flex flex-col hidden md:flex shrink-0 relative z-30 transition-all duration-300">
+                <div className="p-8 border-b border-white/5">
+                    <Link href="/dashboard" className="flex items-center space-x-3 group animate-in fade-in slide-in-from-left-4 duration-500">
+                        <div className="bg-medical-cyan/10 p-2 rounded-xl group-hover:bg-medical-cyan/20 transition-all">
+                            <ShieldCheck className="w-8 h-8 text-medical-cyan transition-transform group-hover:scale-110" />
+                        </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">PASH</h2>
-                            <span className="text-[10px] text-fintech-cyan font-bold uppercase tracking-widest">Automation</span>
+                            <h2 className="text-xl font-bold text-white tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">GMM PRO</h2>
+                            <span className="text-[10px] text-medical-cyan font-bold uppercase tracking-widest mt-1 block">Panel Médico</span>
                         </div>
                     </Link>
                 </div>
 
-                <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 mt-2 px-3">Principal</p>
-                    <Link href="/dashboard" className="flex items-center space-x-3 px-3 py-2.5 bg-fintech-emerald/10 text-fintech-emerald rounded-lg font-medium border border-fintech-emerald/20">
-                        <LayoutDashboard className="w-5 h-5" />
+                <nav className="flex-1 p-6 space-y-1.5 overflow-y-auto custom-scrollbar">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 mt-2 px-3">Gestión</p>
+                    
+                    <Link href="/dashboard" className="flex items-center space-x-3 px-4 py-3 bg-medical-cyan/10 text-medical-cyan rounded-xl font-semibold border border-medical-cyan/20 transition-all hover:bg-medical-cyan/15 group">
+                        <LayoutDashboard className="w-5 h-5 transition-transform group-hover:scale-110" />
                         <span>Centro de Control</span>
                     </Link>
-                    <Link href="#" className="flex items-center space-x-3 px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors font-medium">
-                        <FileText className="w-5 h-5" />
-                        <span>Expedientes</span>
+                    
+                    <Link href="/tramites" className="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium group">
+                        <FileText className="w-5 h-5 transition-transform group-hover:scale-110" />
+                        <span>Mis Trámites</span>
                     </Link>
-                    <Link href="#" className="flex items-center space-x-3 px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors font-medium">
-                        <HeartPulse className="w-5 h-5" />
-                        <span>Siniestros</span>
-                    </Link>
-                    <Link href="#" className="flex items-center space-x-3 px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors font-medium">
-                        <Users className="w-5 h-5" />
+
+                    <Link href="#" className="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium group">
+                        <Users className="w-5 h-5 transition-transform group-hover:scale-110" />
                         <span>Asegurados</span>
                     </Link>
 
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 mt-8 px-3">Configuración</p>
-                    <Link href="#" className="flex items-center space-x-3 px-3 py-2.5 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-lg transition-colors font-medium">
-                        <Settings className="w-5 h-5" />
-                        <span>Parámetros</span>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 mt-8 px-3">Herramientas</p>
+                    
+                    <Link href="#" className="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium group">
+                        <HeartPulse className="w-5 h-5 transition-transform group-hover:scale-110" />
+                        <span>Directorio Médico</span>
+                    </Link>
+                    
+                    <Link href="#" className="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium group">
+                        <Settings className="w-5 h-5 transition-transform group-hover:scale-110" />
+                        <span>Configuración</span>
                     </Link>
                 </nav>
 
-                <div className="p-4 border-t border-slate-800/80">
-                    <div className="flex items-center space-x-3 px-3 py-3 bg-slate-800/30 rounded-lg border border-slate-800/50">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-fintech-emerald to-fintech-cyan flex items-center justify-center text-fintech-navy font-bold text-sm">
-                            UX
+                <div className="p-6 border-t border-white/5">
+                    <div className="flex items-center space-x-3 px-4 py-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:bg-white/[0.05] transition-all cursor-pointer group">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-medical-cyan to-blue-500 flex items-center justify-center text-slate-950 font-bold text-sm shadow-lg shadow-medical-cyan/20">
+                            JD
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white truncate">Usuario Demo</p>
-                            <p className="text-xs text-slate-400 truncate">demo@pash.uno</p>
+                            <p className="text-sm font-bold text-white truncate">Juan Diego</p>
+                            <p className="text-xs text-slate-500 truncate">demo@gmm-pro.com</p>
                         </div>
                     </div>
                 </div>
             </aside>
 
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col min-w-0 relative">
-                <div className="absolute inset-0 bg-grid-white pointer-events-none opacity-5 z-0"></div>
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col min-w-0 relative h-screen">
+                {/* Modern Backdrop Pattern */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-medical-cyan/5 via-transparent to-transparent pointer-events-none z-0"></div>
 
-                {/* Top Header */}
-                <header className="h-16 border-b border-slate-800/80 bg-fintech-navy/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-20">
+                {/* Glass Header */}
+                <header className="h-20 border-b border-white/5 bg-slate-950/70 backdrop-blur-xl flex items-center justify-between px-6 md:px-10 sticky top-0 z-40 transition-all">
                     <div className="flex items-center space-x-4">
-                        <h1 className="text-lg font-semibold text-white">Procesamiento GMM</h1>
-                        <div className="h-5 w-px bg-slate-700"></div>
-                        <span className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-medium border border-slate-700">Entorno Seguro</span>
+                        {/* Mobile Logo/Menu Toggle Placeholder */}
+                        <div className="md:hidden flex items-center space-x-3">
+                            <div className="bg-medical-cyan/10 p-1.5 rounded-lg">
+                                <ShieldCheck className="w-6 h-6 text-medical-cyan" />
+                            </div>
+                        </div>
+                        
+                        <div className="hidden sm:block">
+                            <h1 className="text-xl font-bold text-white tracking-tight">GMM Dashboard</h1>
+                            <p className="text-xs text-slate-500 font-medium tracking-wide items-center flex gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Sistema en Línea v2.0
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="flex items-center space-x-4">
-                        <button className="relative p-2 text-slate-400 hover:text-white transition-colors">
-                            <Bell className="w-5 h-5" />
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-fintech-emerald rounded-full"></span>
+                    <div className="flex items-center space-x-3 md:space-x-5">
+                        <button className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 rounded-full border border-white/10 transition-all text-sm font-medium">
+                            <Plus className="w-4 h-4" />
+                            <span>Solicitud</span>
                         </button>
+                        
+                        <div className="h-8 w-px bg-white/10 hidden sm:block"></div>
+                        
+                        <NotificationCenter />
                     </div>
                 </header>
 
-                {/* Scrollable Content */}
-                <main className="flex-1 overflow-y-auto p-6 relative z-10">
-                    <div className="max-w-6xl mx-auto">
+                {/* Responsive Content Surface */}
+                <main className="flex-1 overflow-y-auto px-4 py-6 md:p-10 relative z-10 pb-24 md:pb-10">
+                    <div className="max-w-7xl mx-auto animate-in fade-in duration-700 delay-150">
                         {children}
                     </div>
                 </main>
+
+                {/* Strategy A: Reemplazo condicional */}
+                <MobileBottomNav className="md:hidden fixed bottom-0 left-0 right-0" />
             </div>
         </div>
     );
 }
+
