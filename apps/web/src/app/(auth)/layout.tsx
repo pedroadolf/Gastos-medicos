@@ -15,7 +15,6 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
-import { usePathname } from "next/navigation";
 import { Copilot } from "@/components/layout/Copilot";
 
 // Client Component Wrapper for Active Links
