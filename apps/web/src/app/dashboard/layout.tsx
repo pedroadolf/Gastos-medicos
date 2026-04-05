@@ -2,7 +2,7 @@ import { ShieldCheck, LayoutDashboard, Users, HeartPulse, Settings, FileText, Be
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
-import { cn } from "@/lib/utils";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const { data: session } = useSession();
@@ -73,7 +73,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         </div>
                     </div>
                 </div>
-            </aside>
             </aside>
 
             {/* Main Content Area */}
