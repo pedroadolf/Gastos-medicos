@@ -65,7 +65,7 @@ export default function Home() {
             </div>
 
             <p className="text-lg text-slate-400 max-w-lg leading-relaxed font-light">
-              El motor inteligente y seguro para automatizar flujos de pólizas, extraer datos de facturas mediante inteligencia artificial y procesar expedientes en minutos.
+              GMM es la plataforma que revoluciona la forma de tramitar gastos médicos. Combina automatización inteligente de pólizas, extracción de datos de facturas con IA y procesamiento seguro de expedientes —reduciendo lo que tomaba días a solo minutos.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-6 border-t border-slate-800/60 w-full max-w-md">
