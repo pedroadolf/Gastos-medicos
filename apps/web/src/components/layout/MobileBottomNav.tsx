@@ -17,10 +17,10 @@ export function MobileBottomNav({ className }: { className?: string }) {
 
   const NAV_ITEMS = [
     { label: 'Inicio', icon: Home, href: '/dashboard' },
-    { label: 'Trámites', icon: FileText, href: '/tramites' },
-    { label: 'Nuevo', icon: PlusCircle, href: '/tramites/nuevo', primary: true },
-    { label: 'Perfil', icon: User, href: '/dashboard/proyectos' }, // Mapped to existing/new views
-    { label: 'Ajustes', icon: Settings, href: '/dashboard/configuracion' },
+    { label: 'Siniestros', icon: FileText, href: '/siniestros' },
+    { label: 'Nuevo', icon: PlusCircle, href: '/siniestros/nuevo', primary: true },
+    { label: 'Agentes', icon: User, href: '/agentes' }, 
+    { label: 'Ajustes', icon: Settings, href: '/configuracion' },
   ];
 
   return (

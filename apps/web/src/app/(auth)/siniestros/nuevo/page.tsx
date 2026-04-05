@@ -644,12 +644,20 @@ export default function NuevoSiniestroPage() {
                         {/* Acciones Finales */}
                         <div className="pt-5 border-t border-slate-800/80 flex flex-col space-y-4">
                             {/* Validation Messages */}
+                            {/* Sticky Validation Banner for better UX */}
                             {!selectedAsegurado && (anexosFiles.length > 0 || facturasFiles.length > 0) && (
-                                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex items-center animate-pulse">
-                                    <Sparkles className="w-4 h-4 text-amber-500 mr-2 shrink-0" />
-                                    <p className="text-[11px] font-bold text-amber-200">
-                                        PASO FALTANTE: Selecciona un asegurado en la sección 1 para habilitar el envío.
-                                    </p>
+                                <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-full max-w-lg px-4 animate-in slide-in-from-bottom duration-500">
+                                    <div className="bg-amber-500 text-slate-900 rounded-2xl p-4 flex items-center shadow-2xl border border-amber-400">
+                                        <div className="bg-slate-900/10 p-2 rounded-lg mr-3">
+                                            <Sparkles className="w-5 h-5 text-slate-900" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-xs font-black uppercase tracking-tight">Acción Requerida</p>
+                                            <p className="text-[11px] font-bold opacity-80 leading-none">
+                                                Selecciona un asegurado en el Paso 1 para procesar los documentos.
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 

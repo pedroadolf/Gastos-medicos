@@ -10,10 +10,14 @@ import {
   Zap,
   TrendingUp,
   Brain,
-  DollarSign
+  DollarSign,
+  Plus,
+  MonitorPlay,
+  FileText,
+  ChevronRight,
+  FilePlus
 } from 'lucide-react';
 import Link from 'next/link';
-import { DesktopTable } from '@/components/tramites/DesktopTable';
 import { 
   BarChart, 
   Bar, 
@@ -39,10 +43,9 @@ export default function GlobalDashboardPage() {
       .catch(() => setIsLoading(false));
   }, []);
 
-  // Calculamos métricas reales
-  const totalSiniestros = data.asegurados.length;
-  const totalReembolsado = data.asegurados.reduce((acc: number, curr: any) => 
-    acc + parseFloat((curr.montoPagado || "0").replace(/[^0-9.]/g, "")), 0);
+  const totalSiniestros = data.asegurados?.length || 0;
+  const totalReembolsado = data.asegurados?.reduce((acc: number, curr: any) => 
+    acc + parseFloat((curr.montoPagado || "0").replace(/[^0-9.]/g, "")), 0) || 0;
   
   const chartData = [
     { name: 'Lun', total: 12 },
@@ -56,169 +59,141 @@ export default function GlobalDashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 p-4 md:p-8">
-      {/* Header */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="animate-in fade-in slide-in-from-left duration-700">
-            <h1 className="text-3xl font-bold text-slate-100 font-plus-jakarta tracking-tight">
-              Centro de Control
-            </h1>
-            <p className="text-slate-500 mt-2">
-              Siniestros médicos, KPIs ejecutivos e inteligencia
-            </p>
+      <div className="max-w-7xl mx-auto border-b border-slate-900 pb-8 mb-12">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h1 className="text-4xl font-black text-white italic tracking-tighter">OS Dashboard</h1>
+            <p className="text-slate-500 font-bold mt-1 uppercase text-[10px] tracking-[0.3em]">Neural Intelligence Center</p>
           </div>
-          
-          <div className="flex gap-3">
-            <Link href="/siniestros/nuevo" className="flex items-center gap-2 px-5 py-2.5 bg-medical-cyan hover:bg-medical-cyan/90 text-slate-950 font-bold rounded-xl transition-all shadow-lg shadow-medical-cyan/20 group">
-              <Zap size={20} className="group-hover:animate-pulse" />
-              <span>Ejecutar GMM Bot</span>
-            </Link>
+          <div className="flex gap-4">
+             <Link href="/siniestros/nuevo" className="px-6 py-4 bg-medical-cyan text-slate-950 font-black rounded-2xl flex items-center gap-2 hover:scale-105 transition-all shadow-xl shadow-medical-cyan/20">
+                <Plus size={20} strokeWidth={3} />
+                NUEVO TRÁMITE
+             </Link>
           </div>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-          <StatCard 
-            label="Total Siniestros"
-            value={isLoading ? "..." : totalSiniestros}
-            trend="+12% vs anterior"
-            icon={<Activity className="text-medical-cyan" size={20} />}
-            color="cyan"
-          />
-          <StatCard 
-            label="Total Reembolsado"
-            value={isLoading ? "..." : `$${totalReembolsado.toLocaleString()}`}
-            trend="Monto acumulado"
-            icon={<DollarSign className="text-medical-emerald" size={20} />}
-            color="emerald"
-          />
-          <StatCard 
-            label="Alertas Auditoría"
-            value="3"
-            trend="Requieren atención"
-            icon={<AlertCircle className="text-medical-amber" size={20} />}
-            color="amber"
-            alert
-          />
-          <StatCard 
-            label="Tiempo de Resolución"
-            value="3.2m"
-            trend="-80% vs original"
-            icon={<Clock className="text-medical-violet" size={20} />}
-            color="violet"
-          />
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 mt-12">
-        {/* Chart Section */}
-        <div className="lg:col-span-2 bg-slate-900/40 rounded-3xl border border-slate-800 p-8 backdrop-blur-sm relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h3 className="text-white font-bold text-lg">Actividad por Día</h3>
-              <p className="text-xs text-slate-500">Siniestros procesados última semana</p>
-            </div>
-            <TrendingUp size={20} className="text-medical-cyan opacity-50" />
-          </div>
-          
-          <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                <XAxis 
-                  dataKey="name" 
-                  stroke="#64748b" 
-                  fontSize={12} 
-                  tickLine={false} 
-                  axisLine={false}
-                />
-                <YAxis 
-                  stroke="#64748b" 
-                  fontSize={12} 
-                  tickLine={false} 
-                  axisLine={false}
-                  tickFormatter={(value) => `${value}`}
-                />
-                <Tooltip 
-                  cursor={{fill: '#1e293b', opacity: 0.4}}
-                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px' }}
-                  itemStyle={{ color: '#2dd4bf', fontWeight: 'bold' }}
-                />
-                <Bar dataKey="total" radius={[6, 6, 0, 0]}>
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={index === 4 ? '#2dd4bf' : '#1e293b'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-        
-        {/* Health Score Section */}
-        <div className="bg-slate-900/40 rounded-3xl border border-slate-800 p-8 flex flex-col items-center justify-center text-center backdrop-blur-sm group hover:border-medical-cyan/30 transition-all">
-            <div className="relative mb-6">
-                <div className="absolute inset-0 bg-medical-cyan/20 blur-2xl rounded-full group-hover:bg-medical-cyan/40 transition-all"></div>
-                <Brain size={64} className="text-medical-cyan relative z-10" />
-            </div>
-            <h3 className="font-bold text-white text-lg mb-2">Salud del Sistema (Score)</h3>
-            <div className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-br from-medical-emerald to-medical-cyan mb-4">
-                92<span className="text-2xl text-slate-500 font-medium">/100</span>
-            </div>
-            <div className="space-y-4">
-                <p className="text-sm text-slate-400 leading-relaxed px-4">
-                    Tus agentes de IA han mantenido una tasa de éxito del <span className="text-medical-emerald font-bold">100%</span> en las últimas 24 horas.
-                </p>
-                <div className="flex gap-2 justify-center">
-                    <span className="w-2 h-2 rounded-full bg-medical-emerald animate-pulse"></span>
-                    <span className="w-2 h-2 rounded-full bg-medical-emerald animate-pulse delay-75"></span>
-                    <span className="w-2 h-2 rounded-full bg-medical-emerald animate-pulse delay-150"></span>
+      <div className="max-w-7xl mx-auto">
+        {/* KPI Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
+            <div className="lg:col-span-2 p-10 bg-slate-900/40 rounded-[40px] border border-slate-800 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-medical-cyan/5 blur-[100px]" />
+                <h2 className="text-[10px] font-black text-medical-cyan uppercase tracking-widest mb-4 flex items-center gap-2">
+                     <Zap size={14} fill="currentColor" />
+                     Métricas de Eficiencia
+                </h2>
+                <div className="text-7xl font-black text-white italic tracking-tighter mb-2">98.5<span className="text-3xl text-medical-cyan">%</span></div>
+                <p className="text-slate-500 font-bold mb-8">Nivel de automatización en la última semana</p>
+                <div className="flex gap-4">
+                     <div className="flex-1 p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                         <p className="text-[10px] text-slate-500 font-black uppercase mb-1">Total Reembolsado</p>
+                         <p className="text-2xl font-black text-white italic">${totalReembolsado.toLocaleString()}</p>
+                     </div>
+                     <div className="flex-1 p-4 bg-slate-950 rounded-2xl border border-slate-800">
+                         <p className="text-[10px] text-slate-500 font-black uppercase mb-1">Ahorro Ops</p>
+                         <p className="text-2xl font-black text-white italic">$4.2k</p>
+                     </div>
                 </div>
             </div>
-        </div>
-      </div>
 
-      {/* Siniestros Recientes */}
-      <div className="max-w-7xl mx-auto mt-12 pb-12">
-        <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-                <div className="w-2 h-8 bg-medical-cyan rounded-full"></div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">Siniestros Recientes</h2>
+            <div className="p-8 bg-slate-900/40 rounded-[40px] border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Salud del Sistema</h3>
+                    <div className="space-y-4">
+                        <SystemStatus label="n8n Engine" status="Online" color="emerald" />
+                        <SystemStatus label="Supabase DB" status="Online" color="emerald" />
+                        <SystemStatus label="Agent Grid" status="Warning" color="amber" />
+                    </div>
+                </div>
+                <button className="w-full py-3 bg-slate-800 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:bg-slate-700 transition-all">Ver Logs</button>
             </div>
-            <Link href="/siniestros" className="px-4 py-2 text-sm font-bold text-medical-cyan bg-medical-cyan/10 hover:bg-medical-cyan/20 rounded-xl transition-all border border-medical-cyan/20">
-                Ver todos los registros
-            </Link>
+
+            <div className="p-8 bg-medical-cyan rounded-[40px] flex flex-col justify-between group cursor-pointer relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-[50px] -rotate-45" />
+                <div>
+                     <h3 className="text-slate-950 text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">Siniestros Hoy</h3>
+                     <div className="text-slate-950 text-7xl font-black italic tracking-tighter">{totalSiniestros}</div>
+                </div>
+                <Link href="/siniestros" className="w-full py-4 bg-slate-950 text-white font-black rounded-2xl text-center text-xs shadow-xl shadow-slate-950/20 hover:scale-105 transition-all">GESTIONAR</Link>
+            </div>
         </div>
 
-        <div className="hidden md:block">
-          <DesktopTable items={data.asegurados?.slice(0, 5) || []} />
+        {/* Charts & Lists */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
+            <div className="lg:col-span-2 space-y-6">
+                <div className="flex items-center justify-between mb-4">
+                     <h3 className="text-xl font-bold text-white italic">Live Processing Stream</h3>
+                     <div className="flex items-center gap-2">
+                         <span className="w-2 h-2 rounded-full bg-medical-cyan animate-ping" />
+                         <span className="text-[10px] font-black text-medical-cyan uppercase">Live</span>
+                     </div>
+                </div>
+                <div className="space-y-4">
+                    {data.asegurados?.slice(0, 4).map((claim: any, idx: number) => (
+                        <div key={idx} className="p-5 bg-slate-900/30 border border-slate-800 rounded-[32px] hover:border-slate-700 transition-all flex items-center justify-between group">
+                            <div className="flex items-center gap-5">
+                                <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-medical-cyan">
+                                    <FileText size={20} />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-white">Siniestro #{claim.siniestro_id || '772'+idx} - {claim.nombre || 'Asegurado'}</p>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Status: <span className="text-medical-cyan">Validando</span> • Hace {idx + 2} min</p>
+                                </div>
+                            </div>
+                            <button className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 hover:text-white transition-all">
+                                <ChevronRight size={18} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="space-y-6">
+                 <div className="p-8 bg-slate-900/60 rounded-[40px] border border-slate-800">
+                     <div className="flex items-center gap-3 mb-6">
+                         <MonitorPlay className="w-6 h-6 text-medical-amber" />
+                         <h3 className="text-lg font-black text-white italic">AI Diagnóstico</h3>
+                     </div>
+                     <div className="p-4 bg-medical-amber/5 border border-medical-amber/10 rounded-2xl mb-6">
+                         <p className="text-xs font-bold text-medical-amber flex items-center gap-2 mb-2">
+                             <AlertCircle size={14} /> Anomalía Detectada
+                         </p>
+                         <p className="text-[11px] text-slate-400">Patrón de rechazos inusual en facturas de laboratorio (Hospital ABC).</p>
+                     </div>
+                     <button className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl text-[10px] uppercase tracking-widest transition-all">Ejecutar Corrección</button>
+                 </div>
+
+                 <div className="grid grid-cols-2 gap-4">
+                     <Link href="/agentes" className="p-6 bg-slate-900/40 rounded-[32px] border border-slate-800 hover:border-medical-cyan/50 transition-all text-center group">
+                        <Brain className="w-6 h-6 text-slate-500 group-hover:text-medical-cyan mx-auto mb-2" />
+                        <span className="text-[10px] font-black text-slate-500 group-hover:text-white uppercase tracking-widest">Agentes</span>
+                     </Link>
+                     <Link href="/auditoria" className="p-6 bg-slate-900/40 rounded-[32px] border border-slate-800 hover:border-medical-amber/50 transition-all text-center group">
+                        <Activity className="w-6 h-6 text-slate-500 group-hover:text-medical-amber mx-auto mb-2" />
+                        <span className="text-[10px] font-black text-slate-500 group-hover:text-white uppercase tracking-widest">Auditor</span>
+                     </Link>
+                 </div>
+            </div>
         </div>
       </div>
     </div>
   );
 }
 
-function StatCard({ label, value, trend, icon, color, alert }: any) {
-  const colors: any = {
-    cyan: 'border-medical-cyan/20 group-hover:border-medical-cyan/50',
-    emerald: 'border-medical-emerald/20 group-hover:border-medical-emerald/50',
-    amber: 'border-medical-amber/20 group-hover:border-medical-amber/50',
-    violet: 'border-medical-violet/20 group-hover:border-medical-violet/50',
-  };
+function SystemStatus({ label, status, color }: any) {
+    const statusColors: any = {
+        emerald: 'bg-medical-emerald shadow-[0_0_8px_#10b981]',
+        amber: 'bg-medical-amber shadow-[0_0_8px_#f59e0b]',
+    };
 
-  return (
-    <div className={`group p-6 bg-slate-900/40 rounded-3xl border transition-all hover:bg-slate-900/60 hover:-translate-y-1 ${colors[color]} ${alert ? 'ring-1 ring-medical-amber/40 shadow-xl shadow-medical-amber/5' : ''}`}>
-      <div className="flex justify-between items-start mb-6">
-        <div className={`p-3 rounded-2xl bg-slate-950 border border-slate-800 shadow-inner`}>
-          {icon}
+    return (
+        <div className="flex items-center justify-between p-3 bg-slate-950/40 rounded-xl border border-slate-800/50">
+            <div className="flex items-center gap-3">
+                <div className={`w-2 h-2 rounded-full animate-pulse ${statusColors[color]}`} />
+                <span className="text-xs font-bold text-slate-300">{label}</span>
+            </div>
+            <span className={`text-[10px] font-black uppercase ${color === 'emerald' ? 'text-medical-emerald' : 'text-medical-amber'}`}>{status}</span>
         </div>
-        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-500 tracking-wider shadow-sm`}>
-          {trend}
-        </span>
-      </div>
-      <div>
-        <div className="text-3xl font-black text-white mb-1 tracking-tight">{value}</div>
-        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">{label}</div>
-      </div>
-    </div>
-  );
+    );
 }

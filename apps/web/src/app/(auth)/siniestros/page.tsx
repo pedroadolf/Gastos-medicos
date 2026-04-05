@@ -107,6 +107,15 @@ export default function SiniestrosPage() {
           </div>
           
           <div className="flex gap-2">
+            <Link href="/auditoria" className="flex items-center gap-3 px-6 py-4 bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-medical-amber/40 rounded-2xl transition-all shadow-xl active:scale-95 group overflow-hidden relative">
+                         <div className="absolute inset-0 bg-medical-amber/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                         <AlertCircle size={20} className="text-medical-amber" />
+                         <div className="text-left flex-1 min-w-0">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Auto-Fix Engine</p>
+                            <p className="text-sm font-bold truncate">Auditar Errores</p>
+                         </div>
+                         <ArrowUpRight size={16} className="opacity-0 group-hover:opacity-100 -translate-y-2 group-hover:translate-y-0 transition-all text-medical-amber" />
+                    </Link>
             <FilterButton label="Estado" />
             <FilterButton label="Tipo" />
             <FilterButton label="Fecha" />
@@ -142,18 +151,19 @@ function StatCard({ label, value, trend, icon, color, alert }: any) {
   };
 
   return (
-    <div className={`group p-5 bg-slate-900/40 rounded-2xl border transition-all hover:bg-slate-900/60 ${colors[color]} ${alert ? 'ring-1 ring-medical-amber/40 shadow-lg shadow-medical-amber/5' : ''}`}>
-      <div className="flex justify-between items-start mb-4">
-        <div className={`p-2 rounded-lg bg-slate-950 border border-slate-800`}>
+    <div className={`group p-6 bg-slate-900/40 rounded-[32px] border transition-all hover:bg-slate-900/60 ${colors[color]} ${alert ? 'ring-1 ring-medical-amber/40 shadow-lg shadow-medical-amber/5' : ''} relative overflow-hidden`}>
+      <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/5 to-transparent blur-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="flex justify-between items-start mb-6 relative z-10">
+        <div className={`p-3 rounded-2xl bg-slate-950 border border-slate-800 shadow-inner group-hover:scale-110 transition-transform`}>
           {icon}
         </div>
-        <span className={`text-[10px] font-bold px-2 py-1 rounded-full bg-slate-950 border border-slate-800 text-slate-500`}>
+        <span className={`text-[9px] font-black px-2 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-500 uppercase tracking-widest`}>
           {trend}
         </span>
       </div>
-      <div>
-        <div className="text-2xl font-bold text-slate-100 mb-1">{value}</div>
-        <div className="text-xs font-medium text-slate-500 uppercase tracking-wider">{label}</div>
+      <div className="relative z-10">
+        <div className="text-3xl font-black text-white tracking-tighter mb-1 font-inter">{value}</div>
+        <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.22em] italic">{label}</div>
       </div>
     </div>
   );
