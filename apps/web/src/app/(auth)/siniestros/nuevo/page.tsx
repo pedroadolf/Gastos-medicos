@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 type Asegurado = { id: string; nombre: string; poliza: string; plan: string; rfc: string;[key: string]: any };
 type Siniestro = { id: string; aseguradoId: string; titulo: string; numeroSiniestro?: string; fecha: string; estado: string;[key: string]: any };
 
-export default function DashboardPage() {
+export default function NuevoSiniestroPage() {
     const [selectedAsegurado, setSelectedAsegurado] = useState<Asegurado | null>(null);
     const [selectedSiniestro, setSelectedSiniestro] = useState<string | null>(null);
     const [anexosFiles, setAnexosFiles] = useState<File[]>([]);

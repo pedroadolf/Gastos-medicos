@@ -1,4 +1,4 @@
-import { ShieldCheck, LayoutDashboard, Users, HeartPulse, Settings, FileText, Bell, Menu, Plus } from "lucide-react";
+import { ShieldCheck, LayoutDashboard, Users, Settings, FileText, Zap, Activity, FolderOpen, Terminal } from "lucide-react";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
@@ -42,7 +42,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                     
                     <Link href="/tramites" className="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium group">
                         <FileText className="w-5 h-5 transition-transform group-hover:scale-110" />
-                        <span>Mis Trámites</span>
+                        <span>Siniestros</span>
                     </Link>
 
                     <Link href="#" className="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium group">
@@ -50,16 +50,38 @@ export default async function DashboardLayout({ children }: { children: React.Re
                         <span>Asegurados</span>
                     </Link>
 
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 mt-8 px-3">Herramientas</p>
+                    <Link href="#" className="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium group">
+                        <FolderOpen className="w-5 h-5 transition-transform group-hover:scale-110" />
+                        <span>Documentos</span>
+                    </Link>
+
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 mt-8 px-3">Operaciones & IA</p>
                     
                     <Link href="#" className="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium group">
-                        <HeartPulse className="w-5 h-5 transition-transform group-hover:scale-110" />
-                        <span>Directorio Médico</span>
+                        <Zap className="w-5 h-5 transition-transform group-hover:scale-110" />
+                        <span>Agentes / Workflows</span>
                     </Link>
                     
                     <Link href="#" className="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium group">
+                        <Activity className="w-5 h-5 transition-transform group-hover:scale-110" />
+                        <span>Observabilidad</span>
+                    </Link>
+
+                    <Link href="#" className="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium group">
+                        <ShieldCheck className="w-5 h-5 transition-transform group-hover:scale-110" />
+                        <span>Auditoría & Auto-Fix</span>
+                    </Link>
+
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 mt-8 px-3">Sistema</p>
+
+                    <Link href="#" className="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium group">
                         <Settings className="w-5 h-5 transition-transform group-hover:scale-110" />
                         <span>Configuración</span>
+                    </Link>
+
+                    <Link href="#" className="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all font-medium group">
+                        <Terminal className="w-5 h-5 transition-transform group-hover:scale-110" />
+                        <span>Dev / Admin</span>
                     </Link>
                 </nav>
 
@@ -101,13 +123,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
                     </div>
 
                     <div className="flex items-center space-x-3 md:space-x-5">
-                        <button className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 rounded-full border border-white/10 transition-all text-sm font-medium">
-                            <Plus className="w-4 h-4" />
-                            <span>Solicitud</span>
-                        </button>
-                        
-                        <div className="h-8 w-px bg-white/10 hidden sm:block"></div>
-                        
                         <NotificationCenter />
                     </div>
                 </header>

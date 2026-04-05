@@ -1,7 +1,7 @@
 // apps/web/src/app/tramites/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Search, 
   Plus, 
@@ -13,11 +13,24 @@ import {
   LayoutGrid,
   List
 } from 'lucide-react';
+import Link from 'next/link';
 import { DesktopTable } from '@/components/tramites/DesktopTable';
 import { MobileTramiteList } from '@/components/tramites/MobileTramiteList';
 
-export default function TramitesPage() {
+export default function SiniestrosPage() {
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
+  const [aseguradosBD, setAseguradosBD] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/afectados")
+      .then(res => res.json())
+      .then(data => {
+        if (data.asegurados) setAseguradosBD(data.asegurados);
+        setIsLoading(false);
+      })
+      .catch(() => setIsLoading(false));
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 p-4 md:p-8">
@@ -26,7 +39,7 @@ export default function TramitesPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-100 font-plus-jakarta tracking-tight">
-              Mis Trámites
+              Siniestros
             </h1>
             <p className="text-slate-500 mt-2">
               Gestiona tus solicitudes de Gastos Médicos Mayores
@@ -40,10 +53,10 @@ export default function TramitesPage() {
             >
               {viewMode === 'table' ? <LayoutGrid size={20} /> : <List size={20} />}
             </button>
-            <button className="flex items-center gap-2 px-5 py-2.5 bg-medical-cyan hover:bg-medical-cyan/90 text-slate-950 font-bold rounded-xl transition-all shadow-lg shadow-medical-cyan/20">
+            <Link href="/siniestros/nuevo" className="flex items-center gap-2 px-5 py-2.5 bg-medical-cyan hover:bg-medical-cyan/90 text-slate-950 font-bold rounded-xl transition-all shadow-lg shadow-medical-cyan/20">
               <Plus size={20} />
               <span>Nuevo Trámite</span>
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -103,12 +116,18 @@ export default function TramitesPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto">
-        <div className="hidden md:block">
-          <DesktopTable />
-        </div>
-        <div className="md:hidden">
-          <MobileTramiteList />
-        </div>
+        {isLoading ? (
+          <div className="py-12 text-center text-slate-500 italic">Cargando siniestros...</div>
+        ) : (
+          <>
+            <div className="hidden md:block">
+              <DesktopTable items={aseguradosBD} />
+            </div>
+            <div className="md:hidden">
+              <MobileTramiteList items={aseguradosBD} />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
