@@ -1,10 +1,20 @@
 import { ShieldCheck, LayoutDashboard, Users, HeartPulse, Settings, FileText, Bell, Menu, Plus } from "lucide-react";
 import Link from "next/link";
-import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { useSession } from "next-auth/react";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { cn } from "@/lib/utils";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+    const { data: session } = useSession();
+    const userName = session?.user?.name || "Usuario";
+    const userEmail = session?.user?.email || "usuario@gmm-pro.com";
+    const userInitials = userName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2) || "U";
+
     return (
         <div className="min-h-screen bg-slate-950 flex font-sans selection:bg-medical-cyan/30 text-slate-200">
             {/* Desktop Sidebar */}
@@ -55,14 +65,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <div className="p-6 border-t border-white/5">
                     <div className="flex items-center space-x-3 px-4 py-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:bg-white/[0.05] transition-all cursor-pointer group">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-medical-cyan to-blue-500 flex items-center justify-center text-slate-950 font-bold text-sm shadow-lg shadow-medical-cyan/20">
-                            JD
+                            {userInitials}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-white truncate">Juan Diego</p>
-                            <p className="text-xs text-slate-500 truncate">demo@gmm-pro.com</p>
+                            <p className="text-sm font-bold text-white truncate">{userName}</p>
+                            <p className="text-xs text-slate-500 truncate">{userEmail}</p>
                         </div>
                     </div>
                 </div>
+            </aside>
             </aside>
 
             {/* Main Content Area */}

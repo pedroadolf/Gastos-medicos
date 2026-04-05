@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Search, UploadCloud, FileText, Zap, RefreshCw, CheckCircle2, Loader2, Sparkles, ExternalLink } from "lucide-react";
 import { useDropzone } from "react-dropzone";
+import { cn } from "@/lib/utils";
 
 
 // Tipos basados en Google Sheets (Ampliado)
@@ -641,39 +642,65 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Acciones Finales */}
-                        <div className="pt-5 border-t border-slate-800/80 flex items-center justify-end gap-3">
-                            {lastDriveLink && (
-                                <a href={lastDriveLink} target="_blank" rel="noopener noreferrer" className="flex items-center px-6 py-3 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-all">
-                                    <ExternalLink className="w-4 h-4 mr-2" /> VER EN DRIVE
-                                </a>
-                            )}
-                            <button
-                                onClick={handleProcessBtn}
-                                disabled={!selectedAsegurado || isProcessing || (anexosFiles.length === 0 && facturasFiles.length === 0)}
-                                className={`flex flex-col items-center justify-center px-10 py-3 rounded-xl font-bold text-sm shadow-[0_10px_30px_rgba(0,0,0,0.3)] transition-all ${!selectedAsegurado || isProcessing || (anexosFiles.length === 0 && facturasFiles.length === 0) ? "bg-slate-800 text-slate-600 cursor-not-allowed" : "bg-fintech-emerald hover:bg-emerald-400 text-slate-900 transform active:scale-95"}`}
-                            >
-                                <div className="flex items-center">
-                                    {isProcessing ? (
-                                        <>
-                                            <Loader2 className="w-5 h-5 mr-3 animate-spin text-slate-900" />
-                                            <div className="flex flex-col items-start leading-none">
-                                                <span className="text-[10px] uppercase tracking-widest font-black opacity-60">PROCESANDO</span>
-                                                <span className="text-lg font-black">{formatTime(elapsedTime)}</span>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Zap className="w-4 h-4 mr-2 fill-current" />
-                                            GENERAR Y ENVIAR TRÁMITE
-                                        </>
-                                    )}
+                        <div className="pt-5 border-t border-slate-800/80 flex flex-col space-y-4">
+                            {/* Validation Messages */}
+                            {!selectedAsegurado && (anexosFiles.length > 0 || facturasFiles.length > 0) && (
+                                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex items-center animate-pulse">
+                                    <Sparkles className="w-4 h-4 text-amber-500 mr-2 shrink-0" />
+                                    <p className="text-[11px] font-bold text-amber-200">
+                                        PASO FALTANTE: Selecciona un asegurado en la sección 1 para habilitar el envío.
+                                    </p>
                                 </div>
-                                {isProcessing && (
-                                    <div className="flex flex-col items-center mt-1 text-[9px] uppercase font-bold text-slate-800 opacity-60">
-                                        <span>{jobStatus || "Iniciando..."}</span>
-                                    </div>
+                            )}
+
+                            <div className="flex items-center justify-end gap-3">
+                                {lastDriveLink && (
+                                    <a href={lastDriveLink} target="_blank" rel="noopener noreferrer" className="flex items-center px-6 py-3 rounded-xl font-bold text-sm bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition-all">
+                                        <ExternalLink className="w-4 h-4 mr-2" /> VER EN DRIVE
+                                    </a>
                                 )}
-                            </button>
+                                <button
+                                    onClick={handleProcessBtn}
+                                    disabled={!selectedAsegurado || isProcessing || (anexosFiles.length === 0 && facturasFiles.length === 0)}
+                                    className={cn(
+                                        "flex flex-col items-center justify-center px-10 py-4 rounded-2xl font-black text-sm shadow-[0_20px_50px_rgba(0,0,0,0.4)] transition-all duration-300 relative overflow-hidden group",
+                                        !selectedAsegurado || isProcessing || (anexosFiles.length === 0 && facturasFiles.length === 0)
+                                            ? "bg-slate-800 text-slate-600 cursor-not-allowed border border-white/5"
+                                            : "bg-gradient-to-tr from-fintech-emerald via-emerald-400 to-teal-400 text-slate-900 hover:scale-[1.02] active:scale-95 shadow-emerald-500/20 hover:shadow-emerald-500/40"
+                                    )}
+                                >
+                                    {/* Effect for ready state */}
+                                    {selectedAsegurado && !isProcessing && (anexosFiles.length > 0 || facturasFiles.length > 0) && (
+                                        <div className="absolute inset-0 bg-white/20 animate-pulse opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    )}
+                                    
+                                    <div className="flex items-center relative z-10">
+                                        {isProcessing ? (
+                                            <>
+                                                <Loader2 className="w-6 h-6 mr-3 animate-spin text-slate-900" />
+                                                <div className="flex flex-col items-start leading-none">
+                                                    <span className="text-[10px] uppercase tracking-widest font-black opacity-60">PROCESANDO EXPEDIENTE</span>
+                                                    <span className="text-xl font-black">{formatTime(elapsedTime)}</span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Zap className="w-5 h-5 mr-3 fill-current group-hover:scale-125 transition-transform" />
+                                                <div className="flex flex-col items-start text-left">
+                                                    <span className="text-[10px] uppercase tracking-[0.2em] font-black opacity-70">LISTO PARA ENVIAR</span>
+                                                    <span className="text-sm font-black whitespace-nowrap">GENERAR Y PROCESAR TRÁMITE</span>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                    
+                                    {isProcessing && (
+                                        <div className="flex flex-col items-center mt-2 text-[10px] uppercase font-bold text-slate-900/60 leading-none">
+                                            <span className="bg-slate-900/10 px-2 py-0.5 rounded-full">{jobStatus || "Iniciando..."}</span>
+                                        </div>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
