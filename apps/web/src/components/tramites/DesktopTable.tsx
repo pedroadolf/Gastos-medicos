@@ -13,114 +13,82 @@ import {
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-const DUMMY_TRAMITES = [
-  {
-    id: '1',
-    folio: 'TR-2024-00452',
-    type: 'Reembolso',
-    status: 'completed',
-    asegurado: 'Juan Pérez García',
-    poliza: 'GMM-987234',
-    monto: 12500.50,
-    fecha: new Date('2024-04-01T10:00:00'),
-    progress: 100
-  },
-  {
-    id: '2',
-    folio: 'TR-2024-00451',
-    type: 'Carta Pase',
-    status: 'processing',
-    asegurado: 'María Rodríguez Solo',
-    poliza: 'GMM-123456',
-    monto: 45000.00,
-    fecha: new Date('2024-04-03T14:30:00'),
-    progress: 65
-  },
-  {
-    id: '3',
-    folio: 'TR-2024-00450',
-    type: 'Reembolso',
-    status: 'rejected',
-    asegurado: 'Roberto Sánchez',
-    poliza: 'GMM-554433',
-    monto: 3200.00,
-    fecha: new Date('2024-04-04T09:15:00'),
-    progress: 40
-  },
-  {
-    id: '4',
-    folio: 'TR-2024-00449',
-    type: 'Emergencia',
-    status: 'document_pending',
-    asegurado: 'Elena Martínez',
-    poliza: 'GMM-667788',
-    monto: 8500.00,
-    fecha: new Date('2024-04-05T11:00:00'),
-    progress: 20
-  }
-];
+interface Tramite {
+  id: string;
+  nombre: string;
+  poliza: string;
+  empresa?: string;
+  statusProceso?: string;
+}
 
-export function DesktopTable() {
+export function DesktopTable({ 
+  items, 
+  onSelect, 
+  selectedId 
+}: { 
+  items: any[]; 
+  onSelect?: (item: any) => void;
+  selectedId?: string;
+}) {
+  const displayItems = items && items.length > 0 ? items : [];
+
   return (
     <div className="bg-slate-900/30 rounded-2xl border border-slate-800 overflow-hidden backdrop-blur-sm">
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-slate-800 bg-slate-900/50">
-            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Folio / Tipo</th>
-            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Asegurado / Póliza</th>
-            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Estado</th>
-            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Monto</th>
-            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Acciones</th>
+            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Asegurado</th>
+            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Póliza / ID</th>
+            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Empresa</th>
+            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Estado</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-800/50">
-          {DUMMY_TRAMITES.map((tramite) => (
-            <tr key={tramite.id} className="group hover:bg-slate-800/20 transition-colors">
-              <td className="py-4 px-6">
-                <div className="flex flex-col">
-                  <span className="text-sm font-bold text-slate-100 group-hover:text-medical-cyan transition-colors">
-                    {tramite.folio}
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-medium uppercase tracking-tight mt-1">
-                    {tramite.type}
-                  </span>
-                </div>
-              </td>
-              <td className="py-4 px-6">
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-slate-300">
-                    {tramite.asegurado}
-                  </span>
-                  <span className="text-[10px] text-slate-500 font-mono mt-1">
-                    {tramite.poliza}
-                  </span>
-                </div>
-              </td>
-              <td className="py-4 px-6">
-                <StatusBadge status={tramite.status} progress={tramite.progress} />
-              </td>
-              <td className="py-4 px-6 text-right">
-                <div className="flex flex-col items-end">
-                  <span className="text-sm font-bold text-slate-100 font-mono">
-                    ${tramite.monto.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                  </span>
-                  <span className="text-[10px] text-slate-500 mt-1">
-                    {format(tramite.fecha, 'dd MMM, HH:mm', { locale: es })}
-                  </span>
-                </div>
-              </td>
-              <td className="py-4 px-6 text-right">
-                <div className="flex justify-end gap-2">
-                  <button className="p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-500 hover:text-medical-cyan hover:border-medical-cyan/30 transition-all">
-                    <Download size={14} />
-                  </button>
-                  <button className="p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-500 hover:text-white transition-all">
-                    <MoreHorizontal size={14} />
-                  </button>
-                </div>
-              </td>
+          {displayItems.length === 0 ? (
+            <tr>
+              <td colSpan={4} className="py-12 text-center text-slate-500 italic">No se encontraron asegurados para seleccionar</td>
             </tr>
-          ))}
+          ) : (
+            displayItems.map((item) => (
+              <tr 
+                key={item.id} 
+                onClick={() => onSelect?.(item)}
+                className={`group cursor-pointer transition-all ${
+                  selectedId === item.id 
+                    ? "bg-medical-cyan/10 border-l-2 border-l-medical-cyan" 
+                    : "hover:bg-slate-800/20"
+                }`}
+              >
+                <td className="py-4 px-6">
+                  <div className="flex flex-col">
+                    <span className={`text-sm font-bold transition-colors ${
+                      selectedId === item.id ? "text-medical-cyan" : "text-slate-100 group-hover:text-medical-cyan"
+                    }`}>
+                      {item.nombre}
+                    </span>
+                  </div>
+                </td>
+                <td className="py-4 px-6">
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-slate-300">
+                      {item.poliza || "N/A"}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-mono mt-1">
+                      ID: {item.id}
+                    </span>
+                  </div>
+                </td>
+                <td className="py-4 px-6">
+                  <span className="text-xs text-slate-400">
+                    {item.empresa || "Sin Empresa"}
+                  </span>
+                </td>
+                <td className="py-4 px-6 text-right">
+                  <StatusBadge status={item.statusProceso || 'active'} progress={0} />
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>

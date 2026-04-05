@@ -1,13 +1,14 @@
 import { ShieldCheck, LayoutDashboard, Users, HeartPulse, Settings, FileText, Bell, Menu, Plus } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-    const { data: session } = useSession();
-    const userName = session?.user?.name || "Usuario";
-    const userEmail = session?.user?.email || "usuario@gmm-pro.com";
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+    const session = await getServerSession(authOptions);
+    const userName = session?.user?.name || "Invitado";
+    const userEmail = session?.user?.email || "sin-sesion@gmm-pro.com";
     const userInitials = userName
         .split(" ")
         .map((n) => n[0])

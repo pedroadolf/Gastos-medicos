@@ -15,8 +15,8 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "GMM Automation Platform v2.0",
-  description: "Gestor avanzado de Gastos Médicos Mayores",
+  title: 'GMM Automation Platform v2.0',
+  description: 'Sistema institucional para gestión de expedientes GMM v2.0',
 };
 
 export default function RootLayout({
