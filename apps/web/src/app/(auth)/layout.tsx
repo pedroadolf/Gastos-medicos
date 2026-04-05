@@ -52,7 +52,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                     <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] mb-4 mt-2 px-3 opacity-50 italic">Core Systems</p>
                     
                     <SidebarLink href="/dashboard" icon={<LayoutDashboard />} label="Centro de Control" />
-                    <SidebarLink href="/siniestros" icon={<FileText />} label="Siniestros" />
+                    <SidebarLink href="/siniestros" icon={<FileText />} label="Mis Trámites" />
                     <SidebarLink href="/asegurados" icon={<Users />} label="Asegurados" />
                     <SidebarLink href="/documentos" icon={<FolderOpen />} label="Documentos" />
 

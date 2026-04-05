@@ -35,7 +35,7 @@ export default function Home() {
             onClick={() => window.location.href = '/dashboard'}
             className="px-8 py-3 bg-white text-slate-900 rounded-xl hover:bg-slate-100 transition-all font-bold shadow-lg shadow-white/10 flex items-center mx-auto space-x-2"
           >
-            <span>Ir al Centro de Operaciones</span>
+            <span>Ir al Centro de Control</span>
             <ArrowRight className="w-4 h-4 ml-2" />
           </button>
         </div>

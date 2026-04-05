@@ -15,9 +15,12 @@ import {
   MonitorPlay,
   FileText,
   ChevronRight,
-  FilePlus
+  FilePlus,
+  LayoutGrid,
+  List
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   BarChart, 
   Bar, 
@@ -30,6 +33,7 @@ import {
 } from 'recharts';
 
 export default function GlobalDashboardPage() {
+  const router = useRouter();
   const [data, setData] = useState<any>({ asegurados: [], siniestros: [] });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -59,17 +63,23 @@ export default function GlobalDashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 p-4 md:p-8">
+      {/* Header */}
       <div className="max-w-7xl mx-auto border-b border-slate-900 pb-8 mb-12">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <h1 className="text-4xl font-black text-white italic tracking-tighter">OS Dashboard</h1>
+            <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase">Centro de Control</h1>
             <p className="text-slate-500 font-bold mt-1 uppercase text-[10px] tracking-[0.3em]">Neural Intelligence Center</p>
           </div>
           <div className="flex gap-4">
-             <Link href="/siniestros/nuevo" className="px-6 py-4 bg-medical-cyan text-slate-950 font-black rounded-2xl flex items-center gap-2 hover:scale-105 transition-all shadow-xl shadow-medical-cyan/20">
-                <Plus size={20} strokeWidth={3} />
+             <button 
+                onClick={() => router.push('/siniestros/nuevo')}
+                className="px-6 py-4 bg-medical-cyan text-slate-950 font-black rounded-2xl flex items-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-medical-cyan/20 group uppercase text-xs"
+             >
+                <div className="bg-slate-950/20 p-1 rounded-lg">
+                  <Plus size={18} strokeWidth={4} />
+                </div>
                 NUEVO TRÁMITE
-             </Link>
+             </button>
           </div>
         </div>
       </div>
@@ -141,7 +151,10 @@ export default function GlobalDashboardPage() {
                                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Status: <span className="text-medical-cyan">Validando</span> • Hace {idx + 2} min</p>
                                 </div>
                             </div>
-                            <button className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 hover:text-white transition-all">
+                            <button 
+                                onClick={() => router.push('/siniestros')}
+                                className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 hover:text-white transition-all"
+                            >
                                 <ChevronRight size={18} />
                             </button>
                         </div>
@@ -159,9 +172,14 @@ export default function GlobalDashboardPage() {
                          <p className="text-xs font-bold text-medical-amber flex items-center gap-2 mb-2">
                              <AlertCircle size={14} /> Anomalía Detectada
                          </p>
-                         <p className="text-[11px] text-slate-400">Patrón de rechazos inusual en facturas de laboratorio (Hospital ABC).</p>
+                         <p className="text-[11px] text-slate-400">Patrón de rechazos inusual en facturas de laboratorio.</p>
                      </div>
-                     <button className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl text-[10px] uppercase tracking-widest transition-all">Ejecutar Corrección</button>
+                     <button 
+                        onClick={() => router.push('/auditoria')}
+                        className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl text-[10px] uppercase tracking-widest transition-all"
+                    >
+                        Ejecutar Corrección
+                    </button>
                  </div>
 
                  <div className="grid grid-cols-2 gap-4">

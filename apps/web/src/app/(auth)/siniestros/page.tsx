@@ -38,11 +38,11 @@ export default function SiniestrosPage() {
       <div className="max-w-7xl mx-auto mb-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-100 font-plus-jakarta tracking-tight">
-              Siniestros
+            <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase">
+              Mis Trámites
             </h1>
-            <p className="text-slate-500 mt-2">
-              Gestiona tus solicitudes de Gastos Médicos Mayores
+            <p className="text-slate-500 font-bold mt-1 uppercase text-[10px] tracking-[0.3em]">
+              Central de Gestión de Siniestros
             </p>
           </div>
           
