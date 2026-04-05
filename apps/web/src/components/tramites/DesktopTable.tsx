@@ -19,6 +19,9 @@ interface Tramite {
   poliza: string;
   empresa?: string;
   statusProceso?: string;
+  tipoPago?: string;
+  montoReclamado?: string;
+  montoPagado?: string; // We'll assume this field exists or map it
 }
 
 export function DesktopTable({ 
@@ -37,9 +40,10 @@ export function DesktopTable({
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-slate-800 bg-slate-900/50">
-            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Asegurado</th>
+            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Asegurado / Trámite</th>
             <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Póliza / ID</th>
-            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Empresa</th>
+            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Monto Solicitado</th>
+            <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Reembolsado</th>
             <th className="py-4 px-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">Estado</th>
           </tr>
         </thead>
@@ -66,6 +70,9 @@ export function DesktopTable({
                     }`}>
                       {item.nombre}
                     </span>
+                    <span className="text-[10px] text-slate-500 font-medium uppercase tracking-tighter mt-0.5">
+                      {item.tipoPago || "Reembolso"}
+                    </span>
                   </div>
                 </td>
                 <td className="py-4 px-6">
@@ -79,8 +86,13 @@ export function DesktopTable({
                   </div>
                 </td>
                 <td className="py-4 px-6">
-                  <span className="text-xs text-slate-400">
-                    {item.empresa || "Sin Empresa"}
+                  <span className="text-sm font-bold text-slate-100">
+                    ${item.montoReclamado || "0"}
+                  </span>
+                </td>
+                <td className="py-4 px-6">
+                  <span className="text-sm font-bold text-medical-emerald">
+                    ${item.montoPagado || "0"}
                   </span>
                 </td>
                 <td className="py-4 px-6 text-right">
