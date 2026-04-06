@@ -1,5 +1,6 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { getSupabaseService } from "@/services/supabase";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -12,9 +13,25 @@ export const authOptions: NextAuthOptions = {
     signIn: "/",
   },
   callbacks: {
+    async jwt({ token, user }) {
+      // Al iniciar sesión, el objeto user está presente.
+      // Aquí es donde guardamos el rol en el token.
+      if (user) {
+        const supabase = getSupabaseService();
+        const { data } = await supabase
+          .from('user_roles_by_email')
+          .select('role')
+          .eq('email', user.email)
+          .single();
+          
+        token.role = data?.role || (user.email === 'pash.mx@gmail.com' ? 'admin' : 'asegurado');
+      }
+      return token;
+    },
     async session({ session, token }) {
       if (session?.user) {
-        // Podríamos extender la sesión si necesitamos conectar un ID con la BD
+        session.user.role = token.role as any;
+        session.user.id = token.sub as string;
       }
       return session;
     },

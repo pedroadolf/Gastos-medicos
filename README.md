@@ -46,6 +46,7 @@ Copia `.env.local` en `apps/web/` con las variables necesarias.
 ## 📖 Documentación
 
 - [Arquitectura](docs/arquitectura.md)
+- [Ecosistema Autónomo](docs/autonomous/README.md) ✨
 - [Guía de Auditoría](docs/proposals/GUIA_EJECUCION_AUDITORIA_GMM.md)
 - [Workflows n8n](workflows/README.md)
 - [Migraciones SQL](supabase/migrations/README.md)
