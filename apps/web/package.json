@@ -12,6 +12,7 @@
     "@google/generative-ai": "^0.24.1",
     "@remotion/player": "^4.0.434",
     "@sendgrid/mail": "^8.1.6",
+    "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.99.1",
     "archiver": "^7.0.1",
     "class-variance-authority": "^0.7.1",
