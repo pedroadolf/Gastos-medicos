@@ -1,28 +1,64 @@
 import { NextResponse } from 'next/server';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { createClient } from '@supabase/supabase-js';
+
+// Configuration
+const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY || '';
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(request: Request) {
     try {
         const { message } = await request.json();
 
-        // Aquí iría la lógica RAG o llamada a n8n/OpenAI
-        // Por ahora simulamos inteligencia sobre el dominio GMM
-        let reply = "Entiendo tu consulta sobre los siniestros. Estoy analizando la base de datos de n8n...";
-        
-        const lowerMsg = message.toLowerCase();
-        
-        if (lowerMsg.includes('reembolso') || lowerMsg.includes('dinero') || lowerMsg.includes('pagado')) {
-            reply = "El monto total reembolsado hasta hoy es de aproximadamente $14,200 USD. Los pagos se procesaron exitosamente por el Agente Validador.";
-        } else if (lowerMsg.includes('error') || lowerMsg.includes('fallo') || lowerMsg.includes('rfc')) {
-            reply = "He detectado 2 discrepancias en el módulo de Auditoría. Una de ellas es un RFC incorrecto en el siniestro #7721 de Pash Tech. ¿Quieres que ejecute un Auto-Fix?";
-        } else if (lowerMsg.includes('agente') || lowerMsg.includes('status')) {
-            reply = "Todos los sistemas principales (n8n, Supabase) están Online. Los agentes Extractor y Orquestador operan al 100% de Uptime.";
-        } else {
-            reply = "He recibido tu mensaje: '" + message + "'. ¿Deseas que analice algún siniestro en específico o que genere un reporte de eficiencia?";
+        if (!message) return NextResponse.json({ error: 'Mensaje vacío' }, { status: 400 });
+
+        // 1. Generate embedding for the query using Gemini text-embedding-004
+        const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+        const embeddingRes = await embeddingModel.embedContent(message);
+        const queryVector = embeddingRes.embedding.values;
+
+        // 2. Perform Vector Search on Supabase (match_gmm_kb function)
+        // We use 0.7 as threshold and 5 results max
+        const { data: matchedChunks, error: supabaseError } = await supabase.rpc('match_gmm_kb', {
+            query_embedding: queryVector,
+            match_threshold: 0.5,
+            match_count: 5
+        });
+
+        if (supabaseError) {
+          console.error("Supabase vector search error:", supabaseError);
         }
 
-        return NextResponse.json({ reply });
+        // 3. Construct Context from matched knowledge
+        const contextText = matchedChunks?.map((chunk: any) => chunk.content).join('\n---\n') || 
+                            "No se encontró información documental específica. Responde basándote en tu conocimiento general de Gastos Médicos.";
 
-    } catch (error) {
-        return NextResponse.json({ error: 'Fallo Neural Link' }, { status: 500 });
+        // 4. Augment Prompt for Gemini 1.5 Flash
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            systemInstruction: "Eres GMM Copilot, un Agente IA experto en seguros de Gastos Médicos Mayores (GMM) y el ecosistema PASH OS. Respondes de forma profesional, rápida y basándote en la información documental proporcionada. Si no sabes algo con precisión, menciona que el equipo de soporte de Pash puede ayudar."
+        });
+
+        const prompt = `CONTEXTO DOCUMENTAL:\n${contextText}\n\nPREGUNTA DEL USUARIO: ${message}`;
+        
+        const chatResult = await model.generateContent(prompt);
+        const responseText = await chatResult.response.text();
+
+        return NextResponse.json({ 
+          reply: responseText,
+          sources: matchedChunks?.length || 0
+        });
+
+    } catch (error: any) {
+        console.error("Copilot RAG Error:", error);
+        return NextResponse.json({ 
+          reply: 'Error en Neural Link: ' + (error.message || 'Fallo general de comunicación con Gemini'),
+          error: error.message 
+        }, { status: 500 });
     }
 }
