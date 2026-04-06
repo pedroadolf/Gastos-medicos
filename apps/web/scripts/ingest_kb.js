@@ -25,7 +25,11 @@ async function ingestFile(filePath) {
   // 1. Chunking simple (por ahora por párrafos o bloques de 2000 chars)
   const chunks = content.split('\n\n').filter(c => c.trim().length > 50);
   
+<<<<<<< HEAD
   const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+=======
+  const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
+>>>>>>> 5d52025 (feat(rag): switch to Gemini 3.1 Flash-Lite and rename endpoint to /api/gemini)
 
   for (const chunk of chunks) {
     try {

@@ -20,7 +20,7 @@ export function Copilot() {
         setIsLoading(true);
 
         try {
-            const res = await fetch('/api/copilot', {
+            const res = await fetch('/api/gemini', {
                 method: 'POST',
                 body: JSON.stringify({ message: input })
             });

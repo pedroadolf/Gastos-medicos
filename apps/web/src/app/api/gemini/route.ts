@@ -17,8 +17,8 @@ export async function POST(request: Request) {
 
         if (!message) return NextResponse.json({ error: 'Mensaje vacío' }, { status: 400 });
 
-        // 1. Generate embedding for the query using Gemini text-embedding-004
-        const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+        // 1. Generate embedding for the query using Gemini embedding-001
+        const embeddingModel = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
         const embeddingRes = await embeddingModel.embedContent(message);
         const queryVector = embeddingRes.embedding.values;
 
@@ -38,9 +38,9 @@ export async function POST(request: Request) {
         const contextText = matchedChunks?.map((chunk: any) => chunk.content).join('\n---\n') || 
                             "No se encontró información documental específica. Responde basándote en tu conocimiento general de Gastos Médicos.";
 
-        // 4. Augment Prompt for Gemini 1.5 Flash
+        // 4. Augment Prompt for Gemini 3.1 Flash-Lite
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash",
+            model: "gemini-3.1-flash-lite-preview",
             systemInstruction: "Eres GMM Copilot, un Agente IA experto en seguros de Gastos Médicos Mayores (GMM) y el ecosistema PASH OS. Respondes de forma profesional, rápida y basándote en la información documental proporcionada. Si no sabes algo con precisión, menciona que el equipo de soporte de Pash puede ayudar."
         });
 
@@ -62,3 +62,4 @@ export async function POST(request: Request) {
         }, { status: 500 });
     }
 }
+
