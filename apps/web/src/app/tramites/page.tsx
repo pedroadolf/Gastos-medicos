@@ -1,4 +1,5 @@
 import PowerDashboard from '@/components/tramite/PowerDashboard';
+export const dynamic = 'force-dynamic';
 
 /**
  * 📂 MI PANEL DE TRÁMITES (Dashboard Root)

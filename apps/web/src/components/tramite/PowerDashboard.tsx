@@ -19,7 +19,7 @@ import {
   FileText
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/services/supabase'
 
 type ViewType = 'table' | 'kanban'
 
