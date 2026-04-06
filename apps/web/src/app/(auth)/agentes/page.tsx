@@ -16,9 +16,11 @@ import {
     CheckCircle2,
     Play,
     Settings2,
-    BarChart3
+    BarChart3,
+    ChevronLeft
 } from 'lucide-react';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function AgentesPage() {
     const [selectedCategory, setSelectedCategory] = useState('all');
@@ -61,7 +63,15 @@ export default function AgentesPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-slate-950 p-4 md:p-8">
+        <div className="min-h-screen bg-slate-950 p-4 md:p-8 space-y-6">
+            <Link 
+                href="/tramites" 
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-400 hover:text-medical-cyan bg-slate-900 border border-slate-800 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-sm"
+            >
+                <ChevronLeft size={16} />
+                Regresar al Dashboard
+            </Link>
+
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 animate-in fade-in slide-in-from-top-4 duration-500">
