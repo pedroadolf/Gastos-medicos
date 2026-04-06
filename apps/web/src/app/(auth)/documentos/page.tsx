@@ -1,9 +1,18 @@
 import React from 'react';
-import { Folder, Search, FileText, Download, Filter, MoreHorizontal, ExternalLink } from 'lucide-react';
+import { Folder, Search, FileText, Download, Filter, MoreHorizontal, ExternalLink, ChevronLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export default function DocumentosPage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <Link 
+        href="/tramites" 
+        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-500 hover:text-emerald-600 bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-sm"
+      >
+        <ChevronLeft size={16} />
+        Regresar al Dashboard
+      </Link>
+
       {/* 📂 HEADER SECTION */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-white dark:bg-slate-900/40 p-8 rounded-[2rem] border border-slate-200 dark:border-white/5 backdrop-blur-2xl shadow-xl">
         <div className="space-y-2">
