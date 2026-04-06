@@ -2,22 +2,12 @@
 
 import React, { useEffect, useState, useMemo } from 'react'
 import { 
-  PlusCircle, 
-  Search, 
-  LayoutGrid, 
-  List, 
-  Filter, 
-  Download, 
-  RefreshCcw, 
-  ChevronRight,
-  MoreVertical,
-  Activity,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  TrendingUp,
-  FileText
-} from 'lucide-react'
+  Plus, Search, Filter, RefreshCw, 
+  ChevronRight, ChevronLeft, Brain, 
+  CheckCircle2, Clock, AlertCircle, 
+  Sparkles, FileText, LayoutDashboard,
+  MoreVertical, List, LayoutGrid
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '@/services/supabase'
 
@@ -92,44 +82,45 @@ export default function PowerDashboard() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto py-10 px-6 sm:px-8">
       
-      {/* 🚀 HEADER & VIEW SWITCHER */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div>
-          <div className="inline-flex items-center gap-2 mb-3 py-1 px-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-full border border-emerald-100 dark:border-emerald-800/50">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            Realtime Monitoring Active
-          </div>
-          <h1 className="text-5xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
-            Gestión de <span className="text-blue-600 italic">Expedientes</span>
-          </h1>
-        </div>
+      {/* 🚀 Header Actions (Unified for sub-menu context) */}
+      <div className="flex flex-col space-y-6">
+        <button 
+          onClick={() => window.location.href = '/dashboard'}
+          className="flex items-center gap-2 text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 text-[10px] font-black uppercase tracking-widest transition-all w-fit group"
+        >
+          <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+          Regresar al Panel Principal
+        </button>
 
-        <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner">
-          <button 
-            onClick={() => setView('table')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-[1.2rem] text-sm font-bold transition-all duration-300 ${
-              view === 'table' 
-              ? 'bg-white dark:bg-slate-800 shadow-md text-blue-600 dark:text-blue-400 scale-105' 
-              : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-            }`}
-          >
-            <List className="h-4 w-4" />
-            Grid View
-          </button>
-          <button 
-            onClick={() => setView('kanban')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-[1.2rem] text-sm font-bold transition-all duration-300 ${
-              view === 'kanban' 
-              ? 'bg-white dark:bg-slate-800 shadow-md text-blue-600 dark:text-blue-400 scale-105' 
-              : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-            }`}
-          >
-            <LayoutGrid className="h-4 w-4" />
-            Kanban Board
-          </button>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+          <div className="space-y-1">
+            <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter">
+              Mis <span className="text-blue-600">Reclamaciones</span>
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm max-w-lg font-medium">
+              Gestión centralizada de expedientes con sincronización en tiempo real.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => fetchTramites()}
+              className="flex items-center gap-2 px-5 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-2xl transition-all font-bold text-xs shadow-sm border border-slate-200 dark:border-slate-700 group"
+            >
+              <RefreshCw size={16} className={`${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+              Refrescar
+            </button>
+
+            <button 
+              onClick={() => window.location.href = '/tramites/nuevo'}
+              className="flex items-center gap-2 p-1 pr-5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-lg shadow-blue-500/20 transition-all font-bold text-sm"
+            >
+              <div className="p-2.5 bg-white/20 rounded-xl">
+                <Plus size={20} />
+              </div>
+              Nuevo Trámite
+            </button>
+          </div>
         </div>
       </div>
 
@@ -169,7 +160,7 @@ export default function PowerDashboard() {
           <div className="flex flex-col items-center justify-center py-40 gap-6">
             <div className="relative">
                 <div className="h-16 w-16 rounded-full border-4 border-slate-100 dark:border-slate-800 border-t-blue-600 animate-spin" />
-                <Activity className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-blue-600 animate-pulse" />
+                <Brain className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-blue-600 animate-pulse" />
             </div>
             <div className="text-center">
                 <p className="text-slate-900 dark:text-white font-black text-lg">Sincronizando Nucleo GMM</p>
@@ -219,7 +210,7 @@ export default function PowerDashboard() {
                                     <td className="px-8 py-6">
                                         <div className="flex flex-col items-center gap-1.5">
                                             <div className="flex items-center gap-2">
-                                                <TrendingUp className={`h-3 w-3 ${t.score > 85 ? 'text-emerald-500' : 'text-amber-500'}`} />
+                                                <Sparkles className={`h-3 w-3 ${t.score > 85 ? 'text-emerald-500' : 'text-amber-500'}`} />
                                                 <span className={`text-xl font-black ${t.score > 85 ? 'text-emerald-500' : (t.score > 60 ? 'text-amber-500' : 'text-rose-500')}`}>
                                                     {t.score || '--'}
                                                 </span>
@@ -337,7 +328,7 @@ export default function PowerDashboard() {
 function StatusCircle({ status }: { status: string }) {
   const configs: any = {
     pending: { color: 'text-amber-500 bg-amber-50', label: 'Pendiente', icon: Clock },
-    processing: { color: 'text-blue-500 bg-blue-50', label: 'Auditoría', icon: RefreshCcw },
+    processing: { color: 'text-blue-500 bg-blue-50', label: 'Auditoría', icon: RefreshCw },
     completed: { color: 'text-emerald-500 bg-emerald-50', label: 'Completado', icon: CheckCircle2 },
     error: { color: 'text-rose-500 bg-rose-50', label: 'Revisión', icon: AlertCircle }
   }

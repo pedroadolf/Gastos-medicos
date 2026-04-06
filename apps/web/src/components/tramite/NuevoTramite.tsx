@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { Search, Info, ShieldCheck, Sparkles, AlertCircle } from 'lucide-react';
+import { Search, Info, ShieldCheck, Sparkles, AlertCircle, ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Components
@@ -77,22 +77,32 @@ export default function NuevoTramite() {
     <div className="max-w-6xl mx-auto pb-20 space-y-10">
       {/* 🚀 Top Header (Fixed Logic Indicator) */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-950/40 p-8 rounded-[2rem] border border-white/5 backdrop-blur-2xl shadow-2xl">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2 py-0.5 bg-medical-cyan/10 border border-medical-cyan/20 text-medical-cyan text-[10px] font-black uppercase tracking-widest rounded-md">
-              Módulo de Reclamaciones
-            </span>
-            <span className="text-white/20 text-[10px] uppercase font-black tracking-widest">•</span>
-            <span className="text-emerald-500 text-[10px] uppercase font-black tracking-widest flex items-center gap-1">
-               <ShieldCheck size={12} /> Supabase SSOT v2.1
-            </span>
+        <div className="flex flex-col space-y-4">
+          <button 
+            onClick={() => router.push('/dashboard')}
+            className="flex items-center gap-2 text-slate-500 hover:text-medical-cyan text-[10px] font-black uppercase tracking-widest transition-colors w-fit group"
+          >
+            <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+            Regresar al Dashboard
+          </button>
+          
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2 py-0.5 bg-medical-cyan/10 border border-medical-cyan/20 text-medical-cyan text-[10px] font-black uppercase tracking-widest rounded-md">
+                Módulo de Reclamaciones
+              </span>
+              <span className="text-white/20 text-[10px] uppercase font-black tracking-widest">•</span>
+              <span className="text-emerald-500 text-[10px] uppercase font-black tracking-widest flex items-center gap-1">
+                 <ShieldCheck size={12} /> Supabase SSOT v2.1
+              </span>
+            </div>
+            <h1 className="text-4xl font-black text-white tracking-tighter sm:text-5xl">
+              Nuevo <span className="text-medical-cyan text-glow-cyan font-black">Expediente Digital</span>
+            </h1>
+            <p className="text-slate-500 text-sm max-w-lg font-medium">
+              Completa los pasos para generar la auditoría automatizada en el motor de n8n.
+            </p>
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tighter">
-            Nuevo <span className="text-medical-cyan text-glow-cyan font-black">Expediente Digital</span>
-          </h1>
-          <p className="text-slate-500 text-sm max-w-lg font-medium">
-            Completa los pasos para generar la auditoría automatizada en el motor de n8n.
-          </p>
         </div>
 
         {/* Selected Siniestro Dropdown (Global Context) */}

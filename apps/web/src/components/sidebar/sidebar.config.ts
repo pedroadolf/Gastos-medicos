@@ -36,7 +36,7 @@ export const menuItems: MenuItem[] = [
   },
   {
     label: 'Nuevo Trámite',
-    href: '/tramite/nuevo',
+    href: '/tramites/nuevo',
     icon: Plus,
     roles: ['asegurado', 'operator', 'admin'],
     section: 'core',
