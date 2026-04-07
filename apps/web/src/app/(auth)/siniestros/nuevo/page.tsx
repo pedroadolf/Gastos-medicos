@@ -26,6 +26,7 @@ export default function NuevoSiniestroPage() {
     // Search dropdown state
     const [searchQuery, setSearchQuery] = useState("");
     const [showDropdown, setShowDropdown] = useState(false);
+    const [activeUploadTab, setActiveUploadTab] = useState<'facturas' | 'anexos'>('facturas');
 
     // Cronómetro
     const [startTime, setStartTime] = useState<number | null>(null);
@@ -51,16 +52,11 @@ export default function NuevoSiniestroPage() {
     };
 
     // Configuración de documentos por trámite
-    const procedureConfigs: Record<TramiteType, { label: string; autoPDFs: string[]; manualChecklist: string[] }> = {
+    const procedureConfigs: Record<string, { label: string; autoPDFs: string[]; manualChecklist: string[] }> = {
         "reembolso": {
             label: "Trámite de Reembolso",
             autoPDFs: ["2_Case_Management-Mar26.pdf", "3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf"],
             manualChecklist: ["Informe médico firmado", "Estudios diagnósticos", "Comprobante domicilio (<3 meses)", "ID Oficial Afectado/Titular", "Facturas desglosadas", "Estado de cuenta (CLABE)"]
-        },
-        "carta_pase": {
-            label: "Carta Pase (Terapias/Cirugías)",
-            autoPDFs: ["2_Case_Management-Mar26.pdf", "3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf", "5_Declaración-jurada-Mar26.pdf"],
-            manualChecklist: ["Informe médico firmado", "Estudios diagnósticos", "Comprobante domicilio (<3 meses)", "ID Oficial Afectado/Titular"]
         },
         "programacion": {
             label: "Programación de Cirugía",
@@ -360,11 +356,11 @@ export default function NuevoSiniestroPage() {
                         <div className="relative mb-4">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none z-10" />
                             <input
-                                id="asegurado-search"
+                                 id="asegurado-search"
                                 name="asegurado-search"
                                 type="text"
                                 value={searchQuery}
-                                placeholder={isLoadingData ? "Conectando con Google Sheets..." : `Buscar por nombre o RFC (${aseguradosBD.length} registros)`}
+                                placeholder={isLoadingData ? "Conectando con Base de Datos..." : `Buscar por nombre o RFC (${aseguradosBD.length} registros)`}
                                 disabled={isLoadingData}
                                 autoComplete="off"
                                 className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-lg focus:ring-1 focus:ring-fintech-cyan focus:border-fintech-cyan block pl-9 pr-4 p-2.5 transition-all outline-none"
@@ -456,29 +452,20 @@ export default function NuevoSiniestroPage() {
                             <span className="bg-slate-800 text-slate-400 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-[10px]">2</span>
                             Configuración del Trámite
                         </h2>
-                        <div className="grid grid-cols-1 gap-2 mb-4">
-                            <div className="grid grid-cols-2 gap-2">
-                                <button
-                                    onClick={() => setProcedureType("reembolso")}
-                                    className={`py-2 px-3 text-xs font-bold uppercase rounded-lg border transition-all flex items-center justify-center gap-2 ${procedureType === "reembolso" ? "bg-medical-cyan/20 border-medical-cyan text-medical-cyan shadow-[0_0_15px_rgba(34,211,238,0.1)]" : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300"}`}
-                                >
-                                    <FileText size={14} />
-                                    Reembolso
-                                </button>
-                                <button
-                                    onClick={() => setProcedureType("carta_pase")}
-                                    className={`py-2 px-3 text-xs font-bold uppercase rounded-lg border transition-all flex items-center justify-center gap-2 ${procedureType === "carta_pase" ? "bg-medical-cyan/20 border-medical-cyan text-medical-cyan shadow-[0_0_15px_rgba(34,211,238,0.1)]" : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300"}`}
-                                >
-                                    <Sparkles size={14} />
-                                    Carta Pase
-                                </button>
-                            </div>
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                            <button
+                                onClick={() => setProcedureType("reembolso")}
+                                className={`py-3 px-4 text-xs font-bold uppercase rounded-xl border transition-all flex flex-col items-center justify-center gap-2 ${procedureType === "reembolso" ? "bg-medical-cyan/20 border-medical-cyan text-medical-cyan shadow-[0_0_20px_rgba(34,211,238,0.2)]" : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300 hover:border-slate-700"}`}
+                            >
+                                <FileText size={20} />
+                                Reembolso
+                            </button>
                             <button
                                 onClick={() => setProcedureType("programacion")}
-                                className={`w-full py-2.5 px-3 text-xs font-bold uppercase rounded-lg border transition-all flex items-center justify-center gap-2 ${procedureType === "programacion" ? "bg-medical-cyan/20 border-medical-cyan text-medical-cyan shadow-[0_0_15px_rgba(34,211,238,0.1)]" : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300"}`}
+                                className={`py-3 px-4 text-xs font-bold uppercase rounded-xl border transition-all flex flex-col items-center justify-center gap-2 ${procedureType === "programacion" ? "bg-medical-cyan/20 border-medical-cyan text-medical-cyan shadow-[0_0_20px_rgba(34,211,238,0.2)]" : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300 hover:border-slate-700"}`}
                             >
-                                <Stethoscope size={14} />
-                                Programación de Cirugía
+                                <Stethoscope size={20} />
+                                Cirugía
                             </button>
                         </div>
                         <div className="p-3 bg-slate-900/50 rounded-lg">
@@ -502,27 +489,30 @@ export default function NuevoSiniestroPage() {
                             name="siniestro-selector"
                             title="Seleccionar Siniestro"
                             disabled={!selectedAsegurado}
-                            className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-lg p-2.5 block disabled:opacity-30"
+                            className="w-full bg-slate-900 border border-slate-700 text-white text-sm rounded-lg p-3 block disabled:opacity-30 focus:ring-2 focus:ring-medical-cyan/50 focus:border-medical-cyan transition-all appearance-none cursor-pointer"
                             onChange={(e) => {
-                                const sId = e.target.value;
-                                setSelectedSiniestro(sId);
-                                if (!sId) return;
-                                
-                                const idx = parseInt(sId.split('-').pop() || "");
-                                if (!isNaN(idx) && aseguradosBD[idx]) {
-                                    setSelectedAsegurado({ ...aseguradosBD[idx] });
-                                }
+                                setSelectedSiniestro(e.target.value);
                             }}
+                            value={selectedSiniestro || ""}
                         >
-                            <option value="">{selectedAsegurado ? "-- Seleccionar Siniestro --" : "-- Busca asegurado --"}</option>
+                            <option value="">{selectedAsegurado ? "-- Seleccionar Siniestro / Padecimiento --" : "-- Busca asegurado primero --"}</option>
                             {selectedAsegurado && siniestrosBD
-                                .filter(s => s.aseguradoId === selectedAsegurado.id)
+                                .filter(s => 
+                                    s.aseguradoId === selectedAsegurado.id || 
+                                    s.aseguradoId === selectedAsegurado.rfc ||
+                                    s.aseguradoId === selectedAsegurado.nombre
+                                )
                                 .map((s) => (
                                     <option key={s.id} value={s.id}>
                                         {s.titulo} {s.numeroSiniestro ? `(${s.numeroSiniestro})` : ""}
                                     </option>
                                 ))}
                         </select>
+                        {!selectedSiniestro && selectedAsegurado && (
+                            <p className="mt-2 text-[10px] text-amber-400 italic font-medium">
+                                Si no aparece el siniestro, se creará uno nuevo automáticamente.
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -550,93 +540,137 @@ export default function NuevoSiniestroPage() {
                         </div>
 
                         {/* Dropzones Duales */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                            <div
-                                {...dropzoneFacturas.getRootProps()}
-                                className={`group relative border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-8 transition-all cursor-pointer ${dropzoneFacturas.isDragActive ? "border-fintech-cyan bg-fintech-cyan/10 scale-[1.02]" : "border-slate-800 bg-slate-900/40 hover:border-fintech-cyan/50 hover:bg-slate-900/60"}`}
+                        {/* Modern Categorical Upload UX */}
+                        <div className="flex gap-2 p-1 bg-slate-900/80 rounded-xl border border-slate-800 mb-4">
+                            <button
+                                onClick={() => setActiveUploadTab('facturas')}
+                                className={cn(
+                                    "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all",
+                                    activeUploadTab === 'facturas' 
+                                        ? "bg-fintech-cyan text-slate-900 shadow-lg" 
+                                        : "text-slate-400 hover:text-white hover:bg-slate-800"
+                                )}
                             >
-                                <div className="absolute top-3 right-3">
-                                    <span className="bg-fintech-cyan text-slate-900 text-[8px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase">Obligatorio</span>
-                                </div>
-                                <input {...dropzoneFacturas.getInputProps()} />
-                                <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-colors ${dropzoneFacturas.isDragActive ? "bg-fintech-cyan text-slate-900" : "bg-slate-800 text-fintech-cyan"}`}>
-                                    <Zap className="w-7 h-7" />
-                                </div>
-                                <p className="text-xs font-black text-white text-center uppercase tracking-widest mb-1">GRUPO B: Facturas</p>
-                                <p className="text-[10px] text-slate-400 text-center max-w-[180px]">Sube aquí tus <span className="text-fintech-cyan font-bold">XML</span> y <span className="text-fintech-cyan font-bold">PDF</span> para análisis IA.</p>
-                                <p className="mt-4 text-[9px] text-slate-600 font-bold uppercase">Solo archivos fiscales</p>
-                            </div>
+                                <Zap size={14} className={activeUploadTab === 'facturas' ? "animate-pulse" : ""} />
+                                FACTURAS (XML/PDF)
+                            </button>
+                            <button
+                                onClick={() => setActiveUploadTab('anexos')}
+                                className={cn(
+                                    "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all",
+                                    activeUploadTab === 'anexos' 
+                                        ? "bg-amber-500 text-slate-900 shadow-lg" 
+                                        : "text-slate-400 hover:text-white hover:bg-slate-800"
+                                )}
+                            >
+                                <UploadCloud size={14} />
+                                ANEXOS (INE/MÉDICO)
+                            </button>
+                        </div>
 
-                            <div
-                                {...dropzoneAnexos.getRootProps()}
-                                className={`group relative border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-8 transition-all cursor-pointer ${dropzoneAnexos.isDragActive ? "border-amber-500 bg-amber-500/10 scale-[1.02]" : "border-slate-800 bg-slate-900/40 hover:border-amber-500/50 hover:bg-slate-900/60"}`}
-                            >
-                                <div className="absolute top-3 right-3">
-                                    <span className="bg-amber-500 text-slate-900 text-[8px] font-black px-1.5 py-0.5 rounded shadow-lg uppercase">Soporte</span>
-                                </div>
-                                <input {...dropzoneAnexos.getInputProps()} />
-                                <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-3 transition-colors ${dropzoneAnexos.isDragActive ? "bg-amber-500 text-slate-900" : "bg-slate-800 text-amber-500"}`}>
-                                    <UploadCloud className="w-7 h-7" />
-                                </div>
-                                <p className="text-xs font-black text-white text-center uppercase tracking-widest mb-1">GRUPO A: Anexos</p>
-                                <p className="text-[10px] text-slate-400 text-center max-w-[180px]">INE, Informe Médico, <span className="text-amber-500 font-bold">Recetas</span>, Comprobantes de domicilio.</p>
-                                <p className="mt-4 text-[9px] text-slate-600 font-bold uppercase">Documentación General</p>
+                        {/* Single Intelligent Dropzone */}
+                        <div
+                            {... (activeUploadTab === 'facturas' ? dropzoneFacturas.getRootProps() : dropzoneAnexos.getRootProps())}
+                            className={cn(
+                                "group relative border-2 border-dashed rounded-2xl flex flex-col items-center justify-center p-12 transition-all cursor-pointer mb-6",
+                                activeUploadTab === 'facturas' 
+                                    ? (dropzoneFacturas.isDragActive ? "border-fintech-cyan bg-fintech-cyan/10 scale-[1.01]" : "border-slate-800 bg-slate-900/40 hover:border-fintech-cyan/50")
+                                    : (dropzoneAnexos.isDragActive ? "border-amber-500 bg-amber-500/10 scale-[1.01]" : "border-slate-800 bg-slate-900/40 hover:border-amber-500/50")
+                            )}
+                        >
+                            <input {... (activeUploadTab === 'facturas' ? dropzoneFacturas.getInputProps() : dropzoneAnexos.getInputProps())} />
+                            
+                            <div className={cn(
+                                "w-20 h-20 rounded-3xl flex items-center justify-center mb-4 transition-all duration-500 shadow-2xl rotate-3 group-hover:rotate-0 group-hover:scale-110",
+                                activeUploadTab === 'facturas' ? "bg-fintech-cyan text-slate-900" : "bg-amber-500 text-slate-900"
+                            )}>
+                                {activeUploadTab === 'facturas' ? <Zap size={32} /> : <UploadCloud size={32} />}
+                            </div>
+                            
+                            <h3 className="text-lg font-black text-white uppercase tracking-tighter mb-2">
+                               {activeUploadTab === 'facturas' ? "Soltar Facturas aquí" : "Soltar Anexos aquí"}
+                            </h3>
+                            <p className="text-sm text-slate-400 text-center max-w-sm mb-6 leading-tight">
+                                Puedes seleccionar <span className="text-white font-bold">múltiples</span> archivos a la vez.
+                                {activeUploadTab === 'facturas' 
+                                    ? " El motor IA analizará conceptos y montos automáticamente."
+                                    : " Documentación de soporte para el dictamen médico."}
+                            </p>
+                            
+                            <div className="flex gap-3">
+                                <span className={cn(
+                                    "px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border transition-colors",
+                                    activeUploadTab === 'facturas' ? "border-fintech-cyan/30 text-fintech-cyan" : "border-amber-500/30 text-amber-500"
+                                )}>
+                                    {activeUploadTab === 'facturas' ? "Requiere XML + PDF" : "PDF / JPG / PNG"}
+                                </span>
                             </div>
                         </div>
 
-                        {/* Listas de Archivos Separadas */}
-                        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 pr-2 custom-scrollbar overflow-y-auto max-h-[350px]">
-                            {/* Columna Grupo B: Facturas */}
-                            <div className="space-y-2">
-                                <p className="text-[10px] font-bold text-fintech-cyan uppercase tracking-tighter mb-2 flex justify-between">
-                                    <span>📂 Grupo B (Facturas)</span>
-                                    <span>{facturasFiles.length} docs</span>
-                                </p>
-                                {facturasFiles.map((file, i) => (
-                                    <div key={`f-${i}`} className="flex items-center p-2.5 bg-fintech-cyan/5 border border-fintech-cyan/20 rounded-lg group hover:border-fintech-cyan/40 transition-colors">
-                                        <FileText className="w-4 h-4 mr-2 text-fintech-cyan shrink-0" />
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-[11px] font-medium text-white truncate">{file.name}</p>
-                                        </div>
-                                        <button 
-                                            onClick={(e) => { e.stopPropagation(); setFacturasFiles(facturasFiles.filter((_, idx) => idx !== i)); }} 
-                                            className="text-slate-500 hover:text-rose-400 p-1 transition-colors group-hover:scale-110"
-                                        >✕</button>
+                        {/* Unified File View with Categories */}
+                        <div className="flex-1 space-y-4 pr-2 custom-scrollbar overflow-y-auto max-h-[350px]">
+                            {/* Grupo B: Facturas */}
+                            {facturasFiles.length > 0 && (
+                                <div className="space-y-2">
+                                    <p className="text-[10px] font-black text-fintech-cyan uppercase tracking-widest flex items-center gap-2">
+                                        <Zap size={12} />
+                                        GRUPO B: FACTURAS AUDITABLES ({facturasFiles.length})
+                                    </p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                        {facturasFiles.map((file, i) => (
+                                            <div key={`f-${i}`} className="flex items-center p-3 bg-slate-900/60 border border-slate-800 rounded-xl group hover:border-fintech-cyan/30 transition-all">
+                                                <div className="w-8 h-8 rounded-lg bg-fintech-cyan/10 flex items-center justify-center mr-3 text-fintech-cyan">
+                                                    <FileText size={16} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-[11px] font-bold text-white truncate">{file.name}</p>
+                                                    <p className="text-[9px] text-slate-500 uppercase">{(file.size / 1024).toFixed(0)} KB</p>
+                                                </div>
+                                                <button 
+                                                    onClick={(e) => { e.stopPropagation(); setFacturasFiles(facturasFiles.filter((_, idx) => idx !== i)); }} 
+                                                    className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-400 p-1 transition-all"
+                                                >✕</button>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                                {facturasFiles.length === 0 && (
-                                    <div className="py-8 border border-dashed border-slate-800 rounded-lg flex flex-col items-center justify-center opacity-40">
-                                        <Zap className="w-6 h-6 text-slate-600 mb-1" />
-                                        <p className="text-[10px] text-slate-500">Sin facturas</p>
-                                    </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
 
-                            {/* Columna Grupo A: Anexos */}
-                            <div className="space-y-2">
-                                <p className="text-[10px] font-bold text-amber-500 uppercase tracking-tighter mb-2 flex justify-between">
-                                    <span>📂 Grupo A (Anexos)</span>
-                                    <span>{anexosFiles.length} docs</span>
-                                </p>
-                                {anexosFiles.map((file, i) => (
-                                    <div key={`a-${i}`} className="flex items-center p-2.5 bg-amber-500/5 border border-amber-500/20 rounded-lg group hover:border-amber-500/40 transition-colors">
-                                        <UploadCloud className="w-4 h-4 mr-2 text-amber-500 shrink-0" />
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-[11px] font-medium text-white truncate">{file.name}</p>
-                                        </div>
-                                        <button 
-                                            onClick={(e) => { e.stopPropagation(); setAnexosFiles(anexosFiles.filter((_, idx) => idx !== i)); }} 
-                                            className="text-slate-500 hover:text-rose-400 p-1 transition-colors group-hover:scale-110"
-                                        >✕</button>
+                            {/* Grupo A: Anexos */}
+                            {anexosFiles.length > 0 && (
+                                <div className="space-y-2">
+                                    <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest flex items-center gap-2">
+                                        <UploadCloud size={12} />
+                                        GRUPO A: DOCUMENTACIÓN SOPORTE ({anexosFiles.length})
+                                    </p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                        {anexosFiles.map((file, i) => (
+                                            <div key={`a-${i}`} className="flex items-center p-3 bg-slate-900/60 border border-slate-800 rounded-xl group hover:border-amber-500/30 transition-all">
+                                                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center mr-3 text-amber-500">
+                                                    <UploadCloud size={16} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-[11px] font-bold text-white truncate">{file.name}</p>
+                                                    <p className="text-[9px] text-slate-500 uppercase">{(file.size / 1024).toFixed(0)} KB</p>
+                                                </div>
+                                                <button 
+                                                    onClick={(e) => { e.stopPropagation(); setAnexosFiles(anexosFiles.filter((_, idx) => idx !== i)); }} 
+                                                    className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-400 p-1 transition-all"
+                                                >✕</button>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                                {anexosFiles.length === 0 && (
-                                    <div className="py-8 border border-dashed border-slate-800 rounded-lg flex flex-col items-center justify-center opacity-40">
-                                        <FileText className="w-6 h-6 text-slate-600 mb-1" />
-                                        <p className="text-[10px] text-slate-500">Sin anexos</p>
+                                </div>
+                            )}
+
+                            {facturasFiles.length === 0 && anexosFiles.length === 0 && (
+                                <div className="py-20 border border-dashed border-slate-800 rounded-3xl flex flex-col items-center justify-center opacity-30">
+                                    <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                                        <UploadCloud className="w-8 h-8 text-slate-600" />
                                     </div>
-                                )}
-                            </div>
+                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Esperando archivos...</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Checklist Informativo */}
