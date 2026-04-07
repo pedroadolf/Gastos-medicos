@@ -29,12 +29,16 @@ export const claimsService = {
    */
   async createFullTramite(payload: {
     siniestro_id: string;
+    nombre_siniestro?: string; // Metadata para provisión legacy
     tipo: TramiteType;
     facturas: FacturaRow[];
     files?: Record<string, File>;
   }) {
     const formData = new FormData();
     formData.append('siniestro_id', payload.siniestro_id);
+    if (payload.nombre_siniestro) {
+      formData.append('nombre_siniestro', payload.nombre_siniestro);
+    }
     formData.append('tipo', payload.tipo);
     formData.append('facturas', JSON.stringify(payload.facturas));
 

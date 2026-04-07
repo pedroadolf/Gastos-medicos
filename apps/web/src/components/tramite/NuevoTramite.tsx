@@ -58,6 +58,7 @@ export default function NuevoTramite() {
       // 1. Create the procedure in Supabase
       const result = await claimsService.createFullTramite({
         siniestro_id: selectedSiniestroId,
+        nombre_siniestro: siniestros.find(s => s.id === selectedSiniestroId)?.nombre_siniestro,
         tipo,
         facturas: invoices,
         files: files
@@ -111,15 +112,24 @@ export default function NuevoTramite() {
         </div>
 
         {/* Selected Siniestro Dropdown (Global Context) */}
-        <div className="w-full md:w-80 group">
-          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block group-focus-within:text-medical-cyan transition-colors">
-            Siniestro / Evento Asociado
+        <div className="w-full md:w-96 group">
+          <label className={cn(
+            "text-[10px] font-black uppercase tracking-widest mb-2 block transition-colors",
+            selectedSiniestroId ? "text-emerald-500" : "text-slate-500 group-focus-within:text-medical-cyan"
+          )}>
+            {selectedSiniestroId ? '✓ SINIESTRO SELECCIONADO' : 'Siniestro / Evento Asociado'}
           </label>
           <div className="relative">
             <select
+              id="siniestro-selector"
               value={selectedSiniestroId}
               onChange={(e) => setSelectedSiniestroId(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3.5 text-sm text-white outline-none focus:border-medical-cyan focus:ring-4 focus:ring-medical-cyan/5 transition-all appearance-none font-bold"
+              className={cn(
+                "w-full bg-slate-900 border rounded-2xl px-4 py-4 text-sm text-white outline-none transition-all appearance-none font-bold",
+                selectedSiniestroId 
+                  ? "border-emerald-500/50 ring-4 ring-emerald-500/10 shadow-lg shadow-emerald-500/5 text-emerald-50" 
+                  : "border-slate-800 focus:border-medical-cyan focus:ring-4 focus:ring-medical-cyan/5"
+              )}
             >
               <option value="">-- SELECCIONAR --</option>
               {siniestros.map(s => (
@@ -128,12 +138,45 @@ export default function NuevoTramite() {
                 </option>
               ))}
             </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+            <div className={cn(
+               "absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors",
+               selectedSiniestroId ? "text-emerald-500" : "text-slate-500"
+            )}>
                <Search size={16} />
             </div>
           </div>
         </div>
       </div>
+
+      {/* 🧭 Component Overview Banner (Context Awareness) */}
+      {selectedSiniestroId && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-wrap items-center gap-3 bg-slate-950/20 px-6 py-3 rounded-full border border-white/5 backdrop-blur-md w-fit mx-auto shadow-sm"
+        >
+          <div className="flex items-center gap-2 pr-4 border-r border-white/10">
+            <ShieldCheck size={14} className="text-emerald-500" />
+            <span className="text-[10px] font-black text-white uppercase tracking-wider">
+              {siniestros.find(s => s.id === selectedSiniestroId)?.numero_siniestro}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 pl-1">
+             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Procedimiento:</span>
+             <span className="px-2 py-0.5 bg-medical-cyan/10 text-medical-cyan text-[10px] font-black rounded-lg uppercase">
+               {tipo.replace('_', ' ')}
+             </span>
+          </div>
+          
+          {step > 2 && (
+             <div className="flex items-center gap-2 pl-3 border-l border-white/10">
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Facturas:</span>
+                <span className="text-[10px] font-black text-emerald-500">{invoices.length}</span>
+             </div>
+          )}
+        </motion.div>
+      )}
 
       {/* 🧭 Central Stepper Container */}
       <div className="max-w-4xl mx-auto">

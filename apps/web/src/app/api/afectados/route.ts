@@ -115,11 +115,13 @@ export async function GET() {
         // 3. Unificar asegurados y crear mapeo para siniestros
         const allAseguradosMap = new Map();
         const rfcToUuidMap = new Map();
+        const emailToUuidMap = new Map();
         
         // Primero Sheets (para tener RFCs y Nombres reales)
         sheetAsegurados.forEach(a => {
             allAseguradosMap.set(a.email?.toLowerCase() || a.id, a);
             if (a.rfc) rfcToUuidMap.set(a.rfc, a.id);
+            if (a.email) emailToUuidMap.set(a.email.toLowerCase(), a.id);
         });
         
         // Luego Supabase (prioridad de ID UUID)
@@ -129,21 +131,27 @@ export async function GET() {
                 const existing = allAseguradosMap.get(key);
                 const updated = { ...existing, ...a };
                 allAseguradosMap.set(key, updated);
-                // Si este usuario de Supabase tiene RFC en Sheets, mapeamos ese RFC a su UUID
+                // Mapeo robusto
                 if (existing.rfc) rfcToUuidMap.set(existing.rfc, a.id);
+                emailToUuidMap.set(key, a.id);
             } else {
                 allAseguradosMap.set(key, a);
+                emailToUuidMap.set(key, a.id);
             }
         });
 
         // 4. Mapear Siniestros de Sheets a los IDs finales (UUIDs si existen)
-        const mappedSheetSiniestros = sheetSiniestros.map(s => ({
-            ...s,
-            user_id: rfcToUuidMap.get(s.user_id) || s.user_id
-        }));
+        const mappedSheetSiniestros = sheetSiniestros.map(s => {
+            const finalUserId = rfcToUuidMap.get(s.user_id) || emailToUuidMap.get(s.user_id?.toLowerCase()) || s.user_id;
+            return {
+                ...s,
+                user_id: finalUserId
+            };
+        });
 
         // Combinar Siniestros
         const allSiniestros = [...siniestros, ...mappedSheetSiniestros];
+        console.log(`[API AFECTADOS] Total Siniestros: ${allSiniestros.length} (DB: ${siniestros.length}, Sheets: ${mappedSheetSiniestros.length})`);
 
         return NextResponse.json({ 
             success: true, 

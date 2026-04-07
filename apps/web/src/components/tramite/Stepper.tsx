@@ -52,10 +52,15 @@ export default function Stepper({ steps, currentStep }: StepperProps) {
             </div>
             
             <span className={cn(
-              "text-[10px] font-black uppercase tracking-widest absolute -bottom-6 w-max transition-colors",
+              "text-[10px] font-black uppercase tracking-widest absolute -bottom-6 w-max transition-all duration-300",
+              currentStep > step.id ? "text-emerald-500 scale-105" :
               currentStep === step.id ? "text-medical-cyan" : "text-slate-500"
             )}>
-              {step.label}
+              {currentStep > step.id ? (
+                <span className="flex items-center gap-1">
+                   {step.label} <Check size={10} strokeWidth={4} />
+                </span>
+              ) : step.label}
             </span>
           </div>
 

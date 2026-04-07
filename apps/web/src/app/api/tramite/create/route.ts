@@ -37,26 +37,65 @@ export async function POST(req: Request) {
         }
 
         const supabase = getSupabaseService();
+        let targetSiniestroId = siniestroId;
 
-        // 🔐 VERIFICACIÓN DE PROPIEDAD (Ownership Check)
-        if (session.user.role !== 'admin') {
-            const { data: siniestro, error: sError } = await supabase
-                .from("siniestros")
-                .select("id")
-                .eq("id", siniestroId)
-                .eq("user_id", session.user.id)
-                .single();
+        // 🔗 1. GESTIÓN DE SINIESTROS (Sync on-the-fly)
+        // Si el ID no es un UUID válido, o es un ID de Sheets (ej: SIN-123-0),
+        // procedemos a buscarlo por número o a crearlo.
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(siniestroId);
+        
+        if (!isUuid || (isUuid && session.user.role !== 'admin')) {
+            // Intentar encontrar el siniestro por UUID o por número (fallback)
+            let query = supabase.from("siniestros").select("*");
             
-            if (sError || !siniestro) {
-                return NextResponse.json({ error: "No tienes permiso para crear trámites en este siniestro" }, { status: 403 });
+            if (isUuid) {
+                query = query.eq("id", siniestroId);
+            } else {
+                // Si es legacy, el numero_siniestro suele estar al inicio del ID custom
+                const cleanSNum = siniestroId.split('-').slice(0, 2).join('-'); // Ej: SIN-1234
+                query = query.eq("numero_siniestro", cleanSNum);
+            }
+
+            const { data: existingSiniestro } = await query.single();
+
+            if (existingSiniestro) {
+                targetSiniestroId = existingSiniestro.id;
+                // Verificar propiedad si no es admin
+                if (session.user.role !== 'admin' && existingSiniestro.user_id !== session.user.id) {
+                    return NextResponse.json({ error: "No tienes permiso sobre este siniestro" }, { status: 403 });
+                }
+            } else if (!isUuid) {
+                // 🐣 AUTO-PROVISIONAMIENTO (Si no existe y es legacy ID)
+                console.log("[BACKEND] Provisionando siniestro legacy:", siniestroId);
+                const sNumPrefix = siniestroId.split('-').slice(0, 2).join('-');
+                
+                const { data: newSiniestro, error: nsError } = await supabase
+                    .from("siniestros")
+                    .insert({
+                        numero_siniestro: sNumPrefix,
+                        nombre_siniestro: formData.get("nombre_siniestro") as string || "Trámite Migrado (Sheets)",
+                        user_id: session.user.id,
+                        descripcion: "Migrado automáticamente desde Google Sheets por el Orchestrator."
+                    })
+                    .select()
+                    .single();
+
+                if (nsError) {
+                    console.error("[BACKEND] Error provisionando siniestro:", nsError);
+                    throw new Error("Error al sincronizar el siniestro legacy.");
+                }
+                targetSiniestroId = newSiniestro.id;
+            } else {
+                // Es UUID pero no existe
+                return NextResponse.json({ error: "Siniestro no encontrado" }, { status: 404 });
             }
         }
 
-        // 🧾 1. Crear trámite (Initial state: pending)
+        // 🧾 2. Crear trámite (Initial state: pending)
         const { data: tramite, error: tError } = await supabase
             .from("tramites")
             .insert({
-                siniestro_id: siniestroId,
+                siniestro_id: targetSiniestroId,
                 tipo: tipo,
                 status: "pending", 
                 user_id: session.user.id
@@ -64,7 +103,10 @@ export async function POST(req: Request) {
             .select()
             .single();
 
-        if (tError) throw tError;
+        if (tError) {
+            console.error("[BACKEND] Error al insertar trámite:", tError);
+            throw tError;
+        }
 
         // 🛡️ BLOQUEO ATÓMICO (Atomic Lock)
         // Pasamos a 'processing' inmediatamente para habilitar el flujo enterprise.
