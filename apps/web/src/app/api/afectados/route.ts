@@ -39,10 +39,10 @@ export async function GET() {
         // Mapear siniestros desde la tabla siniestros
         const siniestros = (dbSiniestros || []).map(s => ({
             id: s.id,
-            aseguradoId: s.user_id, // Este debe ser un UUID que coincida con user_roles.user_id
-            titulo: s.nombre_siniestro,
-            numeroSiniestro: s.numero_siniestro,
-            fecha: s.fecha_apertura?.split('T')[0] || new Date().toISOString().split('T')[0],
+            user_id: s.user_id, 
+            nombre_siniestro: s.nombre_siniestro,
+            numero_siniestro: s.numero_siniestro,
+            fecha_apertura: s.fecha_apertura?.split('T')[0] || new Date().toISOString().split('T')[0],
             estado: "Activo"
         }));
 
@@ -100,13 +100,13 @@ export async function GET() {
 
                     return {
                         id: `${sNum}-${index}`,
-                        aseguradoId: rfc,
-                        titulo: pad || "Trámite Médico",
-                        numeroSiniestro: sNum,
-                        fecha: new Date().toISOString().split("T")[0],
+                        user_id: rfc,
+                        nombre_siniestro: pad || "Trámite Médico",
+                        numero_siniestro: sNum,
+                        fecha_apertura: new Date().toISOString().split("T")[0],
                         estado: "Activo",
                     };
-                }).filter((s: any) => s.aseguradoId !== "");
+                }).filter((s: any) => s.user_id !== "");
             }
         } catch (sheetsError) {
             console.warn("⚠️ Error al leer de Google Sheets:", sheetsError);
@@ -139,7 +139,7 @@ export async function GET() {
         // 4. Mapear Siniestros de Sheets a los IDs finales (UUIDs si existen)
         const mappedSheetSiniestros = sheetSiniestros.map(s => ({
             ...s,
-            aseguradoId: rfcToUuidMap.get(s.aseguradoId) || s.aseguradoId
+            user_id: rfcToUuidMap.get(s.user_id) || s.user_id
         }));
 
         // Combinar Siniestros

@@ -56,8 +56,77 @@ export default function UploadDocs({ files, setFiles, onBack, onSubmit, isSubmit
         </p>
       </div>
 
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* 🧩 Document Grid */}
+      <div className="max-w-4xl mx-auto space-y-10 relative z-10">
+        {/* 🚀 Master Dropzone (The "Bulk" Option) */}
+        <div 
+          onDragOver={(e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.currentTarget.classList.add('border-medical-cyan', 'bg-medical-cyan/5'); }}
+          onDragLeave={(e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.currentTarget.classList.remove('border-medical-cyan', 'bg-medical-cyan/5'); }}
+          onDrop={(e: React.DragEvent<HTMLDivElement>) => {
+            e.preventDefault();
+            e.currentTarget.classList.remove('border-medical-cyan', 'bg-medical-cyan/5');
+            const droppedFiles = Array.from(e.dataTransfer.files);
+            
+            const newFiles = { ...files };
+            droppedFiles.forEach(file => {
+              const name = file.name.toLowerCase();
+              if (name.includes('ine') || name.includes('identifica') || name.includes('dni')) newFiles['identificacion'] = file;
+              else if (name.includes('comprobante') || name.includes('domicilio') || name.includes('luz') || name.includes('agua')) newFiles['comprobante'] = file;
+              else if (name.includes('receta')) newFiles['receta'] = file;
+              else if (name.includes('estudio') || name.includes('analisis') || name.includes('lab') || name.includes('imagen')) newFiles['estudios'] = file;
+              else if (name.includes('estado') || name.includes('cuenta') || name.includes('banco')) newFiles['estado_cuenta'] = file;
+              else {
+                // Fallback: assign to first empty slot
+                const firstEmpty = REQUIRED_DOCS.find(doc => !newFiles[doc.id]);
+                if (firstEmpty) newFiles[firstEmpty.id] = file;
+              }
+            });
+            setFiles(newFiles);
+          }}
+          className="relative group cursor-pointer"
+        >
+          <div className="absolute -inset-1 bg-gradient-to-r from-medical-cyan/20 to-indigo-500/20 rounded-[2.5rem] blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative p-10 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2.5rem] bg-white dark:bg-slate-950/50 flex flex-col items-center justify-center gap-4 transition-all hover:border-medical-cyan/50 hover:shadow-2xl hover:shadow-medical-cyan/10">
+            <div className="w-16 h-16 rounded-3xl bg-medical-cyan/10 flex items-center justify-center text-medical-cyan mb-2 group-hover:scale-110 transition-transform">
+              <FileUp size={32} />
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">Carga Masiva (Bulk Upload)</h3>
+              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">
+                Arrastra <span className="text-medical-cyan">todos</span> tus documentos aquí de una sola vez
+              </p>
+            </div>
+            <input 
+              type="file" 
+              multiple 
+              className="absolute inset-0 opacity-0 cursor-pointer" 
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const selected = Array.from(e.target.files || []);
+                const newFiles = { ...files };
+                selected.forEach(file => {
+                  const name = file.name.toLowerCase();
+                  if (name.includes('ine') || name.includes('identifica') || name.includes('dni')) newFiles['identificacion'] = file;
+                  else if (name.includes('comprobante') || name.includes('domicilio') || name.includes('luz') || name.includes('agua')) newFiles['comprobante'] = file;
+                  else if (name.includes('receta')) newFiles['receta'] = file;
+                  else if (name.includes('estudio') || name.includes('analisis') || name.includes('lab') || name.includes('imagen')) newFiles['estudios'] = file;
+                  else if (name.includes('estado') || name.includes('cuenta') || name.includes('banco')) newFiles['estado_cuenta'] = file;
+                  else {
+                    const firstEmpty = REQUIRED_DOCS.find(doc => !newFiles[doc.id]);
+                    if (firstEmpty) newFiles[firstEmpty.id] = file;
+                  }
+                });
+                setFiles(newFiles);
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 py-4">
+          <div className="h-[1px] flex-1 bg-slate-800" />
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">o carga individual</span>
+          <div className="h-[1px] flex-1 bg-slate-800" />
+        </div>
+
+        {/* 🧩 Individual Document Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {REQUIRED_DOCS.map((doc, idx) => {
             const file = files[doc.id];
@@ -68,6 +137,13 @@ export default function UploadDocs({ files, setFiles, onBack, onSubmit, isSubmit
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: idx * 0.05 }}
+                onDragOver={(e: React.DragEvent<HTMLLabelElement>) => { e.preventDefault(); e.currentTarget.classList.add('border-medical-cyan'); }}
+                onDragLeave={(e: React.DragEvent<HTMLLabelElement>) => { e.preventDefault(); e.currentTarget.classList.remove('border-medical-cyan'); }}
+                onDrop={(e: React.DragEvent<HTMLLabelElement>) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove('border-medical-cyan');
+                  if (e.dataTransfer.files[0]) handleFile(doc.id, e.dataTransfer.files[0]);
+                }}
                 className={cn(
                   "p-6 rounded-3xl border-2 transition-all cursor-pointer group flex flex-col items-start gap-4 h-full min-h-[140px] relative overflow-hidden",
                   file 
@@ -78,7 +154,7 @@ export default function UploadDocs({ files, setFiles, onBack, onSubmit, isSubmit
                 <input 
                   type="file" 
                   className="hidden" 
-                  onChange={(e) => handleFile(doc.id, e.target.files?.[0] || null)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFile(doc.id, e.target.files?.[0] || null)}
                 />
 
                 <div className="flex justify-between w-full items-start">
@@ -101,16 +177,9 @@ export default function UploadDocs({ files, setFiles, onBack, onSubmit, isSubmit
                     {doc.label}
                   </h4>
                   <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
-                    {file ? `${file.name.substring(0, 20)}...` : doc.desc}
+                    {file ? `${file.name.substring(0, 30)}...` : doc.desc}
                   </p>
                 </div>
-
-                {/* Overlays / State signals */}
-                {!file && (
-                  <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <BadgeInfo size={20} className="text-medical-cyan" />
-                  </div>
-                )}
               </motion.label>
             );
           })}

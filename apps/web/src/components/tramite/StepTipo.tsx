@@ -30,15 +30,6 @@ const TYPES = [
     border: 'border-indigo-500/20'
   },
   {
-    id: 'programacion',
-    label: 'Programación de Cirugía',
-    description: 'Solicita autorización previa para un procedimiento quirúrgico u hospitalario.',
-    icon: CalendarClock,
-    color: 'text-medical-cyan',
-    bg: 'bg-medical-cyan/10',
-    border: 'border-medical-cyan/20'
-  },
-  {
     id: 'carta_pase',
     label: 'Carta Pase Especial',
     description: 'Solicitud de autorización para terapias, estudios especiales o consultas.',
@@ -63,7 +54,7 @@ export default function StepTipo({ value, onChange, onNext }: StepTipoProps) {
       </div>
 
       {/* 🧩 Selection Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
         {TYPES.map((type, idx) => (
           <motion.button
             key={type.id}

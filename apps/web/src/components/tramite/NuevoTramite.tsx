@@ -38,9 +38,14 @@ export default function NuevoTramite() {
 
   // -- Initial Load --
   useEffect(() => {
-    claimsService.getMySiniestros()
-      .then(setSiniestros)
-      .catch(err => console.error("Error loading siniestros:", err))
+    fetch('/api/afectados')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setSiniestros(data.siniestros);
+        }
+      })
+      .catch(err => console.error("Error loading siniestros from API:", err))
       .finally(() => setIsLoading(false));
   }, []);
 
