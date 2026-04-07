@@ -78,16 +78,34 @@ export class AuditorService {
         findings.push({ severity: 'warning', message: 'Reembolso mayor a $100k requiere comprobante de domicilio' });
     }
 
-    // 2. Save results to public.audit_results
-    if (findings.length > 0) {
-        await supabase.from('audit_results').insert({
-            tramite_id: tramiteId,
-            workflow_name: 'claims-audit-v1',
-            issues: findings,
-            score: this.calculateScore(findings),
-            approved: !findings.some(f => f.severity === 'error'),
-            automated: true
-        });
+    // 2. Persist results to public.audit_results (Always, to satisfy DB triggers)
+    const score = this.calculateScore(findings);
+    const approved = !findings.some(f => f.severity === 'error');
+    const isAutoFixable = findings.some(f => f.severity === 'error') && !findings.some(f => f.message.includes('CLABE'));
+
+    await supabase.from('audit_results').insert({
+        tramite_id: tramiteId,
+        findings: findings,
+        score: score,
+        is_auto_fixable: isAutoFixable,
+        recommendations: approved ? 'Todo correcto. Procede a generar ZIP.' : 'Favor de corregir los errores marcados para continuar.'
+    });
+
+    // 3. Update Tramite Status (Atomic State Change)
+    // El trigger 'validate_status_flow' se encargará de validar que esta transición sea legal.
+    const newStatus = approved ? 'audited' : 'error';
+    const { error: updateError } = await supabase
+        .from('tramites')
+        .update({ 
+            status: newStatus,
+            last_error: approved ? null : 'Fallo en auditoría automática',
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', tramiteId);
+
+    if (updateError) {
+        console.error("[AUDITOR] Error updating tramite status:", updateError);
+        throw new Error(`Error actualizando estado a ${newStatus}: ${updateError.message}`);
     }
 
     return findings;

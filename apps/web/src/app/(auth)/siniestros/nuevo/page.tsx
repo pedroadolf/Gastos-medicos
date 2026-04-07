@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Search, UploadCloud, FileText, Zap, RefreshCw, CheckCircle2, Loader2, Sparkles, ExternalLink } from "lucide-react";
+import { Search, UploadCloud, FileText, Zap, RefreshCw, CheckCircle2, Loader2, Sparkles, ExternalLink, ChevronLeft, Stethoscope } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { cn } from "@/lib/utils";
+import Link from 'next/link';
+import { TramiteType } from "@/types/claims";
 
 
 // Tipos basados en Google Sheets (Ampliado)
@@ -16,7 +18,7 @@ export default function NuevoSiniestroPage() {
     const [anexosFiles, setAnexosFiles] = useState<File[]>([]);
     const [facturasFiles, setFacturasFiles] = useState<File[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [procedureType, setProcedureType] = useState<"reembolso" | "carta-pase">("reembolso");
+    const [procedureType, setProcedureType] = useState<TramiteType>("reembolso");
     const [currentJobId, setCurrentJobId] = useState<string | null>(null);
     const [jobStatus, setJobStatus] = useState<string | null>(null);
     const [fileClassifications, setFileClassifications] = useState<Record<string, string>>({});
@@ -49,18 +51,24 @@ export default function NuevoSiniestroPage() {
     };
 
     // Configuración de documentos por trámite
-    const procedureConfigs = {
+    const procedureConfigs: Record<TramiteType, { label: string; autoPDFs: string[]; manualChecklist: string[] }> = {
         "reembolso": {
             label: "Trámite de Reembolso",
             autoPDFs: ["2_Case_Management-Mar26.pdf", "3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf"],
             manualChecklist: ["Informe médico firmado", "Estudios diagnósticos", "Comprobante domicilio (<3 meses)", "ID Oficial Afectado/Titular", "Facturas desglosadas", "Estado de cuenta (CLABE)"]
         },
-        "carta-pase": {
+        "carta_pase": {
             label: "Carta Pase (Terapias/Cirugías)",
             autoPDFs: ["2_Case_Management-Mar26.pdf", "3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf", "5_Declaración-jurada-Mar26.pdf"],
             manualChecklist: ["Informe médico firmado", "Estudios diagnósticos", "Comprobante domicilio (<3 meses)", "ID Oficial Afectado/Titular"]
+        },
+        "programacion": {
+            label: "Programación de Cirugía",
+            autoPDFs: ["2_Case_Management-Mar26.pdf", "3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf", "7_Programacion-Cirugia.pdf"],
+            manualChecklist: ["Informe médico detallado", "Presupuesto hospitalario", "Presupuesto médico", "Estudios pre-operatorios", "ID Oficial"]
         }
     };
+
 
     // Estado BD (Sheets)
     const [aseguradosBD, setAseguradosBD] = useState<Asegurado[]>([]);
@@ -320,9 +328,19 @@ export default function NuevoSiniestroPage() {
 
     return (
         <div className="space-y-6">
+            <div className="max-w-7xl">
+                <Link 
+                    href="/siniestros" 
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-400 hover:text-medical-cyan bg-slate-900 border border-slate-800 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-sm mb-6"
+                >
+                    <ChevronLeft size={16} />
+                    Regresar a Mis Trámites
+                </Link>
+            </div>
+            
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-white mb-1">Nuevo Trámite GMM</h1>
+                    <h1 className="text-4xl font-black tracking-tight text-white mb-1 italic uppercase">Nuevo Trámite GMM</h1>
                     <p className="text-slate-400 text-sm">Escanea facturas y genera expedientes inteligentes.</p>
                 </div>
                 <div className="flex items-center space-x-2 text-sm">
@@ -438,21 +456,36 @@ export default function NuevoSiniestroPage() {
                             <span className="bg-slate-800 text-slate-400 w-6 h-6 rounded-full flex items-center justify-center mr-2 text-[10px]">2</span>
                             Configuración del Trámite
                         </h2>
-                        <div className="grid grid-cols-2 gap-2 mb-4">
+                        <div className="grid grid-cols-1 gap-2 mb-4">
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    onClick={() => setProcedureType("reembolso")}
+                                    className={`py-2 px-3 text-xs font-bold uppercase rounded-lg border transition-all flex items-center justify-center gap-2 ${procedureType === "reembolso" ? "bg-medical-cyan/20 border-medical-cyan text-medical-cyan shadow-[0_0_15px_rgba(34,211,238,0.1)]" : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300"}`}
+                                >
+                                    <FileText size={14} />
+                                    Reembolso
+                                </button>
+                                <button
+                                    onClick={() => setProcedureType("carta_pase")}
+                                    className={`py-2 px-3 text-xs font-bold uppercase rounded-lg border transition-all flex items-center justify-center gap-2 ${procedureType === "carta_pase" ? "bg-medical-cyan/20 border-medical-cyan text-medical-cyan shadow-[0_0_15px_rgba(34,211,238,0.1)]" : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300"}`}
+                                >
+                                    <Sparkles size={14} />
+                                    Carta Pase
+                                </button>
+                            </div>
                             <button
-                                onClick={() => setProcedureType("reembolso")}
-                                className={`py-2 px-3 text-xs font-medium rounded-lg border transition-all ${procedureType === "reembolso" ? "bg-fintech-cyan/20 border-fintech-cyan text-fintech-cyan" : "bg-slate-900 border-slate-700 text-slate-400"}`}
-                            >Reembolso</button>
-                            <button
-                                onClick={() => setProcedureType("carta-pase")}
-                                className={`py-2 px-3 text-xs font-medium rounded-lg border transition-all ${procedureType === "carta-pase" ? "bg-fintech-cyan/20 border-fintech-cyan text-fintech-cyan" : "bg-slate-900 border-slate-700 text-slate-400"}`}
-                            >Carta Pase</button>
+                                onClick={() => setProcedureType("programacion")}
+                                className={`w-full py-2.5 px-3 text-xs font-bold uppercase rounded-lg border transition-all flex items-center justify-center gap-2 ${procedureType === "programacion" ? "bg-medical-cyan/20 border-medical-cyan text-medical-cyan shadow-[0_0_15px_rgba(34,211,238,0.1)]" : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300"}`}
+                            >
+                                <Stethoscope size={14} />
+                                Programación de Cirugía
+                            </button>
                         </div>
                         <div className="p-3 bg-slate-900/50 rounded-lg">
                             <p className="text-[10px] text-slate-500 font-bold uppercase mb-2">Automáticos:</p>
-                            {procedureConfigs[procedureType].autoPDFs.map((pdf, idx) => (
+                            {procedureConfigs[procedureType].autoPDFs.map((pdf: string, idx: number) => (
                                 <div key={idx} className="flex items-center text-[11px] text-slate-300 mb-1">
-                                    <span className="w-1 h-1 bg-fintech-cyan rounded-full mr-2"></span>
+                                    <span className="w-1 h-1 bg-medical-cyan rounded-full mr-2"></span>
                                     {pdf.replace(".pdf", "")}
                                 </div>
                             ))}
@@ -610,7 +643,7 @@ export default function NuevoSiniestroPage() {
                         <div className="bg-slate-900/30 border border-slate-800 p-4 rounded-xl mb-6">
                             <p className="text-[11px] text-slate-500 font-bold uppercase mb-3">Checklist del Trámite:</p>
                             <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                                {procedureConfigs[procedureType].manualChecklist.map((item, idx) => {
+                                {procedureConfigs[procedureType].manualChecklist.map((item: string, idx: number) => {
                                     const isChecked = Object.values(fileClassifications).some(cls => {
                                         if (item.toLowerCase().includes("id oficial") && cls === "ine") return true;
                                         if (item.toLowerCase().includes("factura") && (cls === "factura_xml" || cls === "posible_factura")) return true;

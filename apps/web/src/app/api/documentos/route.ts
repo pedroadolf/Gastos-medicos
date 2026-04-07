@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseService, supabaseUrl } from "@/services/supabase";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 export async function POST(req: NextRequest) {
     try {
         console.log("📥 [POST] /api/documentos: Iniciando recepción de URLs firmadas (v2.0)...");
         
+        // Auth check - ensure user is logged in
+        const session = await getServerSession(authOptions);
+        
+        if (!session) {
+            return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+        }
+
+        const userId = session.user.id;
+        console.log(`👤 [POST] Usuario: ${userId} (${session.user.email})`);
+
         // El frontend ahora envía JSON directamente, no FormData multipart
         const payload = await req.json();
         const { siniestroId, asegurado, tipoTramite, grupoA_anexos = [], grupoB_facturas = [], metadata } = payload;
@@ -18,47 +30,102 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "No se recibieron archivos" }, { status: 400 });
         }
 
-        console.log(`🚀 [QUEUE] Creando Job en Supabase para: ${asegurado?.nombre || "Usuario Desconocido"}...`);
-
-        // 1. Crear el Job en Supabase usando Service Role centralizado
+        // 1. Resolver Siniestro (Crear si es nuevo)
         const supabaseService = getSupabaseService();
+        let finalSiniestroId = siniestroId;
 
-        const { data: job, error: jobError } = await supabaseService
-            .from('jobs')
-            .insert([
-                { 
-                    status: 'processing', 
-                    file_count: totalFiles,
-                    metadata: {
-                        ...metadata,
-                        siniestroId,
-                        asegurado,
-                        tipoTramite,
-                        // Guardamos las URLs iniciales en el job como referencia
-                        grupoA_anexos,
-                        grupoB_facturas
+        if (siniestroId === "SIN_NUEVO") {
+            console.log("🆕 [DB] Creando nuevo Siniestro...");
+            const { data: newSiniestro, error: sinError } = await supabaseService
+                .from('siniestros')
+                .insert([
+                    {
+                        user_id: userId,
+                        nombre_siniestro: asegurado?.padecimiento || `Trámite ${tipoTramite}`,
+                        numero_siniestro: `PEND-${Date.now().toString().slice(-6)}`
                     }
+                ])
+                .select()
+                .single();
+
+            if (sinError) {
+                console.error("❌ [DB] Error creando Siniestro:", sinError);
+                return NextResponse.json({ error: "Error al crear siniestro context", details: sinError.message }, { status: 500 });
+            }
+            finalSiniestroId = newSiniestro.id;
+        }
+
+        // 2. Crear Trámite (para visibilidad inmediata en Dashboard)
+        console.log(`📑 [DB] Creando Trámite para siniestro: ${finalSiniestroId}...`);
+        const { data: tramite, error: tramiteError } = await supabaseService
+            .from('tramites')
+            .insert([
+                {
+                    siniestro_id: finalSiniestroId,
+                    tipo: tipoTramite,
+                    status: 'procesando'
                 }
             ])
             .select()
             .single();
 
-        if (jobError) {
-            console.error("❌ [POST] Error creando Job en Supabase:", jobError);
-            return NextResponse.json({ 
-                error: "Error al iniciar proceso en Base de Datos", 
-                details: jobError.message,
-                hint: jobError.hint,
-                code: jobError.code,
-                target: supabaseUrl
-            }, { status: 500 });
+        if (tramiteError) {
+            console.error("❌ [DB] Error creando Trámite:", tramiteError);
+            return NextResponse.json({ error: "Error al registrar trámite", details: tramiteError.message }, { status: 500 });
         }
 
-        const jobId = job.id;
-        console.log(`✅ [POST] Job creado exitosamente. ID: ${jobId}`);
+        const jobId = tramite.id; // Usamos el ID del trámite como ID de proceso unificado
+        console.log(`✅ [DB] Trámite creado exitosamente. ID: ${jobId}`);
 
-        // 2. Disparar webhook de n8n para que el agente inicie el procesamiento
-        // El agente en n8n recibirá las URLs, procesará el Grupo B e integrará el Grupo A.
+        // 3. Crear el Job (Legacy/Tracking complementario)
+        const { error: jobError } = await supabaseService
+            .from('jobs')
+            .insert([
+                { 
+                    id: jobId, // Match con el trámite
+                    status: 'processing', 
+                    file_count: totalFiles,
+                    metadata: {
+                        ...metadata,
+                        siniestroId: finalSiniestroId,
+                        asegurado,
+                        tipoTramite,
+                        grupoA_anexos,
+                        grupoB_facturas
+                    }
+                }
+            ]);
+
+        // 5. Registrar archivos en la base de datos (adjuntos/facturas)
+        const results = [...grupoA_anexos, ...grupoB_facturas];
+        console.log(`📑 [API Documentos] Registrando ${results.length} archivos en DB...`);
+        
+        for (const result of results) {
+          if (result.url) {
+            const isFactura = result.name.toLowerCase().endsWith('.xml');
+            
+            if (isFactura) {
+              // Registrar en la tabla 'facturas'
+              await supabaseService.from('facturas').insert({
+                tramite_id: jobId,
+                archivo_storage_path: result.url,
+                nombre_archivo: result.name,
+                estado: 'pendiente'
+              });
+            } else {
+              // Registrar en la tabla 'adjuntos'
+              await supabaseService.from('adjuntos').insert({
+                tramite_id: jobId,
+                storage_path: result.url,
+                nombre_archivo: result.name,
+                tipo_archivo: result.name.split('.').pop() || 'unknown'
+              });
+            }
+          }
+        }
+
+        // 6. Notificar a n8n para iniciar el procesamiento
+        console.log("🚀 [API Documentos] Notificando a n8n...");
         const n8nWebhook = process.env.N8N_WEBHOOK_URL;
         
         if (n8nWebhook) {

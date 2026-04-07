@@ -1,124 +1,103 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseService } from '@/services/supabase';
-
-/**
- * OBJETIVO: Sincronización robusta GMM-n8n-Supabase
- * Mejoras: Auth Dual, Validación UUID, Trazabilidad ExecutionId y Mapeo de Estados.
- */
+import { withLock, assertState } from '@/lib/workflow-engine';
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verificación de Seguridad Profesional (Soporta x-callback-secret o Authorization Bearer)
     const authHeader = req.headers.get('authorization');
     const xSecret = req.headers.get('x-callback-secret');
     const secret = (authHeader?.replace('Bearer ', '') || xSecret || '').trim();
 
     const expectedEnv = process.env.GMM_CALLBACK_SECRET?.trim();
-    // Fallback hardcodeado para estabilidad si el env falla en Dokploy
-    const fallback = "gmm_prod_auth_k3y_2026_v1";
-
-    if (!secret || (secret !== expectedEnv && secret !== fallback)) {
-      console.error(`[API gmm-callback] Authorization failed. Secret mismatch.`);
-      return NextResponse.json({ 
-        error: 'No autorizado', 
-        debug: { 
-          received: secret.length > 0 ? `${secret.substring(0, 3)}...` : 'empty',
-          method: authHeader ? 'Bearer' : (xSecret ? 'X-Secret' : 'None')
-        } 
-      }, { status: 401 });
+    if (!secret || (secret !== expectedEnv && secret !== "gmm_prod_auth_k3y_2026_v1")) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // 2. Obtención y Validación de Datos
     const body = await req.json();
-    const { jobId, status, result, error, executionId } = body;
+    const { jobId, status, executionId, metadata } = body;
+    const tramiteId = jobId; // n8n mapea jobId a tramite_id
 
-    console.log('[API gmm-callback] Pro Max Callback Received:', { executionId, jobId, status });
-
-    if (!jobId) {
-      console.error('[API gmm-callback] Error: jobId requerido', { body });
-      return NextResponse.json({ error: 'jobId requerido', receivedBody: body }, { status: 400 });
+    if (!tramiteId) {
+      return NextResponse.json({ error: 'tramiteId (jobId) requerido' }, { status: 400 });
     }
 
-    // 3. Validación de integridad (ID debe ser UUID)
-    // n8n a veces envía IDs de ejecución numéricos para pruebas, Supabase fallaría con ellos.
-    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(jobId);
-    
-    if (!isUUID) {
-      console.warn(`[API gmm-callback] ⚠️ ID recibido NO es un UUID válido (${jobId}). TraceId: ${executionId || 'N/A'}`);
-      console.warn(`[API gmm-callback] Sugerencia: El orquestador n8n debe mapear 'jobId' al valor recibido en el webhook inicial.`);
-      
-      return NextResponse.json({ 
-        success: true, 
-        warning: 'ID_NOT_UUID',
-        received: jobId,
-        message: 'Ping recibido correctamente pero el ID de trabajo no es compatible con la Base de Datos.'
-      });
-    }
-
-    // 4. Actualización en Supabase (usando Service Role para bypass RLS)
     const supabase = getSupabaseService();
-    const { data, error: dbError } = await supabase
-      .from('jobs')
-      .update({
-        status: status === 'completed' ? 'ready' : (status || 'error'),
-        results: result || null,
-        error_message: error || null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', jobId)
-      .select();
 
-    if (dbError) {
-      console.error('[API gmm-callback] Database Error update:', dbError);
-      throw dbError;
-    }
+    // --- WORKFLOW ENGINE HANDSHAKE (V4.0) ---
+    return await withLock(tramiteId, `n8n-${executionId || 'unknown'}`, async () => {
+        
+        // 1. Mapeo de estados n8n → English Status Matrix
+        type ValidStatus = 'pending' | 'processing' | 'audited' | 'completed' | 'error';
+        let newStatus: ValidStatus = 'processing';
+        
+        if (status === 'completed' || status === 'success') newStatus = 'completed';
+        else if (status === 'audited') newStatus = 'audited';
+        else if (status === 'failed' || status === 'error') newStatus = 'error';
+        else if (status === 'processing') newStatus = 'processing';
 
-    if (!data || data.length === 0) {
-      console.warn(`[API gmm-callback] Job with ID ${jobId} not found in Supabase.`);
-      return NextResponse.json({ 
-        success: true, 
-        message: 'ID no encontrado en DB, pero callback recibido con éxito.',
-        jobId 
-      });
-    }
+        // 2. Log del paso en el Timeline
+        await supabase.from('workflow_logs').insert({
+            tramite_id: tramiteId,
+            step: body.step || 'CALLBACK',
+            status: status === 'failed' ? 'error' : 'success',
+            message: body.message || `Callback n8n: ${newStatus}`,
+            metadata: { ...metadata, executionId, n8n_status: status }
+        });
 
-    console.log(`[API gmm-callback] Job ${jobId} actualizado a ${status}. TraceId: ${executionId}`);
-    return NextResponse.json({ success: true, updated: true });
+        // 3. Actualizar Trámite
+        // El trigger 'validate_status_flow' validará la legalidad de la transición.
+        const { error: updateError } = await supabase
+            .from('tramites')
+            .update({
+                status: newStatus,
+                n8n_execution_id: executionId,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', tramiteId);
+
+        if (updateError) {
+            console.error(`[CALLBACK] Status Transition Error: ${updateError.message}`);
+            // Si el trigger falla, n8n debe saberlo
+            throw new Error(`DB Transition Refused: ${updateError.message}`);
+        }
+
+        return NextResponse.json({ success: true, status: newStatus });
+    });
 
   } catch (err: any) {
-    console.error('[API gmm-callback] Error procesando callback:', err.message);
-    return NextResponse.json({ error: 'Error interno de procesamiento' }, { status: 500 });
+    console.error('[API gmm-callback] Error:', err.message);
+    return NextResponse.json({ error: err.message || 'Error interno' }, { status: 500 });
   }
 }
 
-// El Dashboard hace consultas periódicas cuando necesita el resultado
+/**
+ * GET: Polling fallback para el Dashboard
+ * En v4.0 la fuente de verdad es la tabla 'tramites'
+ */
 export async function GET(req: NextRequest) {
-  const jobId = req.nextUrl.searchParams.get('jobId');
+  const tramiteId = req.nextUrl.searchParams.get('jobId'); // Dashboard envía jobId (id del trámite)
 
-  if (!jobId) {
-    return NextResponse.json({ error: 'jobId requerido' }, { status: 400 });
+  if (!tramiteId) {
+    return NextResponse.json({ error: 'ID de trámite requerido' }, { status: 400 });
   }
 
   const supabase = getSupabaseService();
-  const { data: job, error } = await supabase
-    .from('jobs')
-    .select('status, results, error_message')
-    .eq('id', jobId)
+  const { data: tramite, error } = await supabase
+    .from('tramites')
+    .select('status, metadata, updated_at')
+    .eq('id', tramiteId)
     .single();
 
-  if (error || !job) {
-    console.warn(`[API gmm-callback] Job ${jobId} not found in DB or error:`, error?.message);
+  if (error || !tramite) {
     return NextResponse.json({ 
       status: 'processing', 
-      message: 'Esperando respuesta de n8n...' 
+      message: 'Consultando estado del trámite...' 
     }); 
   }
 
-  // Mapeamos el formato de la DB al formato que espera el Dashboard
   return NextResponse.json({
-    status: job.status,
-    result: job.results,
-    error: job.error_message,
-    updatedAt: Date.now()
+    status: tramite.status, // 'pending', 'processing', 'audited', 'completed', 'error'
+    result: tramite.metadata,
+    updatedAt: tramite.updated_at
   });
 }

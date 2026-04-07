@@ -82,8 +82,23 @@ CREATE POLICY "Users can view their own tramites" ON tramites
 CREATE POLICY "Admins view all tramites" ON tramites FOR ALL TO authenticated USING (true);
 
 -- 🔹 Políticas de Facturas & Adjuntos
-CREATE POLICY "Users view their own details" ON facturas FOR SELECT USING (true); -- Simplified, assuming parent check
-CREATE POLICY "Users view their own attachments" ON adjuntos FOR SELECT USING (true);
+CREATE POLICY "Users view their own facturas" ON facturas
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM tramites
+            JOIN siniestros ON siniestros.id = tramites.siniestro_id
+            WHERE tramites.id = facturas.tramite_id AND siniestros.user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Users view their own adjuntos" ON adjuntos
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM tramites
+            JOIN siniestros ON siniestros.id = tramites.siniestro_id
+            WHERE tramites.id = adjuntos.tramite_id AND siniestros.user_id = auth.uid()
+        )
+    );
 
 -- ⚡ Trigger para UpdatedAt
 CREATE OR REPLACE FUNCTION update_updated_at_column()

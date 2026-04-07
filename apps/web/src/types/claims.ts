@@ -1,8 +1,39 @@
 // 🚑 TypeScript Definitions for Core Claims (Siniestros)
+import { Receipt, Files, Stethoscope } from 'lucide-react';
 
-export type TramiteType = 'reembolso' | 'programacion' | 'carta_pase';
+export type TramiteType = 'reembolso' | 'carta_pase' | 'programacion';
 export type TramiteStatus = 'borrador' | 'en_revision' | 'procesando' | 'completado' | 'rechazado';
 export type FacturaTipo = 'H' | 'M' | 'F' | 'O';
+
+export const TYPES = [
+  {
+    id: 'reembolso',
+    label: 'Reembolso de Gastos',
+    description: 'Recupera los gastos médicos que ya pagaste (Consultas, Medicamentos, etc).',
+    icon: Receipt,
+    color: 'text-indigo-500',
+    bg: 'bg-indigo-500/10',
+    border: 'border-indigo-500/20'
+  },
+  {
+    id: 'carta_pase',
+    label: 'Carta Pase Especial',
+    description: 'Solicitud de autorización para terapias, estudios especiales o consultas.',
+    icon: Files,
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500/20'
+  },
+  {
+    id: 'programacion',
+    label: 'Programación de Cirugía',
+    description: 'Solicita el pago directo para una cirugía o procedimiento mayor programado.',
+    icon: Stethoscope,
+    color: 'text-rose-500',
+    bg: 'bg-rose-500/10',
+    border: 'border-rose-500/20'
+  }
+];
 
 export interface Siniestro {
   id: string;
