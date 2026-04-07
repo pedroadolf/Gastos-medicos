@@ -112,32 +112,48 @@ export async function GET() {
             console.warn("⚠️ Error al leer de Google Sheets:", sheetsError);
         }
 
-        // Combinar datos: Supabase tiene prioridad, pero Sheets completa el catálogo
-        // Unificamos asegurados para evitar duplicados por email
+        // 3. Unificar asegurados y crear mapeo para siniestros
         const allAseguradosMap = new Map();
+        const rfcToUuidMap = new Map();
         
         // Primero Sheets (para tener RFCs y Nombres reales)
-        sheetAsegurados.forEach(a => allAseguradosMap.set(a.email?.toLowerCase() || a.id, a));
+        sheetAsegurados.forEach(a => {
+            allAseguradosMap.set(a.email?.toLowerCase() || a.id, a);
+            if (a.rfc) rfcToUuidMap.set(a.rfc, a.id);
+        });
         
-        // Luego Supabase (si el usuario ya está en Supabase, respetamos su UUID como ID principal)
+        // Luego Supabase (prioridad de ID UUID)
         dbAsegurados.forEach(a => {
             const key = a.email?.toLowerCase();
             if (allAseguradosMap.has(key)) {
                 const existing = allAseguradosMap.get(key);
-                allAseguradosMap.set(key, { ...existing, ...a }); // Merged, Supabase 'id' (UUID) over Sheets 'id' (RFC)
+                const updated = { ...existing, ...a };
+                allAseguradosMap.set(key, updated);
+                // Si este usuario de Supabase tiene RFC en Sheets, mapeamos ese RFC a su UUID
+                if (existing.rfc) rfcToUuidMap.set(existing.rfc, a.id);
             } else {
                 allAseguradosMap.set(key, a);
             }
         });
 
+        // 4. Mapear Siniestros de Sheets a los IDs finales (UUIDs si existen)
+        const mappedSheetSiniestros = sheetSiniestros.map(s => ({
+            ...s,
+            aseguradoId: rfcToUuidMap.get(s.aseguradoId) || s.aseguradoId
+        }));
+
         // Combinar Siniestros
-        const allSiniestros = [...siniestros, ...sheetSiniestros];
+        const allSiniestros = [...siniestros, ...mappedSheetSiniestros];
 
         return NextResponse.json({ 
             success: true, 
             asegurados: Array.from(allAseguradosMap.values()), 
             siniestros: allSiniestros,
-            debug: { supabaseCount: siniestros.length, sheetsCount: sheetSiniestros.length }
+            debug: { 
+                supabaseCount: siniestros.length, 
+                sheetsCount: sheetSiniestros.length,
+                totalAsegurados: allAseguradosMap.size
+            }
         });
 
     } catch (error: any) {

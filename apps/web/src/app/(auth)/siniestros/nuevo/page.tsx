@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Search, UploadCloud, FileText, Zap, RefreshCw, CheckCircle2, Loader2, Sparkles, ExternalLink, ChevronLeft, Stethoscope } from "lucide-react";
+import { Search, UploadCloud, FileText, Zap, RefreshCw, CheckCircle2, Loader2, Sparkles, ExternalLink, ChevronLeft, Stethoscope, Files } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import Link from 'next/link';
@@ -58,10 +58,10 @@ export default function NuevoSiniestroPage() {
             autoPDFs: ["2_Case_Management-Mar26.pdf", "3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf"],
             manualChecklist: ["Informe médico firmado", "Estudios diagnósticos", "Comprobante domicilio (<3 meses)", "ID Oficial Afectado/Titular", "Facturas desglosadas", "Estado de cuenta (CLABE)"]
         },
-        "programacion": {
-            label: "Programación de Cirugía",
-            autoPDFs: ["2_Case_Management-Mar26.pdf", "3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf", "7_Programacion-Cirugia.pdf"],
-            manualChecklist: ["Informe médico detallado", "Presupuesto hospitalario", "Presupuesto médico", "Estudios pre-operatorios", "ID Oficial"]
+        "carta_pase": {
+            label: "Carta Pase Especial",
+            autoPDFs: ["2_Case_Management-Mar26.pdf", "3_Carta-Remesa-Mar26.pdf", "4_SRGMM-Mar26.pdf"],
+            manualChecklist: ["Informe médico detallado", "Presupuesto médico", "Estudios especiales", "ID Oficial"]
         }
     };
 
@@ -461,11 +461,11 @@ export default function NuevoSiniestroPage() {
                                 Reembolso
                             </button>
                             <button
-                                onClick={() => setProcedureType("programacion")}
-                                className={`py-3 px-4 text-xs font-bold uppercase rounded-xl border transition-all flex flex-col items-center justify-center gap-2 ${procedureType === "programacion" ? "bg-medical-cyan/20 border-medical-cyan text-medical-cyan shadow-[0_0_20px_rgba(34,211,238,0.2)]" : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300 hover:border-slate-700"}`}
+                                onClick={() => setProcedureType("carta_pase")}
+                                className={`py-3 px-4 text-xs font-bold uppercase rounded-xl border transition-all flex flex-col items-center justify-center gap-2 ${procedureType === "carta_pase" ? "bg-medical-cyan/20 border-medical-cyan text-medical-cyan shadow-[0_0_20px_rgba(34,211,238,0.2)]" : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300 hover:border-slate-700"}`}
                             >
-                                <Stethoscope size={20} />
-                                Cirugía
+                                <Files size={20} />
+                                Carta Pase
                             </button>
                         </div>
                         <div className="p-3 bg-slate-900/50 rounded-lg">
@@ -495,23 +495,33 @@ export default function NuevoSiniestroPage() {
                             }}
                             value={selectedSiniestro || ""}
                         >
-                            <option value="">{selectedAsegurado ? "-- Seleccionar Siniestro / Padecimiento --" : "-- Busca asegurado primero --"}</option>
-                            {selectedAsegurado && siniestrosBD
-                                .filter(s => 
-                                    s.aseguradoId === selectedAsegurado.id || 
-                                    s.aseguradoId === selectedAsegurado.rfc ||
-                                    s.aseguradoId === selectedAsegurado.nombre
-                                )
-                                .map((s) => (
-                                    <option key={s.id} value={s.id}>
-                                        {s.titulo} {s.numeroSiniestro ? `(${s.numeroSiniestro})` : ""}
-                                    </option>
-                                ))}
+                            {selectedAsegurado ? (
+                                <>
+                                    <option value="">-- [NUEVO] Registrar Nuevo Siniestro --</option>
+                                    {siniestrosBD
+                                        .filter(s => 
+                                            s.aseguradoId === selectedAsegurado.id || 
+                                            s.aseguradoId === selectedAsegurado.rfc ||
+                                            s.aseguradoId === selectedAsegurado.nombre
+                                        )
+                                        .map((s) => (
+                                            <option key={s.id} value={s.id}>
+                                                {s.titulo} {s.numeroSiniestro ? `(${s.numeroSiniestro})` : ""}
+                                            </option>
+                                        ))
+                                    }
+                                </>
+                            ) : (
+                                <option value="">-- Primero busca un asegurado --</option>
+                            )}
                         </select>
-                        {!selectedSiniestro && selectedAsegurado && (
-                            <p className="mt-2 text-[10px] text-amber-400 italic font-medium">
-                                Si no aparece el siniestro, se creará uno nuevo automáticamente.
-                            </p>
+                        {selectedAsegurado && !selectedSiniestro && (
+                            <div className="mt-3 p-2 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                                <p className="text-[10px] text-amber-400 italic font-medium leading-tight">
+                                    <span className="font-bold uppercase block mb-1">Nota: Siniestro Nuevo</span>
+                                    No se encontró un siniestro previo para este padecimiento. Se creará uno automáticamente al procesar.
+                                </p>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -581,28 +591,35 @@ export default function NuevoSiniestroPage() {
                             <input {... (activeUploadTab === 'facturas' ? dropzoneFacturas.getInputProps() : dropzoneAnexos.getInputProps())} />
                             
                             <div className={cn(
-                                "w-20 h-20 rounded-3xl flex items-center justify-center mb-4 transition-all duration-500 shadow-2xl rotate-3 group-hover:rotate-0 group-hover:scale-110",
+                                "w-24 h-24 rounded-3xl flex items-center justify-center mb-6 transition-all duration-500 shadow-2xl group-hover:scale-110",
                                 activeUploadTab === 'facturas' ? "bg-fintech-cyan text-slate-900" : "bg-amber-500 text-slate-900"
                             )}>
-                                {activeUploadTab === 'facturas' ? <Zap size={32} /> : <UploadCloud size={32} />}
+                                {activeUploadTab === 'facturas' ? <Zap size={40} className="animate-pulse" /> : <UploadCloud size={40} />}
                             </div>
                             
-                            <h3 className="text-lg font-black text-white uppercase tracking-tighter mb-2">
-                               {activeUploadTab === 'facturas' ? "Soltar Facturas aquí" : "Soltar Anexos aquí"}
+                            <h3 className="text-xl font-black text-white uppercase tracking-tighter mb-2">
+                               {activeUploadTab === 'facturas' ? "Arrastra tus FACTURAS aquí" : "Arrastra tus ANEXOS aquí"}
                             </h3>
                             <p className="text-sm text-slate-400 text-center max-w-sm mb-6 leading-tight">
-                                Puedes seleccionar <span className="text-white font-bold">múltiples</span> archivos a la vez.
-                                {activeUploadTab === 'facturas' 
-                                    ? " El motor IA analizará conceptos y montos automáticamente."
-                                    : " Documentación de soporte para el dictamen médico."}
+                                Selecciona <span className="text-white font-bold underline decoration-fintech-cyan">múltiples archivos</span> de un solo golpe o arrastra la carpeta completa.
                             </p>
                             
                             <div className="flex gap-3">
+                                <div className="flex -space-x-2">
+                                    {[1,2,3].map(v => (
+                                        <div key={v} className={cn(
+                                            "w-8 h-8 rounded-full border-2 border-slate-900 flex items-center justify-center text-[10px] font-black",
+                                            activeUploadTab === 'facturas' ? "bg-fintech-cyan text-slate-900" : "bg-amber-500 text-slate-900"
+                                        )}>
+                                            <FileText size={12} />
+                                        </div>
+                                    ))}
+                                </div>
                                 <span className={cn(
-                                    "px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border transition-colors",
+                                    "px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border transition-colors bg-slate-900/80",
                                     activeUploadTab === 'facturas' ? "border-fintech-cyan/30 text-fintech-cyan" : "border-amber-500/30 text-amber-500"
                                 )}>
-                                    {activeUploadTab === 'facturas' ? "Requiere XML + PDF" : "PDF / JPG / PNG"}
+                                    {activeUploadTab === 'facturas' ? "Soporta XML + PDF" : "PDF / IMÁGENES"}
                                 </span>
                             </div>
                         </div>
