@@ -24,9 +24,12 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app ./
 COPY --from=pruner /app/out/full/ .
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV TURBO_PACKAGE_MANAGER=npm
 # We build the project using turbo
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+
 RUN npm run build -- --filter=frontend
 
 # Stage 3: Runner

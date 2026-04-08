@@ -21,9 +21,17 @@ export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
   get(_target, prop) {
     if (!_supabase) {
       const { finalUrl, anonKey } = getEnvConfig();
-      if (!anonKey) {
-        console.warn('⚠️ [WARN] Supabase credentials missing or invalid.');
+      
+      // Strict validation to avoid "missing-key-build-time" silent failures
+      if (!anonKey || anonKey.includes('missing')) {
+        const errorMsg = '🚨 [FATAL] Supabase NEXT_PUBLIC_SUPABASE_ANON_KEY is missing or invalid. Check Dokploy Build Args.';
+        console.error(errorMsg);
+        // Only throw in browser to avoid crashing the build process prematurely
+        if (typeof window !== 'undefined') {
+          throw new Error(errorMsg);
+        }
       }
+      
       _supabase = createClient(finalUrl, anonKey || 'missing-key-build-time');
     }
     return (_supabase as any)[prop];
