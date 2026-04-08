@@ -5,7 +5,7 @@ FROM base AS pruner
 WORKDIR /app
 RUN npm install -g turbo
 COPY . .
-RUN turbo prune frontend --docker
+RUN turbo prune web --docker
 
 # Stage 1: Dependencies
 FROM base AS deps
@@ -30,7 +30,10 @@ ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-RUN npm run build -- --filter=frontend
+# Debug check: these should be visible in Dokploy build logs
+RUN echo "DIAGNOSTIC: SUPABASE_URL is ${NEXT_PUBLIC_SUPABASE_URL}"
+
+RUN npx turbo run build --filter=web
 
 # Stage 3: Runner
 FROM base AS runner
