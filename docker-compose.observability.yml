@@ -34,6 +34,7 @@ services:
       - '--web.console.templates=/usr/share/prometheus/console_templates'
     networks:
       - observability
+      - dokploy-network
 
   grafana:
     image: grafana/grafana:latest
@@ -50,6 +51,8 @@ services:
 networks:
   observability:
     driver: bridge
+  dokploy-network:
+    external: true
 
 volumes:
   loki-data:
