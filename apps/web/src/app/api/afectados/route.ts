@@ -94,19 +94,45 @@ export async function GET() {
                 }).filter((a: any) => a.nombre.length > 2);
 
                 sheetSiniestros = dataRows.map((row: any[], index: number) => {
-                    const sNum = val(row, ["2_Case_Management_Numero_Siniestro", "4_SRGMM_Siniestro", "3_Carta_Remesa_No_Siniestro"]) || `SIN-${index + 1}`;
-                    const rfc  = val(row, ["4_SRGMM_Titular_Rfc_1", "4_SRGMM_Afec_Rfc"]);
-                    const pad = val(row, ["3_Carta_Remesa_Padecimiento", "4_SRGMM_Describir_Sintomas"]);
+                    const sNum = val(row, [
+                        "2_Case_Management_Numero_Siniestro", 
+                        "4_SRGMM_Siniestro", 
+                        "3_Carta_Remesa_No_Siniestro",
+                        "SINIESTRO",
+                        "No. Siniestro",
+                        "CASE_NUMBER"
+                    ]) || `EXP-${index + 1}`;
+
+                    const rfc  = val(row, [
+                        "4_SRGMM_Titular_Rfc_1", 
+                        "4_SRGMM_Afec_Rfc",
+                        "RFC_TITULAR",
+                        "RFC"
+                    ]);
+
+                    const pad = val(row, [
+                        "3_Carta_Remesa_Padecimiento", 
+                        "4_SRGMM_Describir_Sintomas",
+                        "2_Case_Management_Padecimiento",
+                        "4_SRGMM_Pad",
+                        "PADECIMIENTO",
+                        "EVENTO",
+                        "MOTIVO",
+                        "SÍNTOMAS",
+                        "SINTOMAS"
+                    ]);
+
+                    const email = val(row, ["From email", "TO Email", "EMAIL", "CORREO"]);
 
                     return {
                         id: `${sNum}-${index}`,
-                        user_id: rfc,
-                        nombre_siniestro: pad || "Trámite Médico",
+                        user_id: rfc || email || val(row, ["4_SRGMM_Titular_Apmaterno"]), // Fallback a cualquier ID relacional
+                        nombre_siniestro: pad || "Trámite Médico General",
                         numero_siniestro: sNum,
                         fecha_apertura: new Date().toISOString().split("T")[0],
                         estado: "Activo",
                     };
-                }).filter((s: any) => s.user_id !== "");
+                }).filter((s: any) => s.numero_siniestro !== "");
             }
         } catch (sheetsError) {
             console.warn("⚠️ Error al leer de Google Sheets:", sheetsError);
@@ -127,15 +153,15 @@ export async function GET() {
         // Luego Supabase (prioridad de ID UUID)
         dbAsegurados.forEach(a => {
             const key = a.email?.toLowerCase();
-            if (allAseguradosMap.has(key)) {
-                const existing = allAseguradosMap.get(key);
-                const updated = { ...existing, ...a };
-                allAseguradosMap.set(key, updated);
-                // Mapeo robusto
-                if (existing.rfc) rfcToUuidMap.set(existing.rfc, a.id);
-                emailToUuidMap.set(key, a.id);
-            } else {
-                allAseguradosMap.set(key, a);
+            if (key) {
+                if (allAseguradosMap.has(key)) {
+                    const existing = allAseguradosMap.get(key);
+                    const updated = { ...existing, ...a };
+                    allAseguradosMap.set(key, updated);
+                    if (existing.rfc) rfcToUuidMap.set(existing.rfc, a.id);
+                } else {
+                    allAseguradosMap.set(key, a);
+                }
                 emailToUuidMap.set(key, a.id);
             }
         });
@@ -149,9 +175,21 @@ export async function GET() {
             };
         });
 
-        // Combinar Siniestros
-        const allSiniestros = [...siniestros, ...mappedSheetSiniestros];
-        console.log(`[API AFECTADOS] Total Siniestros: ${allSiniestros.length} (DB: ${siniestros.length}, Sheets: ${mappedSheetSiniestros.length})`);
+        // Combinar Siniestros (Evitar duplicados por Numero de Siniestro)
+        const combinedMap = new Map();
+        
+        // Prioridad Supabase
+        siniestros.forEach(s => combinedMap.set(s.numero_siniestro, s));
+        
+        // Agregar de Sheets si no están
+        mappedSheetSiniestros.forEach(s => {
+            if (!combinedMap.has(s.numero_siniestro)) {
+                combinedMap.set(s.numero_siniestro, s);
+            }
+        });
+
+        const allSiniestros = Array.from(combinedMap.values());
+        console.log(`[API AFECTADOS] Total Siniestros: ${allSiniestros.length} (DB: ${siniestros.length}, Unique Combined: ${allSiniestros.length})`);
 
         return NextResponse.json({ 
             success: true, 

@@ -69,13 +69,13 @@ export default function UploadDocs({ files, setFiles, onBack, onSubmit, isSubmit
             const newFiles = { ...files };
             droppedFiles.forEach(file => {
               const name = file.name.toLowerCase();
-              if (name.includes('ine') || name.includes('identifica') || name.includes('dni')) newFiles['identificacion'] = file;
-              else if (name.includes('comprobante') || name.includes('domicilio') || name.includes('luz') || name.includes('agua')) newFiles['comprobante'] = file;
-              else if (name.includes('receta')) newFiles['receta'] = file;
-              else if (name.includes('estudio') || name.includes('analisis') || name.includes('lab') || name.includes('imagen')) newFiles['estudios'] = file;
-              else if (name.includes('estado') || name.includes('cuenta') || name.includes('banco')) newFiles['estado_cuenta'] = file;
+              if (name.includes('ine') || name.includes('identifica') || name.includes('dni') || name.includes('id_')) newFiles['identificacion'] = file;
+              else if (name.includes('comprobante') || name.includes('domicilio') || name.includes('luz') || name.includes('agua') || name.includes('direcci')) newFiles['comprobante'] = file;
+              else if (name.includes('receta') || name.includes('medico') || name.includes('doctor')) newFiles['receta'] = file;
+              else if (name.includes('estudio') || name.includes('analisis') || name.includes('lab') || name.includes('imagen') || name.includes('rx') || name.includes('sangre')) newFiles['estudios'] = file;
+              else if (name.includes('estado') || name.includes('cuenta') || name.includes('banco') || name.includes('clabe') || name.includes('fiscal')) newFiles['estado_cuenta'] = file;
               else {
-                // Fallback: assign to first empty slot
+                // Fallback: assign to first empty slot if it's a PDF/Image
                 const firstEmpty = REQUIRED_DOCS.find(doc => !newFiles[doc.id]);
                 if (firstEmpty) newFiles[firstEmpty.id] = file;
               }
@@ -84,39 +84,63 @@ export default function UploadDocs({ files, setFiles, onBack, onSubmit, isSubmit
           }}
           className="relative group cursor-pointer"
         >
-          <div className="absolute -inset-1 bg-gradient-to-r from-medical-cyan/20 to-indigo-500/20 rounded-[2.5rem] blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-          <div className="relative p-10 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2.5rem] bg-white dark:bg-slate-950/50 flex flex-col items-center justify-center gap-4 transition-all hover:border-medical-cyan/50 hover:shadow-2xl hover:shadow-medical-cyan/10">
-            <div className="w-16 h-16 rounded-3xl bg-medical-cyan/10 flex items-center justify-center text-medical-cyan mb-2 group-hover:scale-110 transition-transform">
-              <FileUp size={32} />
+          <div className="absolute -top-14 right-4 flex flex-col items-end gap-1">
+            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Documentos Detectados</span>
+            <div className={cn(
+               "px-4 py-1.5 rounded-full shadow-lg transition-all duration-500 border-2",
+               Object.keys(files).length > 0 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" : "bg-medical-cyan/10 border-medical-cyan/30 text-medical-cyan"
+            )}>
+              <span className="text-sm font-black tracking-tighter">
+                {Object.keys(files).length} <span className="text-[10px] opacity-40">de</span> {REQUIRED_DOCS.length}
+              </span>
             </div>
-            <div className="text-center">
-              <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">Carga Masiva (Bulk Upload)</h3>
-              <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">
-                Arrastra <span className="text-medical-cyan">todos</span> tus documentos aquí de una sola vez
-              </p>
-            </div>
-            <input 
-              type="file" 
-              multiple 
-              className="absolute inset-0 opacity-0 cursor-pointer" 
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                const selected = Array.from(e.target.files || []);
-                const newFiles = { ...files };
-                selected.forEach(file => {
-                  const name = file.name.toLowerCase();
-                  if (name.includes('ine') || name.includes('identifica') || name.includes('dni')) newFiles['identificacion'] = file;
-                  else if (name.includes('comprobante') || name.includes('domicilio') || name.includes('luz') || name.includes('agua')) newFiles['comprobante'] = file;
-                  else if (name.includes('receta')) newFiles['receta'] = file;
-                  else if (name.includes('estudio') || name.includes('analisis') || name.includes('lab') || name.includes('imagen')) newFiles['estudios'] = file;
-                  else if (name.includes('estado') || name.includes('cuenta') || name.includes('banco')) newFiles['estado_cuenta'] = file;
-                  else {
-                    const firstEmpty = REQUIRED_DOCS.find(doc => !newFiles[doc.id]);
-                    if (firstEmpty) newFiles[firstEmpty.id] = file;
-                  }
-                });
-                setFiles(newFiles);
-              }}
-            />
+          </div>
+          
+          <div className="absolute -inset-2 bg-gradient-to-r from-medical-cyan/30 to-indigo-500/30 rounded-[3rem] blur-xl opacity-20 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+          <div className="relative p-12 border-4 border-dashed border-slate-200 dark:border-slate-800 rounded-[3rem] bg-white dark:bg-slate-950/80 flex flex-col items-center justify-center gap-6 transition-all hover:border-medical-cyan hover:shadow-2xl hover:shadow-medical-cyan/20 overflow-hidden min-h-[300px]">
+             
+             {/* Decorative Background Icon */}
+             <FileUp size={120} className="absolute -bottom-4 -right-4 text-medical-cyan/5 -rotate-12" />
+
+             <div className="w-24 h-24 rounded-[2.5rem] bg-medical-cyan text-white flex items-center justify-center shadow-2xl shadow-medical-cyan/40 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                <FileUp size={42} strokeWidth={3} />
+             </div>
+             
+             <div className="text-center space-y-3">
+                <h3 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight italic">CARGA MASIVA</h3>
+                <p className="text-sm text-slate-500 font-bold uppercase tracking-[0.2em] max-w-sm mx-auto leading-relaxed">
+                   Arrastra <span className="text-medical-cyan underline decoration-2 underline-offset-4">todo el expediente</span> aquí. El sistema clasificará INE, Recetas y Estudios automáticamente.
+                </p>
+             </div>
+
+             <div className="flex gap-4 p-2 bg-slate-100 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <span className="px-3 py-1 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-200 dark:border-slate-800 last:border-0">PDF</span>
+                <span className="px-3 py-1 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-200 dark:border-slate-800 last:border-0">JPG/PNG</span>
+                <span className="px-3 py-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">XML</span>
+             </div>
+
+             <input 
+               type="file" 
+               multiple 
+               className="absolute inset-0 opacity-0 cursor-pointer" 
+               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                 const selected = Array.from(e.target.files || []);
+                 const newFiles = { ...files };
+                 selected.forEach(file => {
+                   const name = file.name.toLowerCase();
+                   if (name.includes('ine') || name.includes('identifica') || name.includes('dni') || name.includes('id_')) newFiles['identificacion'] = file;
+                   else if (name.includes('comprobante') || name.includes('domicilio') || name.includes('luz') || name.includes('agua') || name.includes('direcci')) newFiles['comprobante'] = file;
+                   else if (name.includes('receta') || name.includes('medico') || name.includes('doctor')) newFiles['receta'] = file;
+                   else if (name.includes('estudio') || name.includes('analisis') || name.includes('lab') || name.includes('imagen') || name.includes('rx') || name.includes('sangre')) newFiles['estudios'] = file;
+                   else if (name.includes('estado') || name.includes('cuenta') || name.includes('banco') || name.includes('clabe') || name.includes('fiscal')) newFiles['estado_cuenta'] = file;
+                   else {
+                     const firstEmpty = REQUIRED_DOCS.find(doc => !newFiles[doc.id]);
+                     if (firstEmpty) newFiles[firstEmpty.id] = file;
+                   }
+                 });
+                 setFiles(newFiles);
+               }}
+             />
           </div>
         </div>
 

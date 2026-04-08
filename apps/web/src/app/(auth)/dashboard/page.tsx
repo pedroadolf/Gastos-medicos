@@ -17,7 +17,8 @@ import {
   ChevronRight,
   FilePlus,
   LayoutGrid,
-  List
+  List,
+  ShieldCheck
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -47,7 +48,7 @@ export default function GlobalDashboardPage() {
       .catch(() => setIsLoading(false));
   }, []);
 
-  const totalSiniestros = data.asegurados?.length || 0;
+  const totalSiniestros = data.siniestros?.length || 0;
   const totalReembolsado = data.asegurados?.reduce((acc: number, curr: any) => 
     acc + parseFloat((curr.montoPagado || "0").replace(/[^0-9.]/g, "")), 0) || 0;
   
@@ -72,11 +73,11 @@ export default function GlobalDashboardPage() {
           </div>
           <div className="flex gap-4">
              <button 
-                onClick={() => router.push('/siniestros/nuevo')}
+                onClick={() => router.push('/tramites/nuevo')}
                 className="px-6 py-4 bg-medical-cyan text-slate-950 font-black rounded-2xl flex items-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-medical-cyan/20 group uppercase text-xs"
              >
                 <div className="bg-slate-950/20 p-1 rounded-lg">
-                  <Plus size={18} strokeWidth={4} />
+                   <Plus size={18} strokeWidth={4} />
                 </div>
                 NUEVO TRÁMITE
              </button>
@@ -116,81 +117,104 @@ export default function GlobalDashboardPage() {
                         <SystemStatus label="Agent Grid" status="Warning" color="amber" />
                     </div>
                 </div>
-                <button className="w-full py-3 bg-slate-800 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:bg-slate-700 transition-all">Ver Logs</button>
+                <button 
+                    onClick={() => router.push('/observabilidad')}
+                    className="w-full py-3 bg-slate-800 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:bg-slate-700 transition-all font-sans"
+                >
+                    Ver Logs
+                </button>
             </div>
 
-            <div className="p-8 bg-medical-cyan rounded-[40px] flex flex-col justify-between group cursor-pointer relative overflow-hidden">
+            <div className="p-8 bg-medical-cyan rounded-[40px] flex flex-col justify-between group cursor-pointer relative overflow-hidden" onClick={() => router.push('/tramites')}>
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-[50px] -rotate-45" />
                 <div>
                      <h3 className="text-slate-950 text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">Siniestros Hoy</h3>
                      <div className="text-slate-950 text-7xl font-black italic tracking-tighter">{totalSiniestros}</div>
                 </div>
-                <Link href="/siniestros" className="w-full py-4 bg-slate-950 text-white font-black rounded-2xl text-center text-xs shadow-xl shadow-slate-950/20 hover:scale-105 transition-all">GESTIONAR</Link>
+                <div className="w-full py-4 bg-slate-950 text-white font-black rounded-2xl text-center text-xs shadow-xl shadow-slate-950/20 group-hover:scale-105 transition-all uppercase">GESTIONAR</div>
             </div>
         </div>
 
         {/* Charts & Lists */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
             <div className="lg:col-span-2 space-y-6">
-                <div className="flex items-center justify-between mb-4">
-                     <h3 className="text-xl font-bold text-white italic">Live Processing Stream</h3>
-                     <div className="flex items-center gap-2">
-                         <span className="w-2 h-2 rounded-full bg-medical-cyan animate-ping" />
-                         <span className="text-[10px] font-black text-medical-cyan uppercase">Live</span>
-                     </div>
+                <div className="flex items-end justify-between">
+                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Live Processing</h3>
+                    <Activity className="w-4 h-4 text-emerald-500 animate-pulse" />
                 </div>
-                <div className="space-y-4">
-                    {data.asegurados?.slice(0, 4).map((claim: any, idx: number) => (
-                        <div key={idx} className="p-5 bg-slate-900/30 border border-slate-800 rounded-[32px] hover:border-slate-700 transition-all flex items-center justify-between group">
-                            <div className="flex items-center gap-5">
-                                <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-medical-cyan">
-                                    <FileText size={20} />
+                <div className="mt-4 flex items-baseline gap-2">
+                    <span className="text-4xl font-black text-white italic tracking-tighter">
+                        {data.siniestros?.filter((t: any) => t.estado === 'processing').length || 0}
+                    </span>
+                    <span className="text-xs font-bold text-slate-500 uppercase">Solicitudes en cola</span>
+                </div>
+                <div className="space-y-4 min-h-[300px]">
+                    {data.siniestros && data.siniestros.length > 0 ? (
+                        data.siniestros.slice(0, 4).map((claim: any, idx: number) => (
+                            <div key={idx} className="p-5 bg-slate-900/30 border border-slate-800 rounded-[32px] hover:border-slate-700 transition-all flex items-center justify-between group">
+                                <div className="flex items-center gap-5">
+                                    <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-medical-cyan text-glow-cyan">
+                                        <FileText size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-white">Siniestro #{claim.numero_siniestro || 'SIN-'+idx} - {claim.nombre_siniestro || 'Evento'}</p>
+                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Status: <span className="text-medical-cyan">Activo</span> • Sincronizado</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm font-bold text-white">Siniestro #{claim.siniestro_id || '772'+idx} - {claim.nombre || 'Asegurado'}</p>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Status: <span className="text-medical-cyan">Validando</span> • Hace {idx + 2} min</p>
-                                </div>
+                                <button 
+                                    onClick={() => router.push('/tramites')}
+                                    className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 hover:text-white transition-all"
+                                >
+                                    <ChevronRight size={18} />
+                                </button>
                             </div>
-                            <button 
-                                onClick={() => router.push('/siniestros')}
-                                className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 hover:text-white transition-all"
-                            >
-                                <ChevronRight size={18} />
-                            </button>
+                        ))
+                    ) : (
+                        <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-slate-800 rounded-[40px] py-12 opacity-50">
+                            <Clock className="text-slate-700 mb-4" size={48} />
+                            <p className="text-xs font-black text-slate-600 uppercase tracking-[0.3em]">Esperando Trámites...</p>
                         </div>
-                    ))}
+                    )}
                 </div>
             </div>
 
             <div className="space-y-6">
-                 <div className="p-8 bg-slate-900/60 rounded-[40px] border border-slate-800">
+                 <div className="p-8 bg-slate-900/60 rounded-[40px] border border-slate-800 relative overflow-hidden">
+                     <div className="absolute top-0 right-0 w-32 h-32 bg-medical-amber/5 blur-3xl" />
                      <div className="flex items-center gap-3 mb-6">
                          <MonitorPlay className="w-6 h-6 text-medical-amber" />
                          <h3 className="text-lg font-black text-white italic">AI Diagnóstico</h3>
                      </div>
                      <div className="p-4 bg-medical-amber/5 border border-medical-amber/10 rounded-2xl mb-6">
                          <p className="text-xs font-bold text-medical-amber flex items-center gap-2 mb-2">
-                             <AlertCircle size={14} /> Anomalía Detectada
+                             <AlertCircle size={14} /> Auditor Inteligente
                          </p>
-                         <p className="text-[11px] text-slate-400">Patrón de rechazos inusual en facturas de laboratorio.</p>
+                         <p className="text-[11px] text-slate-400">Listo para ejecutar validaciones sobre el historial de siniestros.</p>
                      </div>
                      <button 
-                        onClick={() => router.push('/auditoria')}
-                        className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-2xl text-[10px] uppercase tracking-widest transition-all"
+                        onClick={() => router.push('/auditoria?action=fix')}
+                        className="w-full py-4 bg-medical-amber/20 hover:bg-medical-amber/30 text-medical-amber font-bold rounded-2xl text-[10px] uppercase tracking-widest transition-all font-sans border border-medical-amber/20 active:scale-95 flex items-center justify-center gap-2"
                     >
+                        <Zap size={14} fill="currentColor" />
                         Ejecutar Corrección
                     </button>
                  </div>
 
                  <div className="grid grid-cols-2 gap-4">
-                     <Link href="/agentes" className="p-6 bg-slate-900/40 rounded-[32px] border border-slate-800 hover:border-medical-cyan/50 transition-all text-center group">
+                      <button 
+                        onClick={() => router.push('/agentes')}
+                        className="p-6 bg-slate-900/40 rounded-[32px] border border-slate-800 hover:border-medical-cyan/50 transition-all text-center group"
+                      >
                         <Brain className="w-6 h-6 text-slate-500 group-hover:text-medical-cyan mx-auto mb-2" />
-                        <span className="text-[10px] font-black text-slate-500 group-hover:text-white uppercase tracking-widest">Agentes</span>
-                     </Link>
-                     <Link href="/auditoria" className="p-6 bg-slate-900/40 rounded-[32px] border border-slate-800 hover:border-medical-amber/50 transition-all text-center group">
-                        <Activity className="w-6 h-6 text-slate-500 group-hover:text-medical-amber mx-auto mb-2" />
-                        <span className="text-[10px] font-black text-slate-500 group-hover:text-white uppercase tracking-widest">Auditor</span>
-                     </Link>
+                        <span className="text-[10px] font-black text-slate-500 group-hover:text-white uppercase tracking-widest">Agentes AI</span>
+                      </button>
+                      <button 
+                        onClick={() => router.push('/auditoria')}
+                        className="p-6 bg-slate-900/40 rounded-[32px] border border-slate-800 hover:border-emerald-500/50 transition-all text-center group"
+                      >
+                        <ShieldCheck className="w-6 h-6 text-slate-500 group-hover:text-emerald-500 mx-auto mb-2" />
+                        <span className="text-[10px] font-black text-slate-500 group-hover:text-white uppercase tracking-widest">Panel Auditor</span>
+                      </button>
                  </div>
             </div>
         </div>
