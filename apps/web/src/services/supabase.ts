@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { logger } from '../lib/logger';
 
 const FALLBACK_URL = 'https://supabase.pash.uno';
 
@@ -25,11 +26,13 @@ export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
       // Strict validation to avoid "missing-key-build-time" silent failures
       if (!anonKey || anonKey.includes('missing')) {
         const errorMsg = '🚨 [FATAL] SUPABASE ENV NOT LOADED. Check Dokploy Build Args.';
-        console.error(errorMsg);
+        logger.error(errorMsg, { url: finalUrl });
         // Only throw in browser to avoid crashing the build process premature
         if (typeof window !== 'undefined') {
           throw new Error(errorMsg);
         }
+      } else {
+        logger.info('Supabase client initialized successfully', { url: finalUrl });
       }
       
       _supabase = createClient(finalUrl, anonKey || 'missing-key-build-time');

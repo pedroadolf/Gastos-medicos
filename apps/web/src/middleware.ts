@@ -3,31 +3,51 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
+    const requestId = crypto.randomUUID();
+    const startTime = Date.now();
+    
+    // Inyectar Correlation ID en la petición
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set("x-request-id", requestId);
+
     const token = req.nextauth.token;
     const path = req.nextUrl.pathname;
 
+    // Lógica de respuesta
+    let response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+
     // Si no hay token, withAuth ya redirige al login
-    if (!token) return;
+    if (!token && !path.startsWith('/api/health') && !path.startsWith('/api/metrics')) {
+      // Dejar que withAuth maneje la redirección si es necesario
+    } else if (token) {
+      const userRole = (token as any)?.role || "asegurado";
+      
+      // 1. Protección de rutas de Administrador
+      const adminRoutes = ["/agentes", "/observabilidad", "/auditoria", "/logs"];
+      const isAdminRoute = adminRoutes.some(route => path.startsWith(route));
 
-    const userRole = (token as any)?.role || "asegurado";
+      if (isAdminRoute && userRole !== "admin") {
+        response = NextResponse.redirect(new URL("/dashboard", req.url));
+      } else {
+        // 2. Protección de rutas de Operador
+        const operatorRoutes = ["/gestion"];
+        const isOperatorRoute = operatorRoutes.some(route => path.startsWith(route));
 
-    // 1. Protección de rutas de Administrador
-    const adminRoutes = ["/agentes", "/observabilidad", "/auditoria", "/logs"];
-    const isAdminRoute = adminRoutes.some(route => path.startsWith(route));
-
-    if (isAdminRoute && userRole !== "admin") {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+        if (isOperatorRoute && userRole !== "operator" && userRole !== "admin") {
+          response = NextResponse.redirect(new URL("/dashboard", req.url));
+        }
+      }
     }
 
-    // 2. Protección de rutas de Operador
-    const operatorRoutes = ["/gestion"];
-    const isOperatorRoute = operatorRoutes.some(route => path.startsWith(route));
+    // Añadir headers de observabilidad a la respuesta
+    response.headers.set("x-request-id", requestId);
+    response.headers.set("x-response-time", `${Date.now() - startTime}ms`);
 
-    if (isOperatorRoute && userRole !== "operator" && userRole !== "admin") {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
-    }
-
-    return NextResponse.next();
+    return response;
   },
   {
     callbacks: {
