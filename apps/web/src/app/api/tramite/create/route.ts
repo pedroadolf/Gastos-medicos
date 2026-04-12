@@ -66,8 +66,12 @@ export async function POST(req: Request) {
             if (existingSiniestro) {
                 targetSiniestroId = existingSiniestro.id;
                 // Verificar propiedad si no es admin (BYPASS para SINI-TEST de E2E)
-                const isTestSiniestro = existingSiniestro.numero_siniestro === 'SINI-TEST-E2E-001';
+                const isTestSiniestro = existingSiniestro.numero_siniestro?.startsWith('SINI-TEST');
+                
+                console.log(`[E2E-DEBUG] Validando Siniestro: ${existingSiniestro.numero_siniestro}. TestMode: ${isTestSiniestro}. UserID: ${session.user.id}. SiniestroOwner: ${existingSiniestro.user_id}`);
+
                 if (!isTestSiniestro && session.user.role !== 'admin' && existingSiniestro.user_id !== session.user.id) {
+                    console.warn(`[E2E-DEBUG] ❌ Acceso denegado a Siniestro ${targetSiniestroId}`);
                     return NextResponse.json({ error: "No tienes permiso sobre este siniestro" }, { status: 403 });
                 }
             } else if (!isUuid) {
