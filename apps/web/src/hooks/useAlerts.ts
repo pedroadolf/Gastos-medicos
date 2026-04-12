@@ -21,18 +21,25 @@ export function useAlerts(limit = 20) {
 
   const fetchAlerts = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('alerts_log')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    try {
+      const { data, error } = await supabase
+        .from('alerts_log')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit);
 
-    if (error) {
-      console.error('Error fetching alerts:', error);
-    } else {
-      setAlerts(data || []);
+      if (error) {
+        console.warn('⚠️ [OBSERVABILITY] Alertas no disponibles aún:', error.message);
+        setAlerts([]);
+      } else {
+        setAlerts(data || []);
+      }
+    } catch (err) {
+      console.error('❌ [OBSERVABILITY] Error crítico al consultar alertas:', err);
+      setAlerts([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [limit]);
 
   useEffect(() => {
