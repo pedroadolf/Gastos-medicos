@@ -49,7 +49,17 @@ export function useWorkflowLogs(tramiteId: string) {
           filter: `tramite_id=eq.${tramiteId}`
         },
         (payload: any) => {
-          setLogs((prev) => [payload.new, ...prev])
+          setLogs((prev) => {
+            const index = prev.findIndex(log => log.id === payload.new.id);
+            if (index !== -1) {
+              // Update existing log
+              const newLogs = [...prev];
+              newLogs[index] = payload.new;
+              return newLogs;
+            }
+            // Insert new log at the beginning if not exists
+            return [payload.new, ...prev];
+          });
         }
       )
       .subscribe()

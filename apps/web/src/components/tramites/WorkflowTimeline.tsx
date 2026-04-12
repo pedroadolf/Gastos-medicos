@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Database
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useWorkflowLogs, WorkflowLog } from '@/hooks/useWorkflowLogs';
 import { cn } from '@/lib/utils';
 
@@ -85,64 +86,77 @@ export function WorkflowTimeline({ tramiteId }: { tramiteId: string }) {
         </button>
       </div>
 
-      <div className="space-y-4">
-        {Object.entries(PHASE_CONFIG).map(([key, config]) => {
-          const phaseLogs = groupedPhases[key];
-          if (!phaseLogs || phaseLogs.length === 0) return null;
+      <div className="relative space-y-4">
+        {/* Animated Line Connector */}
+        <div className="absolute left-[33px] top-6 bottom-6 w-[2px] bg-slate-800/50 hidden lg:block" />
 
-          const isProcessing = phaseLogs.some(l => l.status === 'processing');
-          const isError = key === 'ERROR';
+        <AnimatePresence>
+          {Object.entries(PHASE_CONFIG).map(([key, config]) => {
+            const phaseLogs = groupedPhases[key];
+            if (!phaseLogs || phaseLogs.length === 0) return null;
 
-          return (
-            <div key={key} className={cn(
-              "group relative overflow-hidden rounded-[24px] border transition-all duration-500",
-              isProcessing ? "bg-slate-900/80 border-medical-cyan/40 shadow-xl shadow-medical-cyan/5" : "bg-slate-950/40 border-slate-800/80 hover:border-slate-700",
-              isError ? "border-rose-500/30 bg-rose-500/5" : ""
-            )}>
-              {/* Pulse Indicator on Processing */}
-              {isProcessing && (
-                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-medical-cyan to-transparent animate-shimmer" />
-              )}
+            const isProcessing = phaseLogs.some(l => l.status === 'processing');
+            const isError = key === 'ERROR';
 
-              <div className="p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "p-2 rounded-xl border transition-colors",
-                      isProcessing ? "bg-medical-cyan/20 border-medical-cyan/30 text-medical-cyan shadow-[0_0_15px_rgba(6,182,212,0.2)]" : "bg-slate-900 border-slate-800 text-slate-500"
-                    )}>
-                      <config.icon size={18} className={isProcessing ? "animate-pulse" : ""} />
-                    </div>
-                    <div>
-                      <h3 className={cn(
-                        "text-[12px] font-black uppercase tracking-tight italic",
-                        isProcessing ? "text-white" : "text-slate-400"
+            return (
+              <motion.div 
+                key={key}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={cn(
+                  "group relative overflow-hidden rounded-[24px] border transition-all duration-500",
+                  isProcessing ? "bg-slate-900/80 border-medical-cyan/40 shadow-xl shadow-medical-cyan/5" : "bg-slate-950/40 border-slate-800/80 hover:border-slate-700",
+                  isError ? "border-rose-500/30 bg-rose-500/5" : ""
+                )}
+              >
+                {/* Pulse Indicator on Processing */}
+                {isProcessing && (
+                  <motion.div 
+                    initial={{ x: '-100%' }}
+                    animate={{ x: '100%' }}
+                    transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                    className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-medical-cyan to-transparent" 
+                  />
+                )}
+
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "p-2 rounded-xl border transition-colors relative",
+                        isProcessing ? "bg-medical-cyan/20 border-medical-cyan/30 text-medical-cyan shadow-[0_0_15px_rgba(6,182,212,0.2)]" : "bg-slate-900 border-slate-800 text-slate-500"
                       )}>
-                        {config.label}
-                      </h3>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">
-                          {phaseLogs.length} EVENTOS REGISTRADOS
-                        </span>
-                        {isProcessing && (
-                           <span className="flex items-center gap-1 text-[8px] font-black text-medical-cyan uppercase animate-pulse">
-                              <Activity size={8} /> TRABAJANDO...
-                           </span>
-                        )}
+                        <config.icon size={18} className={isProcessing ? "animate-pulse" : ""} />
+                      </div>
+                      <div>
+                        <h3 className={cn(
+                          "text-[12px] font-black uppercase tracking-tight italic",
+                          isProcessing ? "text-white" : "text-slate-400"
+                        )}>
+                          {config.label}
+                        </h3>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">
+                            {phaseLogs.length} EVENTOS REGISTRADOS
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="space-y-3 pl-2">
-                  {phaseLogs.map((log) => (
-                    <TimelineItem key={log.id} log={log} showDebug={showDebug} />
-                  ))}
+                  <div className="space-y-3 pl-2">
+                    <AnimatePresence>
+                      {phaseLogs.map((log) => (
+                        <TimelineItem key={log.id} log={log} showDebug={showDebug} />
+                      ))}
+                    </AnimatePresence>
+                  </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -153,14 +167,22 @@ function TimelineItem({ log, showDebug }: { log: WorkflowLog; showDebug: boolean
   const isProcessing = log.status === 'processing';
 
   return (
-    <div className="relative pl-6 border-l border-slate-800/50 group/item">
+    <motion.div 
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      layout
+      className="relative pl-6 border-l border-slate-800/50 group/item"
+    >
       {/* Connector Node */}
-      <div className={cn(
-        "absolute left-[-4.5px] top-1.5 w-2 h-2 rounded-full border border-slate-950 transition-all z-10",
-        log.status === 'success' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" :
-        log.status === 'error' ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]" :
-        log.status === 'processing' ? "bg-medical-cyan animate-pulse" : "bg-slate-700"
-      )} />
+      <motion.div 
+        layoutId={`node-${log.id}`}
+        className={cn(
+          "absolute left-[-4.5px] top-1.5 w-2 h-2 rounded-full border border-slate-950 transition-all z-10",
+          log.status === 'success' ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" :
+          log.status === 'error' ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]" :
+          log.status === 'processing' ? "bg-medical-cyan animate-pulse" : "bg-slate-700"
+        )} 
+      />
 
       <div className="flex items-start gap-3">
         <div className="flex-1 min-w-0">
@@ -177,18 +199,22 @@ function TimelineItem({ log, showDebug }: { log: WorkflowLog; showDebug: boolean
           </div>
 
           {showDebug && log.metadata && (
-            <div className="mt-2 p-2 bg-slate-950/80 border border-slate-800/50 rounded-lg overflow-x-hidden">
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              className="mt-2 p-2 bg-slate-950/80 border border-slate-800/50 rounded-lg overflow-x-hidden"
+            >
                <div className="flex flex-wrap gap-2 mb-1">
                   <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Metadata Context:</span>
                </div>
                <pre className="text-[9px] font-mono text-slate-500 block overflow-x-auto whitespace-pre max-w-full">
                  {JSON.stringify(log.metadata, null, 2)}
                </pre>
-            </div>
+            </motion.div>
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

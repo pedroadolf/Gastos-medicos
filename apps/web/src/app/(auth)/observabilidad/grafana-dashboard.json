@@ -1,0 +1,345 @@
+{
+  "dashboard": {
+    "title": "GMM Observability PRO",
+    "uid": "gmm-obs-pro",
+    "description": "Dashboard de observabilidad del sistema GMM — AIOps, trámites y logs en tiempo real",
+    "timezone": "browser",
+    "refresh": "5s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "tags": ["gmm", "observability", "supabase"],
+    "panels": [
+      {
+        "type": "row",
+        "title": "🟢 FILA 1 — ESTADO GLOBAL",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+        "collapsed": false
+      },
+      {
+        "id": 1,
+        "title": "🟢 System Status",
+        "type": "stat",
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "ffillji3tt3i8e" },
+        "gridPos": { "h": 6, "w": 6, "x": 0, "y": 1 },
+        "targets": [
+          {
+            "rawSql": "SELECT CASE WHEN MAX(created_at) > now() - interval '10 minutes' THEN 1 ELSE 0 END as alive FROM system_logs;",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              { "type": "value", "options": { "1": { "text": "ALIVE", "color": "green" } } },
+              { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" } } }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "red", "value": null },
+                { "color": "green", "value": 1 }
+              ]
+            },
+            "color": { "mode": "thresholds" }
+          },
+          "overrides": []
+        },
+        "options": {
+          "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "auto"
+        }
+      },
+      {
+        "id": 2,
+        "title": "⏰ Última Ejecución",
+        "type": "stat",
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "ffillji3tt3i8e" },
+        "gridPos": { "h": 6, "w": 6, "x": 6, "y": 1 },
+        "targets": [
+          {
+            "rawSql": "SELECT MAX(created_at) as last_run FROM system_logs;",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": { "mode": "thresholds" },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "blue", "value": null }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "options": {
+          "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "auto"
+        }
+      },
+      {
+        "id": 3,
+        "title": "❌ Errores (última hora)",
+        "type": "stat",
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "ffillji3tt3i8e" },
+        "gridPos": { "h": 6, "w": 6, "x": 12, "y": 1 },
+        "targets": [
+          {
+            "rawSql": "SELECT COUNT(*) as errors FROM system_logs WHERE status = 'error' AND created_at > now() - interval '1 hour';",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 5 }
+              ]
+            },
+            "color": { "mode": "thresholds" }
+          },
+          "overrides": []
+        },
+        "options": {
+          "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "auto"
+        }
+      },
+      {
+        "id": 10,
+        "title": "🚨 Alertas Activas",
+        "type": "stat",
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "ffillji3tt3i8e" },
+        "gridPos": { "h": 6, "w": 6, "x": 18, "y": 1 },
+        "targets": [
+          {
+            "rawSql": "SELECT COUNT(*) as firing FROM alerts_log WHERE status = 'firing';",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "orange", "value": 1 },
+                { "color": "red", "value": 3 }
+              ]
+            },
+            "color": { "mode": "thresholds" }
+          },
+          "overrides": []
+        },
+        "options": {
+          "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+          "orientation": "auto",
+          "textMode": "auto",
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "auto"
+        }
+      },
+      {
+        "type": "row",
+        "title": "🔵 FILA 2 — SYSTEM LOGS EN VIVO",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
+        "collapsed": false
+      },
+      {
+        "id": 4,
+        "title": "📋 System Logs Recientes (últimos 50)",
+        "type": "table",
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "ffillji3tt3i8e" },
+        "gridPos": { "h": 12, "w": 24, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "rawSql": "SELECT created_at, agent, node, workflow, status, severity, message FROM system_logs ORDER BY created_at DESC LIMIT 50;",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "status" },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": { "type": "color-background" }
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    { "type": "value", "options": { "success": { "color": "green", "text": "✅ success" } } },
+                    { "type": "value", "options": { "error": { "color": "red", "text": "❌ error" } } },
+                    { "type": "value", "options": { "pending": { "color": "yellow", "text": "⏳ pending" } } },
+                    { "type": "value", "options": { "processing": { "color": "blue", "text": "⚙️ processing" } } }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "severity" },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": { "type": "color-background" }
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    { "type": "value", "options": { "critical": { "color": "red", "text": "🔴 critical" } } },
+                    { "type": "value", "options": { "warning": { "color": "orange", "text": "🟡 warning" } } },
+                    { "type": "value", "options": { "info": { "color": "blue", "text": "🔵 info" } } }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "cellHeight": "sm",
+          "footer": { "show": false }
+        }
+      },
+      {
+        "type": "row",
+        "title": "🚨 FILA 3 — ALERTAS AIOPS",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 20 },
+        "collapsed": false
+      },
+      {
+        "id": 5,
+        "title": "🚨 Historial de Alertas",
+        "type": "table",
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "ffillji3tt3i8e" },
+        "gridPos": { "h": 10, "w": 16, "x": 0, "y": 21 },
+        "targets": [
+          {
+            "rawSql": "SELECT created_at, title, status, severity FROM alerts_log ORDER BY created_at DESC LIMIT 20;",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "status" },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": { "type": "color-background" }
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    { "type": "value", "options": { "firing": { "color": "red", "text": "🔥 FIRING" } } },
+                    { "type": "value", "options": { "resolved": { "color": "green", "text": "✅ resolved" } } }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": { "id": "byName", "options": "severity" },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": { "type": "color-background" }
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    { "type": "value", "options": { "critical": { "color": "red" } } },
+                    { "type": "value", "options": { "warning": { "color": "orange" } } },
+                    { "type": "value", "options": { "info": { "color": "blue" } } }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "cellHeight": "sm"
+        }
+      },
+      {
+        "id": 6,
+        "title": "📊 Alertas por Severidad",
+        "type": "piechart",
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "ffillji3tt3i8e" },
+        "gridPos": { "h": 10, "w": 8, "x": 16, "y": 21 },
+        "targets": [
+          {
+            "rawSql": "SELECT severity, COUNT(*) as total FROM alerts_log GROUP BY severity ORDER BY total DESC;",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": []
+        },
+        "options": {
+          "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": true },
+          "pieType": "donut",
+          "legend": { "displayMode": "table", "placement": "right" }
+        }
+      },
+      {
+        "type": "row",
+        "title": "📈 FILA 4 — TRÁMITES (cuando haya datos reales)",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 31 },
+        "collapsed": true,
+        "panels": [
+          {
+            "id": 7,
+            "title": "Timeline de Workflow Logs",
+            "type": "table",
+            "datasource": { "type": "grafana-postgresql-datasource", "uid": "ffillji3tt3i8e" },
+            "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+            "targets": [
+              {
+                "rawSql": "SELECT created_at, step, status, message, tramite_id FROM workflow_logs ORDER BY created_at DESC LIMIT 30;",
+                "format": "table",
+                "refId": "A"
+              }
+            ],
+            "fieldConfig": { "defaults": {}, "overrides": [] },
+            "options": { "showHeader": true, "cellHeight": "sm" }
+          }
+        ]
+      }
+    ],
+    "schemaVersion": 39,
+    "version": 2
+  },
+  "overwrite": true
+}

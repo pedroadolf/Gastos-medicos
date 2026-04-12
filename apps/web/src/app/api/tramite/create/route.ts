@@ -26,13 +26,18 @@ export async function POST(req: Request) {
         const formData = await req.formData();
         const traceId = crypto.randomUUID();
         
+        console.log(`[E2E-BACKEND] 🚀 Recibida solicitud de creación. TraceID: ${traceId}`);
+
         // 🧩 Extract metadata
         const siniestroId = formData.get("siniestro_id") as string;
         const tipo = formData.get("tipo") as string;
         const facturasRaw = formData.get("facturas") as string;
         const facturas = facturasRaw ? JSON.parse(facturasRaw) : [];
 
+        console.log(`[E2E-BACKEND] 📦 Metadata: SiniestroID=${siniestroId}, Tipo=${tipo}, Facturas=${facturas.length}`);
+
         if (!siniestroId || !tipo) {
+            console.error("[E2E-BACKEND] ❌ Faltan datos obligatorios.");
             return NextResponse.json({ error: "Faltan datos obligatorios (siniestro_id, tipo)" }, { status: 400 });
         }
 
@@ -104,9 +109,11 @@ export async function POST(req: Request) {
             .single();
 
         if (tError) {
-            console.error("[BACKEND] Error al insertar trámite:", tError);
+            console.error("[E2E-BACKEND] ❌ Error al insertar trámite en DB:", tError);
             throw tError;
         }
+
+        console.log(`[E2E-BACKEND] ✅ Trámite insertado en DB con ID: ${tramite.id}`);
 
         // 🛡️ BLOQUEO ATÓMICO (Atomic Lock)
         // Pasamos a 'processing' inmediatamente para habilitar el flujo enterprise.

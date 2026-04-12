@@ -1,0 +1,344 @@
+{
+  "name": "GMM-Alert-Orchestrator-PRO",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "grafana-alert",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Grafana",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        300
+      ],
+      "webhookId": "grafana-alert"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "is-firing",
+              "leftValue": "={{ $json.status }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "firing"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "if-firing",
+      "name": "Is Firing?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "tramite_id",
+              "value": "={{ $json.labels.tramite_id }}"
+            },
+            {
+              "name": "step",
+              "value": "={{ $json.labels.step || 'unknown' }}"
+            },
+            {
+              "name": "error_type",
+              "value": "={{ $json.labels.error_type || 'transient' }}"
+            }
+          ],
+          "json": [
+            {
+              "name": "raw_payload",
+              "value": "={{ $json }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "normalize-data",
+      "name": "Normalize Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "rpc",
+        "rpcKey": "handle_tramite_retry_pro",
+        "args": {
+          "parameters": [
+            {
+              "name": "p_tramite_id",
+              "value": "={{ $json.tramite_id }}"
+            },
+            {
+              "name": "p_max_retries",
+              "value": 3
+            }
+          ]
+        }
+      },
+      "id": "supabase-atomic-check",
+      "name": "Smart Decision RPC",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        700,
+        200
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "Supabase account ID",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "should-retry-check",
+              "leftValue": "={{ $json.should_retry }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "should-retry-if",
+      "name": "Authorize Retry?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        900,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.OCR_RETRY_ENDPOINT || 'http://ocr-engine/process' }}",
+        "method": "POST",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "tramite_id",
+              "value": "={{ $node['Normalize Data'].json.tramite_id }}"
+            },
+            {
+              "name": "source",
+              "value": "retry"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "trigger-ocr-engine",
+      "name": "Relanzar OCR",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1100,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "method": "POST",
+        "sendBody": true,
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{ $env.TELEGRAM_CHAT_ID }}"
+            },
+            {
+              "name": "parse_mode",
+              "value": "Markdown"
+            },
+            {
+              "name": "text",
+              "value": "=🚨 *FALLO DEFINITIVO: GMM Observability*\n\n*Trámite:* `{{ $node['Normalize Data'].json.tramite_id }}`\n*Estado:* `{{ $json.message }}`\n*Intento:* `{{ $json.current_retry_count }}/3`\n*Breaker:* `{{ $json.circuit_state.toUpperCase() }}`\n\n❌ El sistema no pudo auto-recuperarse.\n[Ver Logs Grafana]({{ $env.GRAFANA_URL }})\n[Ver PDF](https://supabase.pash.uno/storage/v1/object/public/expedientes/{{ $node['Normalize Data'].json.tramite_id }}.pdf)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "telegram-alert",
+      "name": "Telegram Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "alerts_log",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "tramite_id": "={{ $node['Normalize Data'].json.tramite_id }}",
+            "step": "={{ $node['Normalize Data'].json.step }}",
+            "action": "={{ $node['Authorize Retry?'].json.should_retry ? 'retry' : 'escalate' }}",
+            "retry_attempt": "={{ $json.current_retry_count }}",
+            "reason": "={{ $json.message }}",
+            "payload": "={{ JSON.stringify($node['Normalize Data'].json.raw_payload) }}"
+          },
+          "matchingColumns": [
+            "id"
+          ]
+        },
+        "options": {}
+      },
+      "id": "log-audit-db",
+      "name": "Audit Logging",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        200
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "Supabase account ID",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Grafana": {
+      "main": [
+        [
+          {
+            "node": "Is Firing?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Firing?": {
+      "main": [
+        [
+          {
+            "node": "Normalize Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Data": {
+      "main": [
+        [
+          {
+            "node": "Smart Decision RPC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Smart Decision RPC": {
+      "main": [
+        [
+          {
+            "node": "Authorize Retry?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authorize Retry?": {
+      "main": [
+        [
+          {
+            "node": "Relanzar OCR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Relanzar OCR": {
+      "main": [
+        [
+          {
+            "node": "Audit Logging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Alert": {
+      "main": [
+        [
+          {
+            "node": "Audit Logging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

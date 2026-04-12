@@ -52,20 +52,27 @@ export default function NuevoTramite() {
 
   // -- Handlers --
   const handleFinalSubmit = async () => {
-    if (!selectedSiniestroId) return;
+    if (!selectedSiniestroId) {
+      console.warn("⚠️ Intento de envío sin siniestro seleccionado.");
+      return;
+    }
     
+    console.log("🚀 Iniciando proceso de envío E2E...");
     setIsSubmitting(true);
+
     try {
-      // Mock result or actual service call
+      const selectedSiniestro = siniestros.find(s => s.id === selectedSiniestroId);
+      console.log("📦 Preparando payload para Siniestro:", selectedSiniestro?.numero_siniestro);
+
       const result = await claimsService.createFullTramite({
         siniestro_id: selectedSiniestroId,
-        nombre_siniestro: siniestros.find(s => s.id === selectedSiniestroId)?.nombre_siniestro,
+        nombre_siniestro: selectedSiniestro?.nombre_siniestro,
         tipo,
         facturas: invoices,
         files: files
       });
 
-      console.log("¡Éxito! Trámite creado:", result);
+      console.log("✅ Servidor respondió con éxito:", result);
       
       // Visual feedback before redirect
       setStep(5); // Success step
@@ -74,10 +81,11 @@ export default function NuevoTramite() {
         router.push('/dashboard');
       }, 3000);
       
-    } catch (error) {
-      console.error(error);
-      alert('Error crítico al procesar el trámite en Supabase.');
+    } catch (error: any) {
+      console.error("❌ ERROR CRÍTICO EN ENVÍO:", error);
+      alert(`Error al procesar el trámite: ${error.message || 'Error desconocido'}`);
     } finally {
+      console.log("🏁 Proceso de envío finalizado (Clean up).");
       setIsSubmitting(false);
     }
   };

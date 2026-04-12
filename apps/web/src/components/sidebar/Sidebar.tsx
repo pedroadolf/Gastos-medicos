@@ -2,107 +2,65 @@
 
 import React from 'react';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
-import { 
-  LogOut, 
-  Settings, 
-  User as UserIcon, 
-  ChevronRight,
-  ShieldCheck
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { LayoutDashboard, GitBranch } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-import { menuItems, Role } from './sidebar.config';
-import { SidebarItem } from './SidebarItem';
 import { useUserRole } from '@/hooks/useUserRole';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { role, user, isAuthenticated } = useUserRole();
+  const { role, isAuthenticated } = useUserRole();
 
-  // Filter items based on user role
-  const filteredItems = menuItems.filter((item) => 
-    item.roles.includes(role as Role)
-  );
+  // Simplificamos la navegación SaaS a lo mínimo esencial dictado por SRE
+  const menuItems = [
+    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { label: 'Workflows', href: '/dashboard/workflows', icon: GitBranch },
+  ];
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950 flex flex-col">
-      {/* 🏙️ Branding */}
-      <div className="flex h-16 items-center px-6 border-b border-slate-100 dark:border-slate-800/50">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 font-bold text-white shadow-lg shadow-indigo-500/20">
-            G
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">GMM PLATFORM</span>
-            <span className="text-[10px] font-medium text-slate-500 uppercase tracking-widest leading-none">Management</span>
-          </div>
-        </div>
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-[#0B0F14] border-r border-[#1F2A37] text-[#E5E7EB] flex flex-col p-5">
+      
+      {/* ⚡ Branding Logo Minimalista */}
+      <div className="font-semibold mb-8 text-base tracking-wide flex items-center gap-2 pl-3">
+        <span className="text-yellow-500">⚡</span> GMM Platform
       </div>
 
       {/* 🧭 Navigation */}
-      <nav className="flex-1 overflow-y-auto px-4 py-6 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
-        <div className="space-y-1.5">
-          {filteredItems.map((item) => (
-            <SidebarItem
-              key={item.href}
-              {...item}
-            />
-          ))}
-        </div>
-
-        {/* 🛠️ Admin quick access visual hint if applicable */}
-        {role === 'admin' && (
-          <div className="mt-8 px-2">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Power Control</span>
-              <ShieldCheck className="w-3 h-3 text-indigo-500" />
-            </div>
-            <div className="h-px w-full bg-gradient-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent" />
-          </div>
-        )}
+      <nav className="flex-1 flex flex-col gap-1.5">
+        {menuItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link href={item.href} key={item.href}>
+              <motion.div
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors duration-200 text-sm font-medium",
+                  isActive 
+                    ? "bg-[#121821] text-white" 
+                    : "text-[#9CA3AF] hover:bg-[#0F172A] hover:text-white"
+                )}
+              >
+                <item.icon className={cn("w-4 h-4", isActive ? "text-indigo-500" : "text-[#9CA3AF]")} />
+                {item.label}
+              </motion.div>
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* 👤 User Profile Section */}
-      <div className="border-t border-slate-100 dark:border-slate-800 p-4 bg-slate-50/50 dark:bg-slate-900/30 backdrop-blur-sm">
-        {isAuthenticated ? (
-          <div className="flex items-center justify-between gap-2 group">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 border border-indigo-200 dark:border-indigo-800/50">
-                {user?.image ? (
-                  <img src={user.image} alt={user.name || 'User'} className="h-full w-full rounded-full object-cover" />
-                ) : (
-                  <UserIcon className="h-5 w-5" />
-                )}
-              </div>
-              <div className="flex flex-col overflow-hidden min-w-0">
-                <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200 leading-none mb-1">
-                  {user?.name || 'Usuario'}
-                </p>
-                <p className="truncate text-[10px] font-medium text-slate-500 dark:text-slate-500 leading-none flex items-center">
-                  <span className={cn(
-                    "inline-block w-1.5 h-1.5 rounded-full mr-1.5 shrink-0",
-                    role === 'admin' ? "bg-red-400" : role === 'operator' ? "bg-amber-400" : "bg-emerald-400"
-                  )} />
-                  {role.toUpperCase()}
-                </p>
-              </div>
-            </div>
-            
-            <button 
-              onClick={() => signOut()}
-              className="p-2 rounded-lg hover:bg-slate-200/50 dark:hover:bg-slate-800 text-slate-400 hover:text-red-500 transition-all duration-200"
-              title="Cerrar sesión"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-             <div className="h-9 w-full bg-slate-200 animate-pulse rounded-lg" />
-          </div>
-        )}
+      {/* 👤 Config Bottom */}
+      <div className="mt-auto pt-4 border-t border-[#1F2A37]/50">
+        <Link href="/dashboard/settings">
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            className="flex items-center px-3 py-2.5 rounded-lg cursor-pointer transition-colors hover:bg-[#0F172A] text-[#9CA3AF] hover:text-white text-sm font-medium"
+          >
+            Cuenta
+          </motion.div>
+        </Link>
       </div>
     </aside>
   );
