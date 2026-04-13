@@ -16,7 +16,7 @@ export function Sidebar() {
   // Simplificamos la navegación SaaS a lo mínimo esencial dictado por SRE
   const menuItems = [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Workflows', href: '/dashboard/workflows', icon: GitBranch },
+    { label: 'Workflows', href: '/workflows', icon: GitBranch }, // Corregido el path
   ];
 
   return (
@@ -53,7 +53,7 @@ export function Sidebar() {
 
       {/* 👤 Config Bottom */}
       <div className="mt-auto pt-4 border-t border-[#1F2A37]/50">
-        <Link href="/dashboard/settings">
+        <Link href="/configuracion">
           <motion.div
             whileHover={{ scale: 1.01 }}
             className="flex items-center px-3 py-2.5 rounded-lg cursor-pointer transition-colors hover:bg-[#0F172A] text-[#9CA3AF] hover:text-white text-sm font-medium"
