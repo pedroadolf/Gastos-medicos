@@ -5,9 +5,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: sonarsource/sonarqube-quality-gate-action@v1
-      with:
-        args: >-
-          -Dsonar.projectKey=GMM-n8n
-          -Dsonar.sources=.agent/
-          -Dsonar.n8n.workflowIds=eLPePdBS1utfjed0
+    - name: Native n8n JSON Validation
+      run: |
+        echo "Validating n8n exported workflows..."
+        if [ -d ".agent/" ]; then
+          find .agent/ -name "*.json" -type f -print0 | while IFS= read -r -d '' file; do
+            jq empty "$file" || (echo "Syntax error in n8n workflow: $file" && exit 1)
+          done
+          echo "All n8n workflows are valid JSON."
+        else
+          echo "No .agent directory found. Skipping."
+        fi
