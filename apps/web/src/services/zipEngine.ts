@@ -41,7 +41,7 @@ export async function generateZip(tramiteId: string) {
   const downloadPromises = docs.map(async (doc) => {
     try {
       const { data: fileBlob, error: downloadError } = await supabase.storage
-        .from('documentos')
+        .from('gmm-uploads')
         .download(doc.file_path);
 
       if (downloadError || !fileBlob) {
@@ -78,7 +78,7 @@ export async function generateZip(tramiteId: string) {
   // 5. Encrypted Upload to Supabase Storage
   const zipPath = `${tramiteId}/EXPEDIENTE_GMM_${Date.now()}.zip`;
   const { error: uploadError } = await supabase.storage
-    .from('documentos')
+    .from('gmm-uploads')
     .upload(zipPath, zipBuffer, {
       contentType: 'application/zip',
       cacheControl: '3600',
@@ -88,7 +88,7 @@ export async function generateZip(tramiteId: string) {
   if (uploadError) throw new Error(`Storage error: ${uploadError.message}`);
 
   const { data: publicUrl } = supabase.storage
-    .from('documentos')
+    .from('gmm-uploads')
     .getPublicUrl(zipPath);
 
   // 6. Persistence: Update Tramite with the ZIP pointer

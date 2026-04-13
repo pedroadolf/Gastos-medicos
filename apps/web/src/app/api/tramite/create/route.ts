@@ -165,7 +165,7 @@ export async function POST(req: Request) {
             if (value instanceof File) files[key] = value;
         }
 
-        const bucketName = "documentos";
+        const bucketName = "gmm-uploads";
         for (const [docName, file] of Object.entries(files)) {
             const fileName = `${tramite.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
             const buffer = await file.arrayBuffer();
