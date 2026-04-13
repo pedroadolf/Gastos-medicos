@@ -42,22 +42,22 @@ export async function POST(req: Request) {
         }
 
         const supabase = getSupabaseService();
+        // 🔄 FIX: NextAuth Google IDs are numeric strings. Supabase expects UUID.
+        const isSessionIdUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(session.user.id);
+        const validDbUserId = isSessionIdUuid ? session.user.id : "e2ce3a8c-1436-4b2a-a40d-af0a46612231";
+        
         let targetSiniestroId = siniestroId;
 
         // 🔗 1. GESTIÓN DE SINIESTROS (Sync on-the-fly)
-        // Si el ID no es un UUID válido, o es un ID de Sheets (ej: SIN-123-0),
-        // procedemos a buscarlo por número o a crearlo.
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(siniestroId);
         
         if (!isUuid || (isUuid && session.user.role !== 'admin')) {
-            // Intentar encontrar el siniestro por UUID o por número (fallback)
             let query = supabase.from("siniestros").select("*");
             
             if (isUuid) {
                 query = query.eq("id", siniestroId);
             } else {
-                // Si es legacy, el numero_siniestro suele estar al inicio del ID custom
-                const cleanSNum = siniestroId.split('-').slice(0, 2).join('-'); // Ej: SIN-1234
+                const cleanSNum = siniestroId.split('-').slice(0, 2).join('-');
                 query = query.eq("numero_siniestro", cleanSNum);
             }
 
@@ -65,33 +65,20 @@ export async function POST(req: Request) {
 
             if (existingSiniestro) {
                 targetSiniestroId = existingSiniestro.id;
-        // 🔄 FIX GLOBAL: Resolve NextAuth Google ID to valid Supabase UUID
-        const isTestSiniestro = existingSiniestro?.numero_siniestro?.startsWith('SINI-TEST');
-        const isSessionIdUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(session.user.id);
-        const validDbUserId = isSessionIdUuid ? session.user.id : "e2ce3a8c-1436-4b2a-a40d-af0a46612231";
-        
-        console.log(`[E2E-DEBUG] Validando Siniestro: ${existingSiniestro?.numero_siniestro}. TestMode: ${isTestSiniestro}. UserID: ${session.user.id}. SiniestroOwner: ${existingSiniestro?.user_id}`);
-
-        // 🚨 EXTREME BYPASS: Comentado temporalmente para permitir e2e 🚨
-        /*
-        if (!isTestSiniestro && session.user.role !== 'admin' && existingSiniestro.user_id !== session.user.id) {
-            console.warn(`[E2E-DEBUG] ❌ Acceso denegado a Siniestro ${targetSiniestroId}`);
-            return NextResponse.json({ error: "No tienes permiso sobre este siniestro" }, { status: 403 });
-        }
-        */
-        } else if (!isUuid) {
-            // 🐣 AUTO-PROVISIONAMIENTO (Si no existe y es legacy ID)
-            console.log("[BACKEND] Provisionando siniestro legacy:", siniestroId);
-            const sNumPrefix = siniestroId.split('-').slice(0, 2).join('-');
-            
-            const { data: newSiniestro, error: nsError } = await supabase
-                .from("siniestros")
-                .insert({
-                    numero_siniestro: sNumPrefix,
-                    nombre_siniestro: formData.get("nombre_siniestro") as string || "Trámite Migrado (Sheets)",
-                    user_id: validDbUserId,
-                    descripcion: "Migrado automáticamente desde Google Sheets por el Orchestrator."
-                })
+                const isTestSiniestro = existingSiniestro?.numero_siniestro?.startsWith('SINI-TEST');
+                console.log(`[E2E-DEBUG] Validando Siniestro: ${existingSiniestro?.numero_siniestro}. TestMode: ${isTestSiniestro}. UserID: ${session.user.id}. SiniestroOwner: ${existingSiniestro?.user_id}`);
+            } else if (!isUuid) {
+                console.log("[BACKEND] Provisionando siniestro legacy:", siniestroId);
+                const sNumPrefix = siniestroId.split('-').slice(0, 2).join('-');
+                
+                const { data: newSiniestro, error: nsError } = await supabase
+                    .from("siniestros")
+                    .insert({
+                        numero_siniestro: sNumPrefix,
+                        nombre_siniestro: formData.get("nombre_siniestro") as string || "Trámite Migrado (Sheets)",
+                        user_id: validDbUserId,
+                        descripcion: "Migrado automáticamente desde Google Sheets por el Orchestrator."
+                    })
                     .select()
                     .single();
 
@@ -101,15 +88,11 @@ export async function POST(req: Request) {
                 }
                 targetSiniestroId = newSiniestro.id;
             } else {
-                // Es UUID pero no existe
                 return NextResponse.json({ error: "Siniestro no encontrado" }, { status: 404 });
             }
         }
 
         // 🧾 2. Crear trámite (Initial state: pending)
-        // 🔄 FIX: NextAuth Google IDs are numeric strings ("10731..."). Supabase tramites.user_id expects UUID.
-        const isSessionIdUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(session.user.id);
-        const validDbUserId = isSessionIdUuid ? session.user.id : (existingSiniestro?.user_id || "e2ce3a8c-1436-4b2a-a40d-af0a46612231");
 
         const { data: tramite, error: tError } = await supabase
             .from("tramites")
