@@ -5,7 +5,7 @@ import {
   Plus, 
   Trash2, 
   Calculator, 
-  Receipt, 
+  Hash, 
   DollarSign, 
   ArrowLeft, 
   ArrowRight,
@@ -111,7 +111,7 @@ export default function FacturasTable({ invoices, onChange, onBack, onNext }: Fa
                     </td>
                     <td className="px-4 py-4">
                       <div className="relative">
-                        <Receipt className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                         <input 
                           type="text"
                           value={row.numero_factura}
