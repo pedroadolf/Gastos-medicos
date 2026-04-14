@@ -1,0 +1,166 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Throughput (exec/min)",
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT NOW() as time, COUNT(*)::float as value FROM public.workflow_executions WHERE start_time > NOW() - interval '1 minute';"
+        }
+      ],
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 }
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate (%)",
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "rawSql": "SELECT NOW() as time, COALESCE((SUM(CASE WHEN status='error' THEN 1 ELSE 0 END)::float / NULLIF(COUNT(*), 0)) * 100, 0) as value FROM public.workflow_executions WHERE start_time > NOW() - interval '5 minutes';"
+        }
+      ],
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 }
+    },
+    {
+      "type": "stat",
+      "title": "Avg Duration (ms)",
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "rawSql": "SELECT NOW() as time, COALESCE(AVG(duration_ms), 0)::float as value FROM public.workflow_executions WHERE start_time > NOW() - interval '5 minutes';"
+        }
+      ],
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 }
+    },
+    {
+      "type": "stat",
+      "title": "Processing Now",
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "rawSql": "SELECT NOW() as time, COUNT(*)::float as value FROM public.workflow_executions WHERE status::text='processing';"
+        }
+      ],
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 }
+    },
+    {
+      "type": "table",
+      "title": "Live Executions Command Center",
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT execution_id::text, status::text, current_step::text, duration_ms, start_time, workflow_name FROM public.workflow_executions ORDER BY start_time DESC LIMIT 50;"
+        }
+      ],
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 4 }
+    },
+    {
+      "type": "piechart",
+      "title": "Status Distribution (5 min)",
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT status::text as label, COUNT(*)::float as value FROM public.workflow_executions WHERE start_time > NOW() - interval '5 minutes' GROUP BY status;"
+        }
+      ],
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 14 }
+    },
+    {
+      "type": "barchart",
+      "title": "Step Avg Duration",
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT step_name::text as step, AVG(duration_ms)::float as value FROM public.workflow_steps GROUP BY step_name;"
+        }
+      ],
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 14 }
+    },
+    {
+      "type": "barchart",
+      "title": "Bottlenecks (Max Step Time)",
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT step_name::text as step, MAX(duration_ms)::float as value FROM public.workflow_steps GROUP BY step_name ORDER BY value DESC;"
+        }
+      ],
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 14 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Errors Over Time (Live)",
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT date_trunc('minute', start_time) as time, COUNT(*)::float as value FROM public.workflow_executions WHERE status::text='error' GROUP BY 1 ORDER BY 1;"
+        }
+      ],
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 20 }
+    },
+    {
+      "type": "table",
+      "title": "Top Errors (By Severity)",
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT error_type::text, error_severity::text as severity, COUNT(*)::float as count FROM public.workflow_executions WHERE status::text='error' GROUP BY error_type, error_severity ORDER BY count DESC LIMIT 10;"
+        }
+      ],
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 20 }
+    },
+    {
+      "type": "stat",
+      "title": "Auto-Healing Triggered (1h)",
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT NOW() as time, COUNT(*)::float as value FROM public.system_events WHERE event_type LIKE '%auto_heal%' AND timestamp > NOW() - interval '1 hour';"
+        }
+      ],
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 20 }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["sre", "workflow", "noc", "gmm"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Datasource",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "postgres",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timezone": "browser",
+  "title": "GMM Command Center [SRE NOC] v6 - Hardened",
+  "version": 6
+}
