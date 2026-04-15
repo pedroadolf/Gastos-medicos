@@ -101,30 +101,9 @@ export async function generateZip(tramiteId: string) {
     })
     .eq('id', tramiteId);
 
-  // 7. 🔥 CONNECT TO n8n: Trigger Autonomous Email Submission
   const n8nWebhook = process.env.N8N_WEBHOOK_URL;
   if (n8nWebhook) {
-      console.log(`📡 Notifying n8n orchestrator for submission...`);
-      try {
-        await fetch(n8nWebhook, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'SUBMIT_CLAIM',
-                tramite_id: tramiteId,
-                zip_url: publicUrl.publicUrl,
-                status: 'ready_to_send',
-                source: 'ZipEngine-Production',
-                metadata: {
-                    file_count: docs.length,
-                    generated_at: new Date().toISOString()
-                }
-            })
-        });
-        console.log('✅ n8n Orchestrator notified successfully.');
-      } catch (err) {
-        console.error('❌ Failed to trigger n8n orchestration:', err);
-      }
+      console.log(`[ZIP ENGINE] ZIP generated, but webhook logic moved back to main route orchestrator.`);
   }
 
   return publicUrl.publicUrl;

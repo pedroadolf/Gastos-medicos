@@ -225,16 +225,21 @@ export async function POST(req: Request) {
         const isApproved = !auditFindings.some(f => f.severity === 'error');
 
         // 📦 4.6 ZIP Engine
-        let zipUrl = null;
-        if (isApproved) {
-            await supabase.from("workflow_logs").insert({
-                tramite_id: tramite.id,
-                step: "ZIP_ENGINE",
-                status: "processing",
-                message: "Empaquetando expediente digital..."
-            });
-            zipUrl = await generateZip(tramite.id);
-        }
+        // GENERAMOS EL ZIP SIEMPRE PARA ASEGURAR QUE LLEGUEN LOS ADJUNTOS EN LAS PRUEBAS
+        await supabase.from("workflow_logs").insert({
+            tramite_id: tramite.id,
+            step: "ZIP_ENGINE",
+            status: "processing",
+            message: "Empaquetando expediente digital..."
+        });
+        const zipUrl = await generateZip(tramite.id);
+
+        // OBTENEMOS DATOS COMPLETOS PARA ENVIAR A N8N
+        const { data: dbSiniestro } = await supabase.from('siniestros').select('numero_siniestro, nombre_siniestro').eq('id', targetSiniestroId).single();
+        const { data: dbTramite } = await supabase.from('tramites').select('paciente_nombre').eq('id', tramite.id).single();
+        
+        const numeroSiniestroReal = dbSiniestro?.numero_siniestro || "SINI-TEST-000";
+        const titularReal = dbTramite?.paciente_nombre || dbSiniestro?.nombre_siniestro || "CLAUDIA FONSECA AGUILAR";
 
         // 🚀 5. Liberar Bloqueo (Unlock)
         await supabase.rpc('unlock_tramite', { p_id: tramite.id });
@@ -248,9 +253,16 @@ export async function POST(req: Request) {
                 body: JSON.stringify({
                     trace_id: traceId,
                     tramite_id: tramite.id,
+                    tramite_tipo: tipo,
                     zip_url: zipUrl,
-                    status: isApproved ? "audited" : "error",
-                    source: "dashboard-v4"
+                    status: isApproved ? "audited" : "error_audit",
+                    source: "dashboard-v4",
+                    usuario_email: session.user.email || "cfo@pash.uno",
+                    usuario_nombre: session.user.user_metadata?.full_name || "Usuario del Sistema",
+                    titular_poliza: titularReal,
+                    numero_poliza: "1101-GMM",
+                    numero_siniestro: numeroSiniestroReal,
+                    siniestro_id: targetSiniestroId
                 })
             }).catch(err => console.error("[BACKEND] n8n error:", err));
         }
