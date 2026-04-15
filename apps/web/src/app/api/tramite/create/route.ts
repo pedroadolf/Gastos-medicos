@@ -61,7 +61,11 @@ export async function POST(req: Request) {
                 query = query.eq("numero_siniestro", cleanSNum);
             }
 
-            const { data: existingSiniestro } = await query.single();
+            const { data: existingSiniestro, error: searchError } = await query.maybeSingle();
+
+            if (searchError) {
+                console.error("[BACKEND] Error buscando siniestro existente:", searchError);
+            }
 
             if (existingSiniestro) {
                 targetSiniestroId = existingSiniestro.id;
@@ -83,8 +87,12 @@ export async function POST(req: Request) {
                     .single();
 
                 if (nsError) {
-                    console.error("[BACKEND] Error provisionando siniestro:", nsError);
-                    throw new Error("Error al sincronizar el siniestro legacy.");
+                    console.error("[BACKEND] ❌ Error provisionando siniestro legacy:", nsError);
+                    console.error("[BACKEND] Datos intentados:", {
+                        numero_siniestro: sNumPrefix,
+                        user_id: validDbUserId
+                    });
+                    throw new Error(`Error al sincronizar el siniestro legacy: ${nsError.message}`);
                 }
                 targetSiniestroId = newSiniestro.id;
             } else {
@@ -234,12 +242,22 @@ export async function POST(req: Request) {
         });
         const zipUrl = await generateZip(tramite.id);
 
-        // OBTENEMOS DATOS COMPLETOS PARA ENVIAR A N8N
-        const { data: dbSiniestro } = await supabase.from('siniestros').select('numero_siniestro, nombre_siniestro').eq('id', targetSiniestroId).single();
-        const { data: dbTramite } = await supabase.from('tramites').select('paciente_nombre').eq('id', tramite.id).single();
+        // OBTENEMOS DATOS COMPLETOS PARA ENVIAR A N8N (Safe check for UUID)
+        let numeroSiniestroReal = "SINI-TEST-000";
+        let titularReal = "CLAUDIA FONSECA AGUILAR";
+
+        const isTargetUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(targetSiniestroId);
         
-        const numeroSiniestroReal = dbSiniestro?.numero_siniestro || "SINI-TEST-000";
-        const titularReal = dbTramite?.paciente_nombre || dbSiniestro?.nombre_siniestro || "CLAUDIA FONSECA AGUILAR";
+        if (isTargetUuid) {
+            const { data: dbSiniestro } = await supabase.from('siniestros').select('numero_siniestro, nombre_siniestro').eq('id', targetSiniestroId).maybeSingle();
+            const { data: dbTramite } = await supabase.from('tramites').select('paciente_nombre').eq('id', tramite.id).maybeSingle();
+
+            numeroSiniestroReal = dbSiniestro?.numero_siniestro || numeroSiniestroReal;
+            titularReal = dbTramite?.paciente_nombre || dbSiniestro?.nombre_siniestro || titularReal;
+        } else {
+            console.warn("[BACKEND] targetSiniestroId no es UUID, usando valores por defecto o string original:", targetSiniestroId);
+            numeroSiniestroReal = targetSiniestroId;
+        }
 
         // 🚀 5. Liberar Bloqueo (Unlock)
         await supabase.rpc('unlock_tramite', { p_id: tramite.id });
