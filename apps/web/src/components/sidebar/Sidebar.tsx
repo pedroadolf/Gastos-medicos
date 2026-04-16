@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, GitBranch } from 'lucide-react';
+import { LayoutDashboard, GitBranch, Settings, ShieldCheck, Database, Layers } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 import { useUserRole } from '@/hooks/useUserRole';
@@ -13,52 +13,67 @@ export function Sidebar() {
   const pathname = usePathname();
   const { role, isAuthenticated } = useUserRole();
 
-  // Simplificamos la navegación SaaS a lo mínimo esencial dictado por SRE
   const menuItems = [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Workflows', href: '/workflows', icon: GitBranch }, // Corregido el path
+    { label: 'Workflow', href: '/workflows', icon: GitBranch },
+    { label: 'Siniestros', href: '/siniestros', icon: ShieldCheck },
+    { label: 'Observabilidad', href: '/observabilidad', icon: Database },
   ];
 
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-[#0B0F14] border-r border-[#1F2A37] text-[#E5E7EB] flex flex-col p-5">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-20 bg-gmm-black border-r border-white/5 flex flex-col items-center py-8">
       
-      {/* ⚡ Branding Logo Minimalista */}
-      <div className="font-semibold mb-8 text-base tracking-wide flex items-center gap-2 pl-3">
-        <span className="text-yellow-500">⚡</span> GMM Platform
+      {/* ⚡ Branding - SRE Minimalist */}
+      <div className="mb-12">
+        <div className="w-10 h-10 bg-gmm-yellow rounded-xl flex items-center justify-center shadow-lg shadow-gmm-yellow/20">
+          <Layers className="text-black w-6 h-6" />
+        </div>
       </div>
 
       {/* 🧭 Navigation */}
-      <nav className="flex-1 flex flex-col gap-1.5">
+      <nav className="flex-1 flex flex-col gap-6">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
           return (
-            <Link href={item.href} key={item.href}>
+            <Link href={item.href} key={item.href} title={item.label}>
               <motion.div
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition-colors duration-200 text-sm font-medium",
+                  "p-3 rounded-2xl cursor-pointer transition-all duration-300 relative group",
                   isActive 
-                    ? "bg-[#121821] text-white" 
-                    : "text-[#9CA3AF] hover:bg-[#0F172A] hover:text-white"
+                    ? "bg-gmm-yellow text-black" 
+                    : "text-slate-500 hover:text-white"
                 )}
               >
-                <item.icon className={cn("w-4 h-4", isActive ? "text-indigo-500" : "text-[#9CA3AF]")} />
-                {item.label}
+                <item.icon className="w-6 h-6" strokeWidth={2.5} />
+                
+                {/* Tooltip hint */}
+                <div className="absolute left-full ml-4 px-3 py-1 bg-gmm-gray border border-white/10 text-white text-[10px] font-bold rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 uppercase tracking-widest shadow-2xl">
+                    {item.label}
+                </div>
+
+                {/* Active indicator bar */}
+                {isActive && (
+                    <div className="absolute left-[-24px] top-1/2 -translate-y-1/2 w-1 h-8 bg-gmm-yellow rounded-r-full blur-[2px]" />
+                )}
               </motion.div>
             </Link>
           );
         })}
       </nav>
 
-      {/* 👤 Config Bottom */}
-      <div className="mt-auto pt-4 border-t border-[#1F2A37]/50">
-        <Link href="/configuracion">
+      {/* ⚙️ Footer Config */}
+      <div className="mt-auto">
+        <Link href="/configuracion" title="Configuración">
           <motion.div
-            whileHover={{ scale: 1.01 }}
-            className="flex items-center px-3 py-2.5 rounded-lg cursor-pointer transition-colors hover:bg-[#0F172A] text-[#9CA3AF] hover:text-white text-sm font-medium"
+            whileHover={{ rotate: 90 }}
+            className={cn(
+                "p-3 rounded-2xl cursor-pointer transition-all duration-300 text-slate-500 hover:text-white",
+                pathname === '/configuracion' && "bg-white/10 text-white"
+            )}
           >
-            Cuenta
+            <Settings className="w-6 h-6" />
           </motion.div>
         </Link>
       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Monitor } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { NotificationCenter } from '../notifications/NotificationCenter';
 
@@ -18,34 +18,43 @@ export function Topbar() {
 
   const status = {
     label:
-      slo >= 0.99 ? 'Estable' :
-      slo >= 0.95 ? 'Degradado' :
-      'Inestable',
+      slo >= 0.99 ? 'Stable' :
+      slo >= 0.95 ? 'Degraded' :
+      'Critical',
     color:
-      slo >= 0.99 ? '#22C55E' : // Emerald 500
-      slo >= 0.95 ? '#F59E0B' : // Amber 500
+      slo >= 0.99 ? '#10B981' : // Emerald 500
+      slo >= 0.95 ? '#FFD32C' : // GMM Yellow
       '#EF4444'                 // Red 500
   };
 
   return (
-    <header className="h-16 border-b border-slate-200 dark:border-slate-800/50 bg-white/70 dark:bg-[#0B0F14]/70 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-40 transition-all">
-      {/* 🔍 Search */}
+    <header className="h-16 border-b border-white/5 bg-gmm-black/80 backdrop-blur-xl flex items-center justify-between px-8 sticky top-0 z-40">
+      
+      {/* 🔍 Search - SRE Minimalist */}
       <div className="relative group hidden sm:block">
-        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+        <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-gmm-yellow transition-colors" />
         <input
-          placeholder="Buscar expedientes, pólizas..."
-          className="bg-slate-100 dark:bg-[#121821] border border-transparent dark:border-[#1F2A37] focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-lg pl-10 pr-4 py-1.5 text-sm w-64 md:w-80 text-slate-800 dark:text-white transition-all outline-none"
+          placeholder="QUERY ENGINE: PATIENTS, CLAIMS..."
+          className="bg-white/5 border border-white/5 focus:border-gmm-yellow/50 rounded-xl pl-12 pr-4 py-2 text-[10px] font-black tracking-widest w-64 md:w-96 text-white transition-all outline-none uppercase placeholder:text-slate-600"
         />
       </div>
 
-      <div className="flex items-center gap-6 ml-auto">
-        {/* 📊 Status (UX SLO) */}
-        <div className="hidden md:flex items-center gap-2 text-[13px] font-medium text-slate-500 dark:text-[#9CA3AF]">
-          <span 
-            className="w-2 h-2 rounded-full shadow-sm"
-            style={{ backgroundColor: status.color, boxShadow: `0 0 8px ${status.color}60` }}
-          />
-          {status.label}
+      <div className="flex items-center gap-8 ml-auto">
+        {/* 📊 Node Status (SLO) */}
+        <div className="hidden md:flex items-center gap-3 bg-white/5 px-4 py-1.5 rounded-full border border-white/5">
+          <div className="flex items-center gap-2">
+            <Monitor size={12} className="text-slate-500" />
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">System:</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span 
+                className="w-1.5 h-1.5 rounded-full animate-pulse"
+                style={{ backgroundColor: status.color, boxShadow: `0 0 10px ${status.color}` }}
+            />
+            <span className="text-[10px] font-black uppercase tracking-tighter" style={{ color: status.color }}>
+                {status.label} { (slo * 100).toFixed(1) }%
+            </span>
+          </div>
         </div>
 
         {/* 🔔 Notifications */}
@@ -53,20 +62,23 @@ export function Topbar() {
           <NotificationCenter />
         </div>
 
-        {/* 👤 User Account Minimal */}
-        <div className="flex items-center gap-3 cursor-pointer group hover:bg-slate-50 dark:hover:bg-[#121821] p-1.5 pr-3 rounded-full transition-colors border border-transparent dark:border-[#1F2A37]">
-          <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800/50 flex items-center justify-center overflow-hidden shrink-0">
+        {/* 👤 Instance Key (User) */}
+        <div className="flex items-center gap-4 cursor-pointer group hover:bg-white/5 p-1 pr-4 rounded-2xl transition-all border border-transparent hover:border-white/5">
+          <div className="w-9 h-9 rounded-xl bg-gmm-yellow flex items-center justify-center overflow-hidden shrink-0 shadow-lg shadow-gmm-yellow/10">
             {session?.user?.image ? (
                <img src={session.user.image} alt="User" className="w-full h-full object-cover" />
             ) : (
-               <span className="text-indigo-600 dark:text-indigo-400 font-bold text-sm">
+               <span className="text-black font-black text-xs uppercase italic">
                   {session?.user?.name?.charAt(0) || 'U'}
                </span>
             )}
           </div>
-          <span className="text-sm font-semibold text-slate-700 dark:text-[#E5E7EB] group-hover:text-indigo-600 dark:group-hover:text-white transition-colors">
-            {session?.user?.name ? session.user.name.split(' ')[0] : 'Usuario'}
-          </span>
+          <div className="hidden sm:block">
+            <p className="text-[10px] font-black text-white uppercase tracking-tight leading-none group-hover:text-gmm-yellow transition-colors">
+                {session?.user?.name ? session.user.name.split(' ')[0] : 'Operator'}
+            </p>
+            <p className="text-[8px] font-bold text-slate-600 uppercase tracking-widest mt-1">Admin Access</p>
+          </div>
         </div>
       </div>
     </header>

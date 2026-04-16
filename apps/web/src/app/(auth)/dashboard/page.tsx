@@ -2,240 +2,179 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  ArrowUpRight, 
-  CheckCircle2, 
-  AlertCircle, 
-  Clock,
-  Activity,
   Zap,
-  TrendingUp,
-  Brain,
-  DollarSign,
   Plus,
-  MonitorPlay,
-  FileText,
-  ChevronRight,
-  FilePlus,
-  LayoutGrid,
-  List,
-  ShieldCheck
+  Activity,
+  ShieldCheck,
+  TrendingUp,
+  LayoutGrid
 } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  Cell
-} from 'recharts';
+
+// SRE-Grade Dashboard Components
+import { CoverageKPIs } from '@/components/dashboard/CoverageKPIs';
+import { InsuredCards } from '@/components/dashboard/InsuredCards';
+import { AlertCenter } from '@/components/dashboard/AlertCenter';
+import { ClaimsKanban } from '@/components/dashboard/ClaimsKanban';
+import { ExecutionDrillDown } from '@/components/dashboard/ExecutionDrillDown';
+import { TrustBar } from '@/components/dashboard/TrustBar';
+import { AICopilot, AnomalyClusters, GovernanceBadge, PreventivePanel } from '@/components/dashboard/IntelligenceHub';
 
 export default function GlobalDashboardPage() {
   const router = useRouter();
-  const [data, setData] = useState<any>({ asegurados: [], siniestros: [] });
+  const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [errorCount, setErrorCount] = useState(0);
+  const [selectedExecutionId, setSelectedExecutionId] = useState<string | null>(null);
+
+  const fetchMetrics = async () => {
+    try {
+      const res = await fetch("/api/dashboard/metrics");
+      const d = await res.json();
+      if (d.data) {
+        setData(d.data);
+        setErrorCount(0);
+      } else {
+        throw new Error("Failed to fetch");
+      }
+    } catch (e) {
+      setErrorCount(prev => prev + 1);
+      console.error("Fetch error:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetch("/api/afectados")
-      .then(res => res.json())
-      .then(d => {
-        setData(d);
-        setIsLoading(false);
-      })
-      .catch(() => setIsLoading(false));
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 5000); // Live feel: 5s
+    return () => clearInterval(interval);
   }, []);
 
-  const totalSiniestros = data.siniestros?.length || 0;
-  const totalReembolsado = data.asegurados?.reduce((acc: number, curr: any) => 
-    acc + parseFloat((curr.montoPagado || "0").replace(/[^0-9.]/g, "")), 0) || 0;
-  
-  const chartData = [
-    { name: 'Lun', total: 12 },
-    { name: 'Mar', total: 19 },
-    { name: 'Mie', total: 15 },
-    { name: 'Jue', total: 22 },
-    { name: 'Vie', total: 30 },
-    { name: 'Sab', total: 10 },
-    { name: 'Dom', total: 5 },
-  ];
-
-  return (
-    <div className="min-h-screen bg-slate-950 p-4 md:p-8">
-      {/* Header */}
-      <div className="max-w-7xl mx-auto border-b border-slate-900 pb-8 mb-12">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <h1 className="text-4xl font-black text-white italic tracking-tighter uppercase">Centro de Control</h1>
-            <p className="text-slate-500 font-bold mt-1 uppercase text-[10px] tracking-[0.3em]">Neural Intelligence Center</p>
-          </div>
-          <div className="flex gap-4">
-             <button 
-                onClick={() => router.push('/tramites/nuevo')}
-                className="px-6 py-4 bg-medical-cyan text-slate-950 font-black rounded-2xl flex items-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-medical-cyan/20 group uppercase text-xs"
-             >
-                <div className="bg-slate-950/20 p-1 rounded-lg">
-                   <Plus size={18} strokeWidth={4} />
-                </div>
-                NUEVO TRÁMITE
-             </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto">
-        {/* KPI Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
-            <div className="lg:col-span-2 p-10 bg-slate-900/40 rounded-[40px] border border-slate-800 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-medical-cyan/5 blur-[100px]" />
-                <h2 className="text-[10px] font-black text-medical-cyan uppercase tracking-widest mb-4 flex items-center gap-2">
-                     <Zap size={14} fill="currentColor" />
-                     Métricas de Eficiencia
-                </h2>
-                <div className="text-7xl font-black text-white italic tracking-tighter mb-2">98.5<span className="text-3xl text-medical-cyan">%</span></div>
-                <p className="text-slate-500 font-bold mb-8">Nivel de automatización en la última semana</p>
-                <div className="flex gap-4">
-                     <div className="flex-1 p-4 bg-slate-950 rounded-2xl border border-slate-800">
-                         <p className="text-[10px] text-slate-500 font-black uppercase mb-1">Total Reembolsado</p>
-                         <p className="text-2xl font-black text-white italic">${totalReembolsado.toLocaleString()}</p>
-                     </div>
-                     <div className="flex-1 p-4 bg-slate-950 rounded-2xl border border-slate-800">
-                         <p className="text-[10px] text-slate-500 font-black uppercase mb-1">Ahorro Ops</p>
-                         <p className="text-2xl font-black text-white italic">$4.2k</p>
-                     </div>
-                </div>
-            </div>
-
-            <div className="p-8 bg-slate-900/40 rounded-[40px] border border-slate-800 flex flex-col justify-between">
-                <div>
-                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6">Salud del Sistema</h3>
-                    <div className="space-y-4">
-                        <SystemStatus label="n8n Engine" status="Online" color="emerald" />
-                        <SystemStatus label="Supabase DB" status="Online" color="emerald" />
-                        <SystemStatus label="Agent Grid" status="Warning" color="amber" />
+  if (isLoading || !data) {
+    return (
+        <div className="min-h-screen bg-gmm-black flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+                <div className="relative">
+                    <div className="w-16 h-16 border-4 border-gmm-yellow/10 border-t-gmm-yellow rounded-full animate-spin" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <Activity className="text-gmm-yellow w-6 h-6" />
                     </div>
                 </div>
-                <button 
-                    onClick={() => router.push('/observabilidad')}
-                    className="w-full py-3 bg-slate-800 rounded-xl text-[10px] font-black text-slate-400 uppercase tracking-widest hover:bg-slate-700 transition-all font-sans"
-                >
-                    Ver Logs
-                </button>
+                <p className="text-[10px] font-black text-gmm-yellow uppercase tracking-[0.4em] animate-pulse">Initializing NOC Layer...</p>
             </div>
-
-            <div className="p-8 bg-medical-cyan rounded-[40px] flex flex-col justify-between group cursor-pointer relative overflow-hidden" onClick={() => router.push('/tramites')}>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-[50px] -rotate-45" />
-                <div>
-                     <h3 className="text-slate-950 text-[10px] font-black uppercase tracking-widest opacity-60 mb-2">Siniestros Hoy</h3>
-                     <div className="text-slate-950 text-7xl font-black italic tracking-tighter">{totalSiniestros}</div>
-                </div>
-                <div className="w-full py-4 bg-slate-950 text-white font-black rounded-2xl text-center text-xs shadow-xl shadow-slate-950/20 group-hover:scale-105 transition-all uppercase">GESTIONAR</div>
-            </div>
-        </div>
-
-        {/* Charts & Lists */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
-            <div className="lg:col-span-2 space-y-6">
-                <div className="flex items-end justify-between">
-                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Live Processing</h3>
-                    <Activity className="w-4 h-4 text-emerald-500 animate-pulse" />
-                </div>
-                <div className="mt-4 flex items-baseline gap-2">
-                    <span className="text-4xl font-black text-white italic tracking-tighter">
-                        {data.siniestros?.filter((t: any) => t.estado === 'processing').length || 0}
-                    </span>
-                    <span className="text-xs font-bold text-slate-500 uppercase">Solicitudes en cola</span>
-                </div>
-                <div className="space-y-4 min-h-[300px]">
-                    {data.siniestros && data.siniestros.length > 0 ? (
-                        data.siniestros.slice(0, 4).map((claim: any, idx: number) => (
-                            <div key={idx} className="p-5 bg-slate-900/30 border border-slate-800 rounded-[32px] hover:border-slate-700 transition-all flex items-center justify-between group">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-medical-cyan text-glow-cyan">
-                                        <FileText size={20} />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-white">Siniestro #{claim.numero_siniestro || 'SIN-'+idx} - {claim.nombre_siniestro || 'Evento'}</p>
-                                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Status: <span className="text-medical-cyan">Activo</span> • Sincronizado</p>
-                                    </div>
-                                </div>
-                                <button 
-                                    onClick={() => router.push('/tramites')}
-                                    className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-500 hover:text-white transition-all"
-                                >
-                                    <ChevronRight size={18} />
-                                </button>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-slate-800 rounded-[40px] py-12 opacity-50">
-                            <Clock className="text-slate-700 mb-4" size={48} />
-                            <p className="text-xs font-black text-slate-600 uppercase tracking-[0.3em]">Esperando Trámites...</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            <div className="space-y-6">
-                 <div className="p-8 bg-slate-900/60 rounded-[40px] border border-slate-800 relative overflow-hidden">
-                     <div className="absolute top-0 right-0 w-32 h-32 bg-medical-amber/5 blur-3xl" />
-                     <div className="flex items-center gap-3 mb-6">
-                         <MonitorPlay className="w-6 h-6 text-medical-amber" />
-                         <h3 className="text-lg font-black text-white italic">AI Diagnóstico</h3>
-                     </div>
-                     <div className="p-4 bg-medical-amber/5 border border-medical-amber/10 rounded-2xl mb-6">
-                         <p className="text-xs font-bold text-medical-amber flex items-center gap-2 mb-2">
-                             <AlertCircle size={14} /> Auditor Inteligente
-                         </p>
-                         <p className="text-[11px] text-slate-400">Listo para ejecutar validaciones sobre el historial de siniestros.</p>
-                     </div>
-                     <button 
-                        onClick={() => router.push('/auditoria?action=fix')}
-                        className="w-full py-4 bg-medical-amber/20 hover:bg-medical-amber/30 text-medical-amber font-bold rounded-2xl text-[10px] uppercase tracking-widest transition-all font-sans border border-medical-amber/20 active:scale-95 flex items-center justify-center gap-2"
-                    >
-                        <Zap size={14} fill="currentColor" />
-                        Ejecutar Corrección
-                    </button>
-                 </div>
-
-                 <div className="grid grid-cols-2 gap-4">
-                      <button 
-                        onClick={() => router.push('/agentes')}
-                        className="p-6 bg-slate-900/40 rounded-[32px] border border-slate-800 hover:border-medical-cyan/50 transition-all text-center group"
-                      >
-                        <Brain className="w-6 h-6 text-slate-500 group-hover:text-medical-cyan mx-auto mb-2" />
-                        <span className="text-[10px] font-black text-slate-500 group-hover:text-white uppercase tracking-widest">Agentes AI</span>
-                      </button>
-                      <button 
-                        onClick={() => router.push('/auditoria')}
-                        className="p-6 bg-slate-900/40 rounded-[32px] border border-slate-800 hover:border-emerald-500/50 transition-all text-center group"
-                      >
-                        <ShieldCheck className="w-6 h-6 text-slate-500 group-hover:text-emerald-500 mx-auto mb-2" />
-                        <span className="text-[10px] font-black text-slate-500 group-hover:text-white uppercase tracking-widest">Panel Auditor</span>
-                      </button>
-                 </div>
-            </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SystemStatus({ label, status, color }: any) {
-    const statusColors: any = {
-        emerald: 'bg-medical-emerald shadow-[0_0_8px_#10b981]',
-        amber: 'bg-medical-amber shadow-[0_0_8px_#f59e0b]',
-    };
-
-    return (
-        <div className="flex items-center justify-between p-3 bg-slate-950/40 rounded-xl border border-slate-800/50">
-            <div className="flex items-center gap-3">
-                <div className={`w-2 h-2 rounded-full animate-pulse ${statusColors[color]}`} />
-                <span className="text-xs font-bold text-slate-300">{label}</span>
-            </div>
-            <span className={`text-[10px] font-black uppercase ${color === 'emerald' ? 'text-medical-emerald' : 'text-medical-amber'}`}>{status}</span>
         </div>
     );
+  }
+
+  const { kpis, meta, trust } = data;
+  const isStale = (trust?.status === 'STALE') || errorCount > 0;
+  const intelligence = kpis.intelligence;
+
+  return (
+    <div className="min-h-screen bg-transparent flex flex-col">
+      <TrustBar trust={trust || { status: 'LIVE', confidenceScore: 100 }} meta={meta || {}} />
+
+      <div className="p-10 lg:p-16">
+          {/* 🚀 Header SRE-Grade */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16 border-b border-white/5 pb-10">
+            <div className="relative">
+              <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-gmm-yellow rounded-full shadow-[0_0_20px_#FFD32C]" />
+              <div className="flex items-center gap-6">
+                  <h1 className="text-6xl font-black text-white italic tracking-tighter uppercase leading-none">
+                    Command Center
+                  </h1>
+                  {intelligence && <GovernanceBadge mode={intelligence.governanceMode} />}
+              </div>
+              <div className="flex items-center gap-4 mt-4">
+                <div className="flex items-center gap-2">
+                    <Activity className={`w-3 h-3 ${isStale ? 'text-gmm-danger animate-pulse' : 'text-gmm-yellow animate-pulse'}`} />
+                    <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.4em]">Node Cluster: MX-NORTH-01</p>
+                </div>
+                <div className="h-4 w-[1px] bg-white/10 hidden sm:block" />
+                <div className="hidden sm:flex items-center gap-2">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">AIOps Engine Active</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-6">
+                 <button 
+                    onClick={() => router.push('/tramites/nuevo')}
+                    className="px-8 py-5 bg-gmm-yellow text-black font-black rounded-[24px] flex items-center gap-4 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-gmm-yellow/20 group uppercase text-xs tracking-widest"
+                 >
+                    <div className="bg-black/10 p-1.5 rounded-xl">
+                       <Plus size={20} strokeWidth={4} />
+                    </div>
+                    NEW TRANSACTION
+                 </button>
+            </div>
+          </div>
+
+          <div className="max-w-7xl mx-auto space-y-20">
+            
+            {/* 🧠 Intelligence Hub Section */}
+            <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 bg-white/[0.01] p-8 rounded-[40px] border border-white/5">
+                <div className="lg:col-span-12 flex items-center gap-2 mb-4">
+                    <Zap className="text-yellow-400" size={14} />
+                    <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Intelligence Hub Layer</h2>
+                </div>
+                <div className="lg:col-span-5">
+                    <AICopilot insight={intelligence?.copilot} />
+                </div>
+                <div className="lg:col-span-4">
+                    <AnomalyClusters clusters={intelligence?.clusters} />
+                </div>
+                <div className="lg:col-span-3">
+                    <PreventivePanel actions={intelligence?.preventive} />
+                </div>
+            </section>
+
+            {/* Layer 1: Context (KPIs) */}
+            <section>
+                <div className="flex items-center gap-2 mb-8 ml-2">
+                    <TrendingUp className="text-gmm-yellow" size={14} />
+                    <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Resource Utilization</h2>
+                </div>
+                <CoverageKPIs kpis={kpis} />
+            </section>
+
+            {/* Layer 2: Operación (Insured Cards) */}
+            <section>
+                 <div className="flex items-center gap-2 mb-8 ml-2">
+                    <LayoutGrid className="text-gmm-yellow" size={14} />
+                    <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Asegurados Active Quotas</h2>
+                </div>
+                <InsuredCards users={data.insured || []} />
+            </section>
+
+            {/* Layer 3: SRE Visibility */}
+            <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 pb-20">
+                <div className="lg:col-span-8">
+                    <div className="flex items-center gap-2 mb-8 ml-2">
+                        <Zap className="text-gmm-yellow" size={14} />
+                        <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">NOC Alert Stack</h2>
+                    </div>
+                    <AlertCenter 
+                        alerts={data.alerts || []} 
+                        onAlertClick={(id) => setSelectedExecutionId(id)} 
+                    />
+                </div>
+                <div className="lg:col-span-4">
+                     <div className="flex items-center gap-2 mb-8 ml-2">
+                        <ShieldCheck className="text-gmm-yellow" size={14} />
+                        <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Pipeline Execution State</h2>
+                    </div>
+                    <ClaimsKanban kanban={data.kanban || {}} />
+                </div>
+            </section>
+          </div>
+      </div>
+
+      <ExecutionDrillDown 
+        executionId={selectedExecutionId} 
+        onClose={() => setSelectedExecutionId(null)} 
+      />
+    </div>
+  );
 }
