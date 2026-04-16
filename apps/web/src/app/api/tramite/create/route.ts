@@ -241,22 +241,33 @@ export async function POST(req: Request) {
         });
         const zipUrl = await generateZip(tramite.id);
 
-        // OBTENEMOS DATOS COMPLETOS PARA ENVIAR A N8N (Safe check for UUID)
+        // 3. Orquestamos metadatos adicionales para n8n
+        // REGLA: No confiar en defaults si podemos obtener datos reales
         let numeroSiniestroReal = "SINI-TEST-000";
         let titularReal = "CLAUDIA FONSECA AGUILAR";
 
-        const isTargetUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{12}/i.test(targetSiniestroId);
+        // Normalizamos el tipo de trámite para n8n (Uppercase)
+        const normalizedTipo = (tipo || "reembolso").toUpperCase().replace(/\s+/g, '_');
+
+        const isTargetUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetSiniestroId);
         
         if (isTargetUuid) {
+            // Intentamos obtener del siniestro legacy relacionado
             const { data: dbSiniestro } = await supabase.from('siniestros').select('numero_siniestro, nombre_siniestro').eq('id', targetSiniestroId).maybeSingle();
-            const { data: dbTramite } = await supabase.from('tramites').select('paciente_nombre').eq('id', tramite.id).maybeSingle();
-
-            numeroSiniestroReal = dbSiniestro?.numero_siniestro || numeroSiniestroReal;
-            titularReal = dbTramite?.paciente_nombre || dbSiniestro?.nombre_siniestro || titularReal;
-        } else {
-            console.warn("[BACKEND] targetSiniestroId no es UUID, usando valores por defecto o string original:", targetSiniestroId);
-            numeroSiniestroReal = targetSiniestroId;
+            if (dbSiniestro) {
+                numeroSiniestroReal = dbSiniestro.numero_siniestro || numeroSiniestroReal;
+                titularReal = dbSiniestro.nombre_siniestro || titularReal;
+            }
         }
+
+        // Si aún tenemos el tramite recien creado, intentamos recuperar sus columnas reales (paciente_nombre, num_siniestro_ref)
+        const { data: tramiteFull } = await supabase.from('tramites').select('tipo, paciente_nombre, num_siniestro_ref').eq('id', tramite.id).maybeSingle();
+        if (tramiteFull) {
+            if (tramiteFull.paciente_nombre) titularReal = tramiteFull.paciente_nombre;
+            if (tramiteFull.num_siniestro_ref) numeroSiniestroReal = tramiteFull.num_siniestro_ref;
+        }
+
+        console.log(`[BACKEND] Orbiting n8n with: Siniestro=${numeroSiniestroReal}, Titular=${titularReal}, Tipo=${normalizedTipo}`);
 
         // 🚀 5. Liberar Bloqueo (Unlock)
         await supabase.rpc('unlock_tramite', { p_id: tramite.id });
@@ -270,7 +281,7 @@ export async function POST(req: Request) {
                 body: JSON.stringify({
                     trace_id: traceId,
                     tramite_id: tramite.id,
-                    tramite_tipo: tipo,
+                    tramite_tipo: normalizedTipo,
                     zip_url: zipUrl,
                     status: isApproved ? "audited" : "error_audit",
                     source: "dashboard-v4",
@@ -279,7 +290,11 @@ export async function POST(req: Request) {
                     titular_poliza: titularReal,
                     numero_poliza: "1101-GMM",
                     numero_siniestro: numeroSiniestroReal,
-                    siniestro_id: targetSiniestroId
+                    siniestro_id: targetSiniestroId,
+                    // Alias para sub-workflows legacy/V12
+                    TICKET_ID: numeroSiniestroReal,
+                    emailAsegurado: session.user.email || "cfo@pash.uno",
+                    nombreAsegurado: titularReal
                 })
             }).catch(err => console.error("[BACKEND] n8n error:", err));
         }
