@@ -7,6 +7,12 @@ import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentation
 /**
  * OpenTelemetry SDK Configuration
  * Envía trazas a un recolector OTLP (si existe)
+ *
+ * TODO: tech-debt — 2026-04-16
+ * Actualmente DESACTIVADO en producción (ENABLE_TRACING no definido en .env).
+ * La observabilidad principal corre via Supabase (workflow_steps) + Grafana.
+ * ACTIVAR cuando se despliegue un colector OTLP (Jaeger/Tempo) en Dokploy.
+ * Feature flag: ENABLE_TRACING=true en .env.local para activar.
  */
 
 const exporterOptions = {
