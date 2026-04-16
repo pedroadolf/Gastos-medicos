@@ -3,208 +3,186 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getSupabaseService } from "@/services/supabase";
 import { PdfEngine } from "@/services/pdfEngine";
-import { AuditorService, type AuditFinding } from "@/services/auditorService";
+import { AuditorService } from "@/services/auditorService";
 import { generateZip } from "@/services/zipEngine";
 
-
-
 /**
- * 🚀 ENDPOINT: Create full claim procedure (Tramite)
- * Handles:
- * 1. Metadata creation (Tramite record)
- * 2. Dynamic Invoices (Facturas table)
- * 3. File Uploads (Supabase Storage + Adjuntos table)
- * 4. n8n Audit Engine trigger
+ * 🚀 ENDPOINT SRE-READY (V12.1)
+ * Refactorizado para observabilidad total en Grafana.
+ * Implementa Protocolo Event-Driven: workflow_executions + workflow_steps.
  */
 export async function POST(req: Request) {
+    const traceId = crypto.randomUUID();
+    const executionId = crypto.randomUUID();
+    const startTime = Date.now();
+    const supabase = getSupabaseService();
+
+    // 🔴 1. INITIALIZE EXECUTION (Observability Root)
+    await supabase.from("workflow_executions").insert({
+        execution_id: executionId,
+        correlation_id: traceId,
+        idempotency_key: traceId,
+        status: "processing",
+        start_time: new Date().toISOString(),
+        workflow_name: "tramite_e2e",
+        workflow_version: "v12.1",
+        timeout_at: new Date(Date.now() + 2 * 60 * 1000).toISOString()
+    });
+
+    // 🧠 Helper: Universal Step Logger
+    const runStep = async (stepName: string, fn: () => Promise<any>) => {
+        const stepStart = Date.now();
+        await supabase.from("workflow_steps").insert({
+            execution_id: executionId,
+            step_name: stepName,
+            status: "processing",
+            start_time: new Date().toISOString()
+        });
+
+        try {
+            const result = await fn();
+            await supabase.from("workflow_steps").insert({
+                execution_id: executionId,
+                step_name: stepName,
+                status: "success",
+                duration_ms: Date.now() - stepStart,
+                end_time: new Date().toISOString()
+            });
+            return result;
+        } catch (error: any) {
+            await supabase.from("workflow_steps").insert({
+                execution_id: executionId,
+                step_name: stepName,
+                status: "error",
+                duration_ms: Date.now() - stepStart,
+                error_type: error?.message || "unknown_error",
+                end_time: new Date().toISOString()
+            });
+            throw error;
+        }
+    };
+
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user) {
-            return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-        }
+        if (!session?.user) throw new Error("No autorizado");
 
         const formData = await req.formData();
-        const traceId = crypto.randomUUID();
-        
-        console.log(`[E2E-BACKEND] 🚀 Recibida solicitud de creación. TraceID: ${traceId}`);
-
-        // 🧩 Extract metadata
         const siniestroId = formData.get("siniestro_id") as string;
         const tipo = formData.get("tipo") as string;
         const facturasRaw = formData.get("facturas") as string;
         const facturas = facturasRaw ? JSON.parse(facturasRaw) : [];
 
-        console.log(`[E2E-BACKEND] 📦 Metadata: SiniestroID=${siniestroId}, Tipo=${tipo}, Facturas=${facturas.length}`);
+        if (!siniestroId || !tipo) throw new Error("Faltan datos obligatorios (siniestro_id, tipo)");
 
-        if (!siniestroId || !tipo) {
-            console.error("[E2E-BACKEND] ❌ Faltan datos obligatorios.");
-            return NextResponse.json({ error: "Faltan datos obligatorios (siniestro_id, tipo)" }, { status: 400 });
-        }
-
-        const supabase = getSupabaseService();
-        // 🔄 FIX: NextAuth Google IDs are numeric strings. Supabase expects UUID.
+        // 🔄 FIX USER ID: NextAuth Google IDs are numeric strings.
         const isSessionIdUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(session.user.id);
         const validDbUserId = isSessionIdUuid ? session.user.id : "e2ce3a8c-1436-4b2a-a40d-af0a46612231";
-        
-        let targetSiniestroId = siniestroId;
 
-        // 🔗 1. GESTIÓN DE SINIESTROS (Sync on-the-fly)
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(siniestroId);
-        
-        if (!isUuid || (isUuid && session.user.role !== 'admin')) {
-            let query = supabase.from("siniestros").select("*");
+        // 🔗 STEP 1: SINIESTRO SYNC
+        const targetSiniestroId = await runStep("sync_siniestro", async () => {
+            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(siniestroId);
             
-            if (isUuid) {
-                query = query.eq("id", siniestroId);
-            } else {
-                const cleanSNum = siniestroId.split('-').slice(0, 2).join('-');
-                query = query.eq("numero_siniestro", cleanSNum);
-            }
-
-            const { data: existingSiniestro, error: searchError } = await query.maybeSingle();
-
-            if (searchError) {
-                console.error("[BACKEND] Error buscando siniestro existente:", searchError);
-            }
-
-            if (existingSiniestro) {
-                targetSiniestroId = existingSiniestro.id;
-                const isTestSiniestro = existingSiniestro?.numero_siniestro?.startsWith('SINI-TEST');
-                console.log(`[E2E-DEBUG] Validando Siniestro: ${existingSiniestro?.numero_siniestro}. TestMode: ${isTestSiniestro}. UserID: ${session.user.id}. SiniestroOwner: ${existingSiniestro?.user_id}`);
-            } else if (!isUuid) {
-                console.log("[BACKEND] Provisionando siniestro legacy:", siniestroId);
-                const sNumPrefix = siniestroId.split('-').slice(0, 2).join('-');
-                
-                const { data: newSiniestro, error: nsError } = await supabase
-                    .from("siniestros")
-                    .insert({
-                        numero_siniestro: sNumPrefix,
-                        nombre_siniestro: formData.get("nombre_siniestro") as string || "Trámite Migrado (Sheets)",
-                        user_id: validDbUserId
-                    })
-                    .select()
-                    .single();
-
-                if (nsError) {
-                    console.error("[BACKEND] ❌ Error provisionando siniestro legacy:", nsError);
-                    console.error("[BACKEND] Datos intentados:", {
-                        numero_siniestro: sNumPrefix,
-                        user_id: validDbUserId
-                    });
-                    throw new Error(`Error al sincronizar el siniestro legacy: ${nsError.message}`);
+            if (!isUuid || (isUuid && session.user.role !== 'admin')) {
+                let query = supabase.from("siniestros").select("*");
+                if (isUuid) {
+                    query = query.eq("id", siniestroId);
+                } else {
+                    const cleanSNum = siniestroId.split('-').slice(0, 2).join('-');
+                    query = query.eq("numero_siniestro", cleanSNum);
                 }
-                targetSiniestroId = newSiniestro.id;
-            } else {
-                return NextResponse.json({ error: "Siniestro no encontrado" }, { status: 404 });
+
+                const { data: existingSiniestro } = await query.maybeSingle();
+
+                if (existingSiniestro) {
+                    return existingSiniestro.id;
+                } else if (!isUuid) {
+                    // Provisioning legacy siniestro
+                    const sNumPrefix = siniestroId.split('-').slice(0, 2).join('-');
+                    const { data: newSiniestro, error: nsError } = await supabase
+                        .from("siniestros")
+                        .insert({
+                            numero_siniestro: sNumPrefix,
+                            nombre_siniestro: formData.get("nombre_siniestro") as string || "Trámite Migrado (Sheets)",
+                            user_id: validDbUserId
+                        })
+                        .select()
+                        .single();
+
+                    if (nsError) throw new Error(`Error provisioning legacy siniestro: ${nsError.message}`);
+                    return newSiniestro.id;
+                } else {
+                    throw new Error("Siniestro no encontrado");
+                }
             }
-        }
-
-        // 🧾 2. Crear trámite (Initial state: pending)
-
-        const { data: tramite, error: tError } = await supabase
-            .from("tramites")
-            .insert({
-                siniestro_id: targetSiniestroId,
-                tipo: tipo,
-                status: "pending", 
-                user_id: validDbUserId
-            })
-            .select()
-            .single();
-
-        if (tError) {
-            console.error("[E2E-BACKEND] ❌ Error al insertar trámite en DB:", tError);
-            throw tError;
-        }
-
-        console.log(`[E2E-BACKEND] ✅ Trámite insertado en DB con ID: ${tramite.id}`);
-
-        // 🛡️ BLOQUEO ATÓMICO (Atomic Lock)
-        // Pasamos a 'processing' inmediatamente para habilitar el flujo enterprise.
-        const { data: isLocked, error: lError } = await supabase.rpc('lock_tramite', {
-            p_id: tramite.id,
-            p_owner: 'API_ORCHESTRATOR'
+            return siniestroId;
         });
 
-        if (lError || !isLocked) {
-            throw new Error("No se pudo obtener el bloqueo del trámite para procesamiento.");
-        }
+        // 🧾 STEP 2: CREATE TRAMITE
+        const tramite = await runStep("create_tramite", async () => {
+            const { data, error } = await supabase
+                .from("tramites")
+                .insert({
+                    siniestro_id: targetSiniestroId,
+                    tipo: tipo,
+                    status: "pending",
+                    user_id: validDbUserId
+                })
+                .select()
+                .single();
 
-        // 🔄 TRANSICIÓN OBLIGATORIA A 'PROCESSING' (v4.4 Requirement)
-        await supabase.from("tramites").update({ status: "processing" }).eq("id", tramite.id);
-
-        // 📊 Registrar LOG inicial
-        await supabase.from("workflow_logs").insert({
-            tramite_id: tramite.id,
-            step: "CREATION",
-            status: "success",
-            message: `Trámite ${tramite.folio || tramite.id} iniciado en modo determinista.`,
-            metadata: { user_id: session.user.id, tipo, trace_id: traceId }
+            if (error) throw error;
+            return data;
         });
 
-        // 🧾 2. Guardar facturas
-        if (facturas.length > 0) {
-            const facturasPayload = facturas.map((f: any) => ({
-                tramite_id: tramite.id,
-                rfc_emisor: f.rfc_emisor || "",
-                nombre_emisor: f.nombre_emisor || "",
-                monto_total: parseFloat(f.monto_total || f.importe) || 0,
-                tipo: f.tipo || "O"
-            }));
+        // 🔗 Correlation Update
+        await supabase.from("workflow_executions")
+            .update({ tramite_id: tramite.id })
+            .eq("execution_id", executionId);
 
-            const { error: fError } = await supabase.from("facturas").insert(facturasPayload);
-
-            if (fError) {
-                console.error("[BACKEND] Error al insertar facturas:", fError);
-                await supabase.from("workflow_logs").insert({
-                    tramite_id: tramite.id,
-                    step: "FACTURAS",
-                    status: "error",
-                    message: "Error al registrar facturas en base de datos",
-                    metadata: { error: fError }
-                });
-            }
-        }
-
-        // 📎 3. Subir archivos a Storage
-        const files: { [key: string]: File } = {};
-        for (const [key, value] of formData.entries()) {
-            if (value instanceof File) files[key] = value;
-        }
-
-        const bucketName = "gmm-uploads";
-        for (const [docName, file] of Object.entries(files)) {
-            const fileName = `${tramite.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-            const buffer = await file.arrayBuffer();
-            
-            const { data: uploadData, error: uError } = await supabase.storage
-                .from(bucketName)
-                .upload(fileName, buffer, { contentType: file.type });
-
-            if (!uError && uploadData) {
-                await supabase.from("adjuntos").insert({
-                    tramite_id: tramite.id,
-                    tipo_documento: docName, 
-                    file_path: uploadData.path,
-                    file_name: file.name
-                });
-            }
-        }
-
-        // 🚀 4.4 MOTOR DE DOCUMENTOS (PDF Engine)
-        await supabase.from("workflow_logs").insert({
-            tramite_id: tramite.id,
-            step: "PDF_ENGINE",
-            status: "processing",
-            message: "Generando adjuntos dinámicos y formatos de aseguradora..."
+        // 🛡️ ATOMIC LOCK
+        await runStep("lock_tramite", async () => {
+            const { data: isLocked, error: lError } = await supabase.rpc('lock_tramite', {
+                p_id: tramite.id,
+                p_owner: 'API_ORCHESTRATOR_V12'
+            });
+            if (lError || !isLocked) throw new Error("No se pudo obtener el bloqueo del trámite.");
+            await supabase.from("tramites").update({ status: "processing" }).eq("id", tramite.id);
         });
 
-        try {
+        // 📎 STEP 3: UPLOAD FILES
+        await runStep("upload_files", async () => {
+            const files: { [key: string]: File } = {};
+            for (const [key, value] of formData.entries()) {
+                if (value instanceof File) files[key] = value;
+            }
+
+            const bucketName = "gmm-uploads";
+            for (const [docName, file] of Object.entries(files)) {
+                const fileName = `${tramite.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+                const buffer = await file.arrayBuffer();
+
+                const { data: uploadData, error: uError } = await supabase.storage
+                    .from(bucketName)
+                    .upload(fileName, buffer, { contentType: file.type });
+
+                if (!uError && uploadData) {
+                    await supabase.from("adjuntos").insert({
+                        tramite_id: tramite.id,
+                        tipo_documento: docName,
+                        file_path: uploadData.path,
+                        file_name: file.name
+                    });
+                }
+            }
+        });
+
+        // 📄 STEP 4: PDF ENGINE
+        await runStep("pdf_engine", async () => {
             const generatedPdfs = await PdfEngine.generateExpediente(tramite.id);
             for (const pdf of generatedPdfs) {
                 const fileName = `${tramite.id}/AUTO_${Date.now()}-${pdf.name}`;
                 const { data: uploadData, error: uError } = await supabase.storage
-                    .from(bucketName)
+                    .from("gmm-uploads")
                     .upload(fileName, pdf.buffer, { contentType: 'application/pdf' });
 
                 if (!uError && uploadData) {
@@ -216,97 +194,88 @@ export async function POST(req: Request) {
                     });
                 }
             }
-        } catch (pdfErr) {
-            console.error("[BACKEND] Error PDF Engine:", pdfErr);
-        }
-
-        // 🚀 4.5 AUDITORÍA EN TIEMPO REAL
-        await supabase.from("workflow_logs").insert({
-            tramite_id: tramite.id,
-            step: "AUDIT_ENGINE",
-            status: "processing",
-            message: "Iniciando auditoría inteligente con Gemini-1.5-Pro..."
         });
 
-        let auditFindings = await AuditorService.auditTramite(tramite.id);
-        const isApproved = !auditFindings.some(f => f.severity === 'error');
-
-        // 📦 4.6 ZIP Engine
-        // GENERAMOS EL ZIP SIEMPRE PARA ASEGURAR QUE LLEGUEN LOS ADJUNTOS EN LAS PRUEBAS
-        await supabase.from("workflow_logs").insert({
-            tramite_id: tramite.id,
-            step: "ZIP_ENGINE",
-            status: "processing",
-            message: "Empaquetando expediente digital..."
+        // 🤖 STEP 5: AUDIT
+        const auditFindings = await runStep("audit_engine", async () => {
+            return await AuditorService.auditTramite(tramite.id);
         });
-        const zipUrl = await generateZip(tramite.id);
+        const isApproved = !auditFindings.some((f: any) => f.severity === 'error');
 
-        // 3. Orquestamos metadatos adicionales para n8n
-        // REGLA: No confiar en defaults si podemos obtener datos reales
-        let numeroSiniestroReal = "SINI-TEST-000";
-        let titularReal = "CLAUDIA FONSECA AGUILAR";
+        // 📦 STEP 6: ZIP ENGINE
+        const zipUrl = await runStep("zip_engine", async () => {
+            return await generateZip(tramite.id);
+        });
 
-        // Normalizamos el tipo de trámite para n8n (Uppercase)
-        const normalizedTipo = (tipo || "reembolso").toUpperCase().replace(/\s+/g, '_');
+        // 🚀 STEP 7: N8N DISPATCH
+        await runStep("n8n_dispatch", async () => {
+            const n8nUrl = process.env.N8N_WEBHOOK_URL;
+            if (!n8nUrl) return;
 
-        const isTargetUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetSiniestroId);
-        
-        if (isTargetUuid) {
-            // Intentamos obtener del siniestro legacy relacionado
+            // Fetch metadata aliases for V12 compatibility
             const { data: dbSiniestro } = await supabase.from('siniestros').select('numero_siniestro, nombre_siniestro').eq('id', targetSiniestroId).maybeSingle();
-            if (dbSiniestro) {
-                numeroSiniestroReal = dbSiniestro.numero_siniestro || numeroSiniestroReal;
-                titularReal = dbSiniestro.nombre_siniestro || titularReal;
-            }
-        }
+            const { data: dbTramite } = await supabase.from('tramites').select('paciente_nombre').eq('id', tramite.id).maybeSingle();
 
-        // Si aún tenemos el tramite recien creado, intentamos recuperar sus columnas reales (paciente_nombre, num_siniestro_ref)
-        const { data: tramiteFull } = await supabase.from('tramites').select('tipo, paciente_nombre, num_siniestro_ref').eq('id', tramite.id).maybeSingle();
-        if (tramiteFull) {
-            if (tramiteFull.paciente_nombre) titularReal = tramiteFull.paciente_nombre;
-            if (tramiteFull.num_siniestro_ref) numeroSiniestroReal = tramiteFull.num_siniestro_ref;
-        }
+            const numeroSiniestroReal = dbSiniestro?.numero_siniestro || "SINI-TEST-000";
+            const titularReal = dbTramite?.paciente_nombre || dbSiniestro?.nombre_siniestro || "CLAUDIA FONSECA AGUILAR";
 
-        console.log(`[BACKEND] Orbiting n8n with: Siniestro=${numeroSiniestroReal}, Titular=${titularReal}, Tipo=${normalizedTipo}`);
-
-        // 🚀 5. Liberar Bloqueo (Unlock)
-        await supabase.rpc('unlock_tramite', { p_id: tramite.id });
-
-        // 🚀 6. Disparar n8n (Async)
-        const n8nUrl = process.env.N8N_WEBHOOK_URL;
-        if (n8nUrl) {
-            fetch(n8nUrl, {
+            await fetch(n8nUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    execution_id: executionId,
                     trace_id: traceId,
                     tramite_id: tramite.id,
-                    tramite_tipo: normalizedTipo,
+                    tramite_tipo: tipo,
                     zip_url: zipUrl,
                     status: isApproved ? "audited" : "error_audit",
-                    source: "dashboard-v4",
+                    source: "dashboard-v4-obs",
                     usuario_email: session.user.email || "cfo@pash.uno",
-                    usuario_nombre: session.user.user_metadata?.full_name || "Usuario del Sistema",
+                    usuario_nombre: session.user.user_metadata?.full_name || "Usuario",
                     titular_poliza: titularReal,
                     numero_poliza: "1101-GMM",
                     numero_siniestro: numeroSiniestroReal,
                     siniestro_id: targetSiniestroId,
-                    // Alias para sub-workflows legacy/V12
+                    // Alias for legacy support
                     TICKET_ID: numeroSiniestroReal,
-                    emailAsegurado: session.user.email || "cfo@pash.uno",
+                    emailAsegurado: session.user.email,
                     nombreAsegurado: titularReal
                 })
-            }).catch(err => console.error("[BACKEND] n8n error:", err));
-        }
+            });
+        });
+
+        // 🏁 2. CLOSE EXECUTION (SUCCESS)
+        await supabase.from("workflow_executions")
+            .update({
+                status: isApproved ? "success" : "warning",
+                end_time: new Date().toISOString(),
+                duration_ms: Date.now() - startTime
+            })
+            .eq("execution_id", executionId);
 
         return NextResponse.json({
             success: true,
+            execution_id: executionId,
             tramite_id: tramite.id,
-            status: isApproved ? "audited" : "error"
+            status: isApproved ? "audited" : "error_audit"
         });
 
     } catch (error: any) {
-        console.error("[BACKEND ERROR]:", error);
-        return NextResponse.json({ error: error.message || "Error interno del servidor" }, { status: 500 });
+        console.error("[SRE BACKEND ERROR]:", error);
+
+        // 🏁 2. CLOSE EXECUTION (ERROR)
+        await supabase.from("workflow_executions")
+            .update({
+                status: "error",
+                end_time: new Date().toISOString(),
+                duration_ms: Date.now() - startTime,
+                error_type: error?.message || "fatal_error"
+            })
+            .eq("execution_id", executionId);
+
+        return NextResponse.json({ 
+            error: error.message || "Error interno del servidor",
+            execution_id: executionId
+        }, { status: 500 });
     }
 }

@@ -1,0 +1,193 @@
+{
+  "id": null,
+  "uid": "noc-command-center-v12-pro",
+  "title": "🚀 NOC Command Center - GMM (V12 SRE PRO)",
+  "tags": ["noc", "sre", "gmm", "auto-healing"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 2,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Global Throughput",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "rawSql": "SELECT count(*)/60.0 as tps FROM workflow_executions WHERE created_at > now() - interval '1 minute';",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          },
+          "unit": "tps"
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate (5m)",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "rawSql": "SELECT (count(*) FILTER (WHERE status='error') * 100.0) / NULLIF(count(*), 0) as error_rate FROM workflow_executions WHERE created_at > now() - interval '5 minutes';",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 5 },
+              { "color": "red", "value": 10 }
+            ]
+          },
+          "unit": "percent"
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "P95 Latency",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "rawSql": "SELECT percentile_cont(0.95) WITHIN GROUP (ORDER BY duration_ms) FROM workflow_executions WHERE created_at > now() - interval '15 minutes';",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 3000 },
+              { "color": "red", "value": 7000 }
+            ]
+          },
+          "unit": "ms"
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "SRE Recovery Rate",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "rawSql": "SELECT (count(DISTINCT s2.execution_id) * 100.0) / NULLIF(count(DISTINCT s1.execution_id), 0) as recovery_rate FROM workflow_steps s1 LEFT JOIN workflow_steps s2 ON s1.execution_id = s2.execution_id AND s2.step_name = 'n8n_master_completed' AND s2.status = 'success' WHERE s1.step_name = 'auto_healing_retry_triggered' AND s1.created_at > now() - interval '24 hours';",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 50 },
+              { "color": "green", "value": 90 }
+            ]
+          },
+          "unit": "percent"
+        }
+      }
+    },
+    {
+      "type": "table",
+      "title": "🔴 Live Executions Health Monitoring",
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "rawSql": "SELECT execution_id, status, start_time, duration_ms, workflow_name, CASE WHEN status = 'error' THEN '🔴 INCIDENT' WHEN duration_ms > 4000 THEN '🟠 SLOW' ELSE '🟢 OK' END as health FROM workflow_executions ORDER BY start_time DESC LIMIT 50;",
+          "format": "table"
+        }
+      ],
+      "fieldConfig": {
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "health" },
+            "properties": [
+              { "id": "custom.displayMode", "value": "color-background" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "state-timeline",
+      "title": "Execution Step Waterfall (Selected ID Drill-down)",
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 6 },
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "rawSql": "SELECT step_name as \"metric\", start_time::timestamp as \"time\", CASE WHEN status='error' THEN 0 WHEN status='processing' THEN 0.5 ELSE 1 END as \"value\" FROM workflow_steps WHERE execution_id = '$execution_id' ORDER BY start_time ASC;",
+          "format": "time_series"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "🔍 Drill-down Event Payloads (Selected ID)",
+      "gridPos": { "x": 0, "y": 18, "w": 24, "h": 6 },
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "rawSql": "SELECT step_name, status, start_time, duration_ms, event_payload as \"Diagnostic Data\" FROM workflow_steps WHERE execution_id = '$execution_id' ORDER BY start_time ASC;",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "💀 Blackbox Failure Monitor (Ghost Rider Events)",
+      "gridPos": { "x": 0, "y": 24, "w": 24, "h": 6 },
+      "datasource": { "type": "postgres", "uid": "${datasource}" },
+      "targets": [
+        {
+          "rawSql": "SELECT created_at, step_name, event_payload FROM workflow_steps WHERE execution_id = '00000000-0000-0000-0000-000000000000' ORDER BY created_at DESC LIMIT 20;",
+          "format": "table"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "execution_id",
+        "type": "query",
+        "label": "Inspect Execution",
+        "datasource": { "type": "postgres", "uid": "${datasource}" },
+        "query": "SELECT execution_id FROM workflow_executions ORDER BY created_at DESC LIMIT 100;",
+        "refresh": 2
+      },
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "postgres",
+        "label": "Engine",
+        "refresh": 1
+      }
+    ]
+  }
+}
+

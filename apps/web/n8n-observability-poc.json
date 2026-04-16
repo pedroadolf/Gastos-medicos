@@ -1,0 +1,195 @@
+{
+  "name": "E2E Observability Workflow (SRE Ready)",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "tramite",
+        "httpMethod": "POST",
+        "responseMode": "onReceived"
+      },
+      "id": "webhook",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const execution_id = Date.now().toString();\nreturn [{ execution_id, step_start: new Date().toISOString() }];"
+      },
+      "id": "init",
+      "name": "Init Execution",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [400, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://supabase.pash.uno/rest/v1/workflow_steps",
+        "method": "POST",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\n  \"execution_id\": $json.execution_id,\n  \"step\": \"n8n_webhook_received\",\n  \"status\": \"success\",\n  \"timestamp\": new Date().toISOString()\n}",
+        "headerParametersJson": "={\n  \"apikey\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzI3NTA5OTIsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.arBCFrktA-kgkyz8ASjPbrs-FduxAQOHrA4bqes7Jbo\",\n  \"Authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzI3NTA5OTIsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.arBCFrktA-kgkyz8ASjPbrs-FduxAQOHrA4bqes7Jbo\",\n  \"Content-Type\": \"application/json\",\n  \"Prefer\": \"return=minimal\"\n}"
+      },
+      "id": "step_webhook",
+      "name": "Log: Webhook Received",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [600, 150]
+    },
+    {
+      "parameters": {
+        "functionCode": "const start = Date.now();\nawait new Promise(r => setTimeout(r, 500));\nreturn [{ ...$json, duration_ms: Date.now() - start }];"
+      },
+      "id": "simulate_download",
+      "name": "Simulate File Download",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [600, 350]
+    },
+    {
+      "parameters": {
+        "url": "https://supabase.pash.uno/rest/v1/workflow_steps",
+        "method": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"execution_id\": $json.execution_id,\n  \"step\": \"n8n_file_download\",\n  \"status\": \"success\",\n  \"duration_ms\": $json.duration_ms,\n  \"timestamp\": new Date().toISOString()\n}",
+        "headerParametersJson": "={\n  \"apikey\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzI3NTA5OTIsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.arBCFrktA-kgkyz8ASjPbrs-FduxAQOHrA4bqes7Jbo\",\n  \"Authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzI3NTA5OTIsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.arBCFrktA-kgkyz8ASjPbrs-FduxAQOHrA4bqes7Jbo\",\n  \"Content-Type\": \"application/json\"\n}"
+      },
+      "id": "step_download",
+      "name": "Log: File Download",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [800, 350]
+    },
+    {
+      "parameters": {
+        "functionCode": "const start = Date.now();\nawait new Promise(r => setTimeout(r, 800));\nreturn [{ ...$json, duration_ms_ai: Date.now() - start }];"
+      },
+      "id": "simulate_ai",
+      "name": "Simulate AI Processing",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1000, 350]
+    },
+    {
+      "parameters": {
+        "url": "https://supabase.pash.uno/rest/v1/workflow_steps",
+        "method": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"execution_id\": $json.execution_id,\n  \"step\": \"n8n_ai_processing\",\n  \"status\": \"success\",\n  \"duration_ms\": $json.duration_ms_ai,\n  \"timestamp\": new Date().toISOString()\n}",
+        "headerParametersJson": "={\n  \"apikey\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzI3NTA5OTIsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.arBCFrktA-kgkyz8ASjPbrs-FduxAQOHrA4bqes7Jbo\",\n  \"Authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzI3NTA5OTIsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.arBCFrktA-kgkyz8ASjPbrs-FduxAQOHrA4bqes7Jbo\",\n  \"Content-Type\": \"application/json\"\n}"
+      },
+      "id": "step_ai",
+      "name": "Log: AI Processing",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [1200, 350]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": true,
+              "operation": "equal"
+            }
+          ]
+        }
+      },
+      "id": "decision",
+      "name": "Decision Logic",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1400, 350]
+    },
+    {
+      "parameters": {
+        "url": "https://supabase.pash.uno/rest/v1/workflow_steps",
+        "method": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"execution_id\": $json.execution_id,\n  \"step\": \"n8n_decision\",\n  \"status\": \"success\",\n  \"timestamp\": new Date().toISOString()\n}",
+        "headerParametersJson": "={\n  \"apikey\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzI3NTA5OTIsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.arBCFrktA-kgkyz8ASjPbrs-FduxAQOHrA4bqes7Jbo\",\n  \"Authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzI3NTA5OTIsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.arBCFrktA-kgkyz8ASjPbrs-FduxAQOHrA4bqes7Jbo\",\n  \"Content-Type\": \"application/json\"\n}"
+      },
+      "id": "step_decision",
+      "name": "Log: Decision",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [1600, 250]
+    },
+    {
+      "parameters": {
+        "url": "https://supabase.pash.uno/rest/v1/workflow_steps",
+        "method": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"execution_id\": $json.execution_id,\n  \"step\": \"n8n_notification\",\n  \"status\": \"success\",\n  \"timestamp\": new Date().toISOString()\n}",
+        "headerParametersJson": "={\n  \"apikey\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzI3NTA5OTIsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.arBCFrktA-kgkyz8ASjPbrs-FduxAQOHrA4bqes7Jbo\",\n  \"Authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzI3NTA5OTIsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.arBCFrktA-kgkyz8ASjPbrs-FduxAQOHrA4bqes7Jbo\",\n  \"Content-Type\": \"application/json\"\n}"
+      },
+      "id": "step_notify",
+      "name": "Log: Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [1800, 250]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"status\": \"ok\", \"execution_id\": $json.execution_id }"
+      },
+      "id": "response",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2000, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://supabase.pash.uno/rest/v1/workflow_steps",
+        "method": "POST",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"execution_id\": $json.execution_id || 'unknown',\n  \"step\": \"n8n_error\",\n  \"status\": \"error\",\n  \"error_type\": $json.error?.message || 'unknown',\n  \"timestamp\": new Date().toISOString()\n}",
+        "headerParametersJson": "={\n  \"apikey\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzI3NTA5OTIsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.arBCFrktA-kgkyz8ASjPbrs-FduxAQOHrA4bqes7Jbo\",\n  \"Authorization\": \"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzI3NTA5OTIsImV4cCI6MTg5MzQ1NjAwMCwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlzcyI6InN1cGFiYXNlIn0.arBCFrktA-kgkyz8ASjPbrs-FduxAQOHrA4bqes7Jbo\",\n  \"Content-Type\": \"application/json\"\n}"
+      },
+      "id": "error_logger",
+      "name": "Log: Error",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [1200, 550]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "Init Execution", "type": "main", "index": 0 }]]
+    },
+    "Init Execution": {
+      "main": [
+        [{ "node": "Log: Webhook Received", "type": "main", "index": 0 }],
+        [{ "node": "Simulate File Download", "type": "main", "index": 0 }]
+      ]
+    },
+    "Simulate File Download": {
+      "main": [[{ "node": "Log: File Download", "type": "main", "index": 0 }]]
+    },
+    "Log: File Download": {
+      "main": [[{ "node": "Simulate AI Processing", "type": "main", "index": 0 }]]
+    },
+    "Simulate AI Processing": {
+      "main": [[{ "node": "Log: AI Processing", "type": "main", "index": 0 }]]
+    },
+    "Log: AI Processing": {
+      "main": [[{ "node": "Decision Logic", "type": "main", "index": 0 }]]
+    },
+    "Decision Logic": {
+      "main": [[{ "node": "Log: Decision", "type": "main", "index": 0 }]]
+    },
+    "Log: Decision": {
+      "main": [[{ "node": "Log: Notification", "type": "main", "index": 0 }]]
+    },
+    "Log: Notification": {
+      "main": [[{ "node": "Respond", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+}
