@@ -80,8 +80,7 @@ export async function POST(req: Request) {
                     .insert({
                         numero_siniestro: sNumPrefix,
                         nombre_siniestro: formData.get("nombre_siniestro") as string || "Trámite Migrado (Sheets)",
-                        user_id: validDbUserId,
-                        descripcion: "Migrado automáticamente desde Google Sheets por el Orchestrator."
+                        user_id: validDbUserId
                     })
                     .select()
                     .single();
