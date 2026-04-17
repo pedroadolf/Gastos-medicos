@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── GMM Clinical Palette ── */
-  --color-gmm-bg: #EDE8E0;
-  /* Folder / expediente warm bg */
+  /* ── GMM Clinical Palette (Phase 2 Unification) ── */
+  --color-gmm-bg: #E9E4D9;
+  /* Soft Folder Beige */
   --color-gmm-card: #FFFFFF;
   /* Card surface */
   --color-gmm-accent: #FFAA00;
-  /* Amber – buttons, highlights */
+  /* Amber - primary action/status */
   --color-gmm-text: #343434;
-  /* Primary text */
+  /* Deep Charcoal Gray */
   --color-gmm-text-muted: #6B7280;
   /* Secondary / muted text */
   --color-gmm-border: #D8D9D7;
@@ -19,91 +19,44 @@
   --color-gmm-success: #22c55e;
   /* Approvals, healthy state */
 
-  /* ── Legacy SRE tokens (kept – backend components reference these) ── */
-  --color-gmm-black: #050505;
-  --color-gmm-gray-dark: #0f1115;
-  --color-gmm-gray: #1a1d23;
-  --color-gmm-gray-light: #2c313a;
-  --color-gmm-yellow: #FFD32C;
-  --color-gmm-yellow-dim: rgba(255, 211, 44, 0.1);
-  --color-gmm-warning: #ffa502;
-  --color-gmm-info: #1e90ff;
-
   /* ── Fonts ── */
   --font-plus-jakarta: var(--font-plus-jakarta-sans);
   --font-inter: var(--font-inter);
 }
 
-/* ── Utilities ── */
+/* ── Custom Layers ── */
+@layer base {
+  body {
+    background-color: #E9E4D9;
+    color: #343434;
+    -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(#343434 1px, transparent 1px);
+    background-size: 30px 30px;
+    background-attachment: fixed;
+  }
+}
+
 @layer utilities {
 
-  /* GMM Card — main card surface */
-  .gmm-card {
-    @apply bg-gmm-card dark:bg-gray-800 border border-gmm-border dark:border-gray-700 rounded-2xl p-5 shadow-sm;
+  /* GMM Pill Card — Image 1 organic style */
+  .gmm-pill-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/60 rounded-[32px] p-8 shadow-xl shadow-black/5 transition-all duration-500 hover:shadow-2xl hover:shadow-black/10;
   }
 
-  /* GMM Button filled */
-  .gmm-btn {
-    @apply px-4 py-2 bg-gmm-accent text-white text-xs font-bold rounded-xl hover:bg-amber-500 active:scale-95 transition-all shadow-sm;
+  /* The Central Timeline Line backbone */
+  .timeline-line {
+    @apply absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] bg-gmm-text/5 -z-10;
   }
 
-  /* GMM Button outline */
-  .gmm-btn-outline {
-    @apply px-4 py-2 bg-transparent border border-gmm-accent text-gmm-accent text-xs font-bold rounded-xl hover:bg-gmm-accent hover:text-white active:scale-95 transition-all;
-  }
-
-  /* Folder-paper texture */
-  .bg-gmm-bg {
-    background-color: #EDE8E0;
-    background-image:
-      radial-gradient(circle at 10% 20%, rgba(0, 0, 0, 0.015) 1%, transparent 1%),
-      radial-gradient(circle at 80% 70%, rgba(255, 170, 0, 0.04) 20%, transparent 20%);
-    background-size: 20px 20px, 100% 100%;
-  }
-
-  /* Grid pattern (kept for SRE/Observability pages) */
-  .bg-grid-white {
-    background-size: 50px 50px;
-    background-image:
-      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  }
-
-  /* Glows (kept for legacy SRE components) */
-  .text-glow-yellow {
-    text-shadow: 0 0 20px rgba(255, 211, 44, 0.5);
-  }
-
-  .bg-glass {
-    background: rgba(15, 17, 21, 0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .shadow-soft {
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-  }
-
-  .card-glow {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card-glow::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100px;
-    height: 100px;
-    background: radial-gradient(circle, rgba(255, 211, 44, 0.05) 0%, transparent 70%);
-    pointer-events: none;
+  /* GMM Header Nav — Glassmorphism pill */
+  .gmm-header-nav {
+    @apply bg-white/70 backdrop-blur-md border border-white/50 rounded-full px-8 py-3 shadow-xl;
   }
 
   /* Custom scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    width: 6px;
+    height: 6px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -111,6 +64,10 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-gmm-gray-light/30 rounded-full hover:bg-gmm-accent/30 transition-all;
+    @apply bg-gmm-text/10 rounded-full hover:bg-gmm-accent/20 transition-all;
+  }
+  
+  .bg-folder {
+     background-color: #E9E4D9;
   }
 }
