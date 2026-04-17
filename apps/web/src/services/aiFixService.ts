@@ -30,11 +30,11 @@ export class AiFixService {
         // AI-Driven Correction: Recalculate totals from individual invoices
         const { data: facturas } = await this.supabase
           .from('facturas')
-          .select('importe')
+          .select('monto_total')
           .eq('tramite_id', tramiteId);
 
         if (facturas) {
-          const newTotal = facturas.reduce((acc, f) => acc + (Number(f.importe) || 0), 0);
+          const newTotal = facturas.reduce((acc, f) => acc + (Number(f.monto_total) || 0), 0);
           
           await this.supabase
             .from('tramites')

@@ -69,7 +69,7 @@ export async function GET() {
             userSiniestros.forEach(s => {
                 (s.tramites || []).forEach((t: any) => {
                     (t.facturas || []).forEach((f: any) => {
-                        consumed += Number(f.monto_total || f.importe || 0);
+                        consumed += Number(f.monto_total || 0);
                     });
                 });
             });
