@@ -32,7 +32,7 @@ export default function GlobalDashboardPage() {
       const res = await fetch("/api/dashboard/metrics");
       const d = await res.json();
       if (d.data) {
-        setData(d.data);
+        setData(d);
         setErrorCount(0);
       } else {
         throw new Error("Failed to fetch");
@@ -67,9 +67,9 @@ export default function GlobalDashboardPage() {
     );
   }
 
-  const { kpis, meta, trust } = data;
+  const { kpis, meta, trust, insuredUsers, alerts, kanban } = data;
   const isStale = (trust?.status === 'STALE') || errorCount > 0;
-  const intelligence = kpis.intelligence;
+  const intelligence = kpis?.intelligence;
 
   return (
     <div className="min-h-screen bg-transparent flex flex-col">
@@ -145,7 +145,7 @@ export default function GlobalDashboardPage() {
                     <LayoutGrid className="text-gmm-yellow" size={14} />
                     <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Asegurados Active Quotas</h2>
                 </div>
-                <InsuredCards users={data.insured || []} />
+                <InsuredCards users={insuredUsers || []} />
             </section>
 
             {/* Layer 3: SRE Visibility */}
