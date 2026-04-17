@@ -33,7 +33,7 @@ function TramiteNode({ tramite, index }: any) {
           <div className="flex justify-between items-start mb-6">
             <div className="flex items-center gap-4">
               <div className={`w-12 h-12 rounded-2xl ${status.color}/20 flex items-center justify-center`}>
-                <tramite.icon className={status.color.replace('bg-', 'text-')} size={24} />
+                <FileText className={status.color.replace('bg-', 'text-')} size={24} />
               </div>
               <div>
                 <h4 className="text-sm font-black text-gmm-text uppercase tracking-tight leading-tight italic">

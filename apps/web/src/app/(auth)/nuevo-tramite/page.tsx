@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { 
-  User, Hospital, Paperclip, ChevronRight, Save, Send, AlertCircle
+  User, Hospital, Paperclip, Plus, Save, Send
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
