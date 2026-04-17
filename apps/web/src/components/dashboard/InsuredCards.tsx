@@ -13,7 +13,7 @@ export function InsuredCards({ users }: { users: any[] }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
       {users.map((user, idx) => (
-        <Card key={idx} name={user.name} consumed={user.consumed} total={user.total} />
+        <Card key={idx} name={user.name} consumed={user.consumed} total={user.totalLimit || user.total || 1_000_000} />
       ))}
       
       {/* Empty Slot for adding more (Simulation) */}

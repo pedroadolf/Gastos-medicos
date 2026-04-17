@@ -67,7 +67,8 @@ export default function GlobalDashboardPage() {
     );
   }
 
-  const { kpis, meta, trust, insuredUsers, alerts, kanban } = data;
+  const { kpis, insuredUsers, alerts, kanban } = data.data || {};
+  const { meta, trust } = data;
   const isStale = (trust?.status === 'STALE') || errorCount > 0;
   const intelligence = kpis?.intelligence;
 
