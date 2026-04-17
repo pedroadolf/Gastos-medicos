@@ -28,7 +28,7 @@ export async function GET() {
                     tipo,
                     status,
                     paciente_nombre,
-                    facturas ( importe, tipo_gasto, monto_total )
+                    facturas ( monto_total, tipo )
                 )
             `)
             .order('fecha_apertura', { ascending: false });
@@ -45,7 +45,7 @@ export async function GET() {
         // 4. Fetch facturas for financial breakdown
         const { data: facturas, error: fError } = await supabase
             .from('facturas')
-            .select('tramite_id, importe, tipo_gasto, monto_total');
+            .select('tramite_id, monto_total, tipo');
         if (fError) console.warn("⚠️ facturas:", fError.message);
 
         // === Build insured cards ===
@@ -116,8 +116,12 @@ export async function GET() {
         // === Financial breakdown by gasto type ===
         const gastoTotals = { H: 0, M: 0, F: 0, O: 0 };
         (facturas || []).forEach(f => {
-            const tipo = (f.tipo_gasto || 'O') as 'H' | 'M' | 'F' | 'O';
-            gastoTotals[tipo] += Number(f.monto_total || f.importe || 0);
+            const tipo = (f.tipo || 'O') as 'H' | 'M' | 'F' | 'O';
+            if (gastoTotals[tipo] !== undefined) {
+                gastoTotals[tipo] += Number(f.monto_total || 0);
+            } else {
+                gastoTotals['O'] += Number(f.monto_total || 0);
+            }
         });
 
         return NextResponse.json({

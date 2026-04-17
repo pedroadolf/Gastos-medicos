@@ -30,14 +30,14 @@ export async function GET(
             .order('start_time', { ascending: true });
 
         // Financial Context (Exceso + Runway)
-        const { data: facturas } = await supabase.from('facturas').select('importe');
-        const consumed = facturas?.reduce((acc, f) => acc + Number(f.importe), 0) || 0;
+        const { data: facturas } = await supabase.from('facturas').select('monto_total');
+        const consumed = facturas?.reduce((acc, f) => acc + Number(f.monto_total), 0) || 0;
         const baseLimit = 5000000;
         const effectiveAvailable = consumed < baseLimit ? (baseLimit - consumed) + 100000000 : 100000000 - (consumed - baseLimit);
 
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-        const { data: recentFacturas } = await supabase.from('facturas').select('importe').gte('created_at', sevenDaysAgo);
-        const dailyBurn = (recentFacturas?.reduce((acc, f) => acc + Number(f.importe), 0) || 0) / 7;
+        const { data: recentFacturas } = await supabase.from('facturas').select('monto_total').gte('created_at', sevenDaysAgo);
+        const dailyBurn = (recentFacturas?.reduce((acc, f) => acc + Number(f.monto_total), 0) || 0) / 7;
         const runwayDays = dailyBurn > 0 ? effectiveAvailable / dailyBurn : 999;
 
         // History

@@ -12,10 +12,10 @@ export async function GET() {
         // 1. Fetch Real Consumption from Facturas
         const { data: facturas, error: fError } = await supabase
             .from('facturas')
-            .select('importe');
+            .select('monto_total');
 
         if (fError) console.warn("⚠️ Error fetching facturas:", fError.message);
-        const totalConsumed = facturas?.reduce((acc, f) => acc + Number(f.importe), 0) || 0;
+        const totalConsumed = facturas?.reduce((acc, f) => acc + Number(f.monto_total), 0) || 0;
 
         // 2. Fetch Workflow Health
         const { data: executions, error: eError } = await supabase
@@ -53,7 +53,7 @@ export async function GET() {
         const { data: userConsumptionRaw, error: ucError } = await supabase
             .from('facturas')
             .select(`
-                importe,
+                monto_total,
                 tramites (
                     siniestros (
                         user_id
@@ -67,7 +67,7 @@ export async function GET() {
         userConsumptionRaw?.forEach((item: any) => {
             const userId = item.tramites?.siniestros?.user_id;
             if (userId) {
-                consumptionByUser[userId] = (consumptionByUser[userId] || 0) + Number(item.importe);
+                consumptionByUser[userId] = (consumptionByUser[userId] || 0) + Number(item.monto_total);
             }
         });
 
@@ -108,10 +108,10 @@ export async function GET() {
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
         const { data: recentFacturas } = await supabase
             .from('facturas')
-            .select('importe')
+            .select('monto_total')
             .gte('created_at', sevenDaysAgo);
         
-        const sevenDayTotal = recentFacturas?.reduce((acc, f) => acc + Number(f.importe), 0) || 0;
+        const sevenDayTotal = recentFacturas?.reduce((acc, f) => acc + Number(f.monto_total), 0) || 0;
         const dailyBurnRate = sevenDayTotal / 7;
         const runwayDays = dailyBurnRate > 0 ? Math.floor(effectiveAvailable / dailyBurnRate) : 999;
 
