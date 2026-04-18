@@ -92,7 +92,7 @@ export function ReimbursementWaterfall() {
             <YAxis hide />
             <Tooltip 
               cursor={{ fill: 'transparent' }}
-              content={({ active, payload }) => {
+              content={({ active, payload }: any) => {
                 if (active && payload && payload.length) {
                   const data = payload[0].payload;
                   return (
