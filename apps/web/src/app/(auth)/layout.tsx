@@ -10,57 +10,56 @@ import { Copilot } from "@/components/layout/Copilot";
 
 function GlobalTopNav({ theme, toggleTheme }: { theme: string, toggleTheme: () => void }) {
   const pathname = usePathname();
-  const navItems = [
-    { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
-    { name: 'Nuevo Trámite', href: '/nuevo-tramite', icon: Plus },
-    { name: 'Mis Trámites', href: '/tramites', icon: FileText },
-    { name: 'Observabilidad', href: '/observabilidad', icon: Activity },
-    { name: 'Configuración', href: '/settings', icon: Settings }
-  ];
-
+  
   return (
     <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
-      <nav className="gmm-header-nav flex justify-between items-center max-w-6xl mx-auto backdrop-blur-2xl">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 bg-gmm-accent rounded-2xl flex items-center justify-center shadow-lg shadow-gmm-accent/20 text-gmm-text">
-            <Shield size={24} />
-          </div>
-          <div>
-            <h1 className="text-xl font-black tracking-tight text-gmm-text">
-              GMM <span className="text-gmm-text/40 tracking-tighter uppercase text-[9px] font-black block leading-[0.5]">MetLife</span>
-            </h1>
-          </div>
+      <nav className="gmm-header-nav flex justify-between items-center max-w-[1500px] mx-auto backdrop-blur-3xl bg-white/70 dark:bg-black/40">
+        {/* Left: Branding */}
+        <div className="flex items-center gap-6">
+           <div className="w-10 h-10 bg-gmm-text rounded-2xl flex items-center justify-center text-gmm-accent shadow-xl">
+             <Activity size={20} />
+           </div>
+           <div>
+             <h1 className="text-xl font-black tracking-tighter text-gmm-text leading-none">Diagnostic</h1>
+             <p className="text-[9px] font-black text-gmm-text-muted uppercase tracking-[0.3em] mt-1">GMM PLATFORM V12</p>
+           </div>
         </div>
-        
-        <ul className="hidden lg:flex gap-8 items-center text-[10px] font-black uppercase tracking-widest text-gmm-text/50">
-          {navItems.map((item) => (
-            <li key={item.name}>
-              <a 
-                href={item.href} 
-                className={`transition-all duration-300 hover:text-gmm-accent ${
-                  pathname === item.href ? 'text-gmm-accent border-b-2 border-gmm-accent pb-1' : ''
-                }`}
-              >
-                {item.name}
-              </a>
-            </li>
-          ))}
-        </ul>
 
-        <div className="flex items-center gap-4">
+        {/* Center: Search / Ops Monitor */}
+        <div className="hidden xl:flex items-center bg-gmm-bg/50 rounded-2xl px-6 py-2 border border-gmm-border/30 w-[400px] group transition-all focus-within:w-[500px] focus-within:border-gmm-accent">
+           <Search size={16} className="text-gmm-text/40 group-focus-within:text-gmm-accent" />
+           <input 
+             type="text" 
+             placeholder="Buscar Siniestros, Asegurados o Facturas..." 
+             className="bg-transparent border-none outline-none px-4 text-[10px] font-black uppercase tracking-widest text-gmm-text w-full placeholder:text-gmm-text/20"
+           />
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-3">
+          <div className="hidden lg:flex gap-2">
+            {['Visitas', 'Medicamentos', 'Labs', 'Genética'].map(item => (
+              <button key={item} className="px-4 py-2 rounded-xl bg-gmm-bg/30 text-[9px] font-black uppercase tracking-widest text-gmm-text-muted hover:bg-white hover:text-gmm-text transition-all border border-transparent hover:border-gmm-border/50">
+                {item}
+              </button>
+            ))}
+          </div>
+          
+          <div className="w-px h-8 bg-gmm-border/30 mx-2" />
+
           <button 
             onClick={toggleTheme}
-            className="p-3 rounded-full bg-gmm-bg border border-gmm-border/50 text-gmm-text hover:bg-gmm-accent hover:text-white transition-all shadow-sm"
+            className="p-2.5 rounded-xl bg-gmm-card border border-gmm-border/50 text-gmm-text hover:bg-gmm-accent hover:text-white transition-all shadow-sm"
           >
-            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
           </button>
           
-          <button className="bg-gmm-text text-white px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-gmm-accent transition-all cursor-pointer shadow-lg shadow-gmm-text/10">
-            Nuevo Trámite +
+          <button className="bg-gmm-danger text-white p-2.5 rounded-xl hover:scale-105 transition-all shadow-lg shadow-gmm-danger/20">
+            <Plus size={18} />
           </button>
-          
-          <div className="w-10 h-10 rounded-full bg-gmm-bg border border-gmm-border/50 flex items-center justify-center text-gmm-text shadow-sm overflow-hidden">
-             <User size={20} />
+
+          <div className="w-10 h-10 rounded-full border-2 border-white shadow-md overflow-hidden bg-gmm-bg flex items-center justify-center text-gmm-text">
+            <User size={20} />
           </div>
         </div>
       </nav>

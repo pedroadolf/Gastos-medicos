@@ -13,123 +13,92 @@ import { motion } from 'framer-motion';
 
 // ─── Componentes de UI Soft Clinical (Imagen 1) ──────────────
 
-function ClinicalTabs() {
-  const tabs = ['Resumen', 'Tratamientos', 'Visitas', 'Medicamentos', 'Laboratorios', 'Genética'];
-  return (
-    <div className="flex flex-wrap gap-2 mb-12">
-      {tabs.map((tab, i) => (
-        <button key={tab} className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-          i === 0 ? 'bg-gmm-text text-white shadow-lg' : 'bg-gmm-card border border-gmm-border/40 text-gmm-text/40 hover:text-gmm-accent'
-        }`}>
-          {tab}
-        </button>
-      ))}
-    </div>
-  );
-}
+// ─── Componentes de UI Soft Clinical (Imagen 1) ──────────────
 
-function InsuredNode({ patient, index }: any) {
-  const isRight = index % 2 === 0;
+function InsuredCard({ patient, index }: any) {
   const pct = Math.min((patient.consumed / patient.sublimit) * 100, 100);
-  const statusColor = pct > 70 ? 'text-gmm-danger' : 'text-gmm-accent';
+  const statusColor = pct > 80 ? 'bg-gmm-danger' : pct > 50 ? 'bg-gmm-accent' : 'bg-green-500';
+  const textColor = pct > 80 ? 'text-gmm-danger' : pct > 50 ? 'text-gmm-accent' : 'text-green-600';
 
   return (
-    <div className={`relative flex items-center justify-center gap-12 mb-24 ${isRight ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-      
-      {/* Targeta del Asegurado (Nivel Nodo "Cardiology" Style) */}
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        className="w-full md:w-[48%]"
-      >
-        <div className="gmm-pill-card relative group flex items-center gap-8 py-6">
-            <div className="w-24 h-24 rounded-full bg-gmm-bg/50 border-4 border-white shadow-inner flex items-center justify-center text-4xl shrink-0 overflow-hidden">
-                {patient.role === 'Titular' ? '🧑' : patient.role === 'Esposo' ? '👨' : '👧'}
-            </div>
-            
-            <div className="flex-1 min-w-0">
-               <div className="flex justify-between items-start mb-2">
-                 <div>
-                    <h3 className="text-xl font-black text-gmm-text tracking-tighter leading-none">{patient.name}</h3>
-                    <p className="text-[10px] font-bold text-gmm-text-muted uppercase tracking-[0.2em] mt-1 italic">{patient.role}</p>
-                 </div>
-                 <div className="text-right">
-                    <p className="text-[9px] font-black text-gmm-text-muted uppercase tracking-widest">Presión</p>
-                    <p className="text-sm font-black text-gmm-text leading-none">120 / 80</p>
-                 </div>
-               </div>
-
-               <div className="bg-gmm-bg/30 rounded-3xl p-4 border border-gmm-border/20 flex gap-6 items-center">
-                  <div className="flex-1">
-                    <p className="text-[9px] font-black text-gmm-text-muted uppercase mb-1">Padecimiento</p>
-                    <p className="text-[11px] font-bold text-gmm-text uppercase truncate">{patient.padecimiento}</p>
-                  </div>
-                  <div className="w-px h-8 bg-gmm-border/30" />
-                  <div className="flex-1">
-                    <p className="text-[9px] font-black text-gmm-text-muted uppercase mb-1">Consumo</p>
-                    <p className={`text-[11px] font-black ${statusColor}`}>${(patient.consumed / 1000).toFixed(1)}k</p>
-                  </div>
-               </div>
-            </div>
-        </div>
-      </motion.div>
-
-      {/* Nodo Central (Amber junction) */}
-      <div className="hidden md:flex w-14 h-14 bg-gmm-card border-[8px] border-gmm-bg rounded-full z-10 items-center justify-center shadow-lg">
-        <div className="w-10 h-10 rounded-full bg-gmm-accent/10 flex items-center justify-center text-gmm-accent">
-          <Pill size={16} />
-        </div>
-      </div>
-
-      {/* Info Flotante Visual Indicator */}
-      <div className={`hidden md:block w-[48%] ${isRight ? 'text-left' : 'text-right'}`}>
-         <div className="inline-block p-4 bg-white/40 backdrop-blur-sm rounded-3xl border border-white shadow-sm">
-           <svg width="120" height="30" viewBox="0 0 120 30" className="opacity-40">
-              <path d="M0 15 L10 15 L15 5 L20 25 L25 15 L40 15 L45 5 L50 25 L55 15 L70 15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-gmm-accent animate-pulse" />
-           </svg>
-           <p className="text-[9px] font-bold text-gmm-text/30 uppercase tracking-[0.3em] mt-2">Monitoreo de Gasto Activo</p>
-         </div>
-      </div>
-
-    </div>
-  );
-}
-
-function GlobalKPI({ title, value, subtext, color = 'accent', progress }: any) {
-  return (
-    <div className="gmm-pill-card flex flex-col justify-between min-h-[160px]">
-      <div>
-        <p className="text-[10px] font-black text-gmm-text-muted uppercase tracking-[0.3em] mb-1">{title}</p>
-        <h2 className={`text-3xl font-black tracking-tighter ${color === 'red' ? 'text-gmm-danger' : 'text-gmm-text'}`}>
-          {value}
-        </h2>
-      </div>
-      
-      <div className="w-full">
-        {progress !== undefined && (
-          <div className="h-2 w-full bg-gmm-text/5 rounded-full overflow-hidden mb-2">
-            <div className={`h-full rounded-full transition-all duration-1000 ${color === 'red' ? 'bg-gmm-danger' : 'bg-gmm-accent'}`} style={{ width: `${progress}%` }} />
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      className="gmm-pill-card relative overflow-hidden group hover:shadow-2xl transition-all duration-500 border-gmm-border/30"
+    >
+      {/* Role Header */}
+      <div className="flex justify-between items-start mb-6">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-gmm-bg/50 flex items-center justify-center text-2xl shadow-inner">
+            {patient.icon}
           </div>
-        )}
-        <p className="text-[10px] font-bold text-gmm-text-muted uppercase italic tracking-wider">{subtext}</p>
+          <div>
+            <h3 className="text-lg font-black text-gmm-text tracking-tighter uppercase">{patient.name}</h3>
+            <p className="text-[9px] font-black text-gmm-text-muted uppercase tracking-[0.2em]">{patient.role} · {patient.age} Años</p>
+          </div>
+        </div>
+        <button className="p-2 rounded-full hover:bg-gmm-bg transition-colors">
+          <ChevronRight size={18} className="text-gmm-text-muted" />
+        </button>
       </div>
-    </div>
+
+      {/* Diagnosis Section */}
+      <div className="bg-gmm-bg/30 rounded-[2rem] p-5 mb-6 border border-gmm-border/20">
+        <p className="text-[9px] font-black text-gmm-text-muted uppercase tracking-widest mb-1">Padecimiento Crítico</p>
+        <p className="text-xs font-black text-gmm-text uppercase truncate">{patient.padecimiento}</p>
+      </div>
+
+      {/* Sub-limit Tracker */}
+      <div className="mb-6">
+        <div className="flex justify-between items-end mb-2">
+          <p className="text-[9px] font-black text-gmm-text-muted uppercase tracking-widest">Sub-límite</p>
+          <p className={`text-[10px] font-black ${textColor}`}>
+            ${(patient.consumed / 1000).toFixed(0)}k / ${(patient.sublimit / 1000).toFixed(0)}k
+          </p>
+        </div>
+        <div className="h-2 w-full bg-gmm-text/5 rounded-full overflow-hidden">
+          <motion.div 
+            initial={{ width: 0 }}
+            whileInView={{ width: `${pct}%` }}
+            className={`h-full rounded-full ${statusColor}`} 
+          />
+        </div>
+      </div>
+
+      {/* Specs Grid */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="p-3 bg-gmm-bg/20 rounded-2xl border border-gmm-border/10">
+          <p className="text-[8px] font-black text-gmm-text-muted uppercase mb-1">Deducible</p>
+          <p className="text-[10px] font-black text-gmm-text uppercase">{patient.deducible}</p>
+        </div>
+        <div className="p-3 bg-gmm-bg/20 rounded-2xl border border-gmm-border/10">
+          <p className="text-[8px] font-black text-gmm-text-muted uppercase mb-1">Siniestros</p>
+          <p className="text-[10px] font-black text-gmm-text uppercase">{patient.openClaims} Abiertos</p>
+        </div>
+      </div>
+
+      {/* Action */}
+      <button className="w-full mt-6 py-3 rounded-full bg-gmm-text text-white text-[10px] font-black uppercase tracking-[0.3em] hover:bg-gmm-accent transition-all">
+        Ver Detalle Clínico
+      </button>
+    </motion.div>
   );
 }
 
 export default function DashboardPage() {
-  const [data, setData] = useState<any>(null);
-  const [metrics, setMetrics] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Datos Mock basados en el requerimiento exacto para el efecto "WOW"
+  const insuredData = [
+    { name: 'Juan', role: 'Titular', age: 45, icon: '🧑', padecimiento: 'Tumor Cerebral', consumed: 750000, sublimit: 1000000, deducible: 'Cumplido', openClaims: 2 },
+    { name: 'Ana', role: 'Esposa', age: 42, icon: '👩', padecimiento: 'Reemplazo Rodilla', consumed: 300000, sublimit: 500000, deducible: 'En proceso', openClaims: 1 },
+    { name: 'Luis', role: 'Hijo 1', age: 12, icon: '👦', padecimiento: 'Asma Severo', consumed: 50000, sublimit: 200000, deducible: 'Cumplido', openClaims: 1 },
+    { name: 'Mia', role: 'Hija 2', age: 8, icon: '👧', padecimiento: 'Preventivo', consumed: 0, sublimit: 1, deducible: 'N/A', openClaims: 0 },
+  ];
+
   useEffect(() => {
-    Promise.all([
-      fetch('/api/dashboard/estado-cuenta').then(r => r.json()),
-      fetch('/api/dashboard/metrics').then(r => r.json()),
-    ]).then(([ec, met]) => {
-      setData(ec);
-      setMetrics(met);
-    }).finally(() => setIsLoading(false));
+    setTimeout(() => setIsLoading(false), 800);
   }, []);
 
   if (isLoading) {
@@ -140,95 +109,131 @@ export default function DashboardPage() {
     );
   }
 
-  const kpis = metrics?.data?.kpis;
-  const cards = data?.insuredCards || [];
-
   return (
-    <div className="max-w-[1400px] mx-auto space-y-16 pb-20">
+    <div className="max-w-[1400px] mx-auto space-y-12 pb-20 px-4">
       
-      {/* ── Section 0: Header & Tabs ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
-        <div>
-          <h2 className="text-4xl font-black text-gmm-text tracking-tighter mb-2">Timeline Clínico</h2>
-          <p className="text-[10px] font-black text-gmm-text-muted uppercase tracking-[0.4em]">Vista General de la Póliza MetLife</p>
-        </div>
-        <ClinicalTabs />
-      </div>
-      
-      {/* ── Section 1: KPI Floating Nodes ── */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <GlobalKPI 
-          title="Suma Asegurada Global" 
-          value={`$${(kpis?.baseLimit / 1_000_000).toFixed(1)}M`} 
-          subtext="Límite máximo por cobertura básica"
-        />
-        <GlobalKPI 
-          title="Gasto Acumulado" 
-          value={`$${(kpis?.consumed / 1_000_000).toFixed(2)}M`} 
-          subtext={`${((kpis?.consumed / kpis?.baseLimit) * 100).toFixed(1)}% de la póliza`}
-          color="red"
-          progress={(kpis?.consumed / kpis?.baseLimit) * 100}
-        />
-        <GlobalKPI 
-          title="Remanente" 
-          value={`$${((kpis?.baseLimit - kpis?.consumed) / 1_000_000).toFixed(1)}M`} 
-          subtext="Monto disponible para eventos"
-          color="accent"
-          progress={100 - (kpis?.consumed / kpis?.baseLimit) * 100}
-        />
-      </section>
-
-      {/* ── Section 2: Timeline of Insured ── */}
-      <section className="relative">
-        <div className="text-center mb-16">
-          <h2 className="text-[11px] font-black uppercase tracking-[0.5em] text-gmm-text/30">Nodos de Asegurados</h2>
-        </div>
-        
-        <div className="space-y-4">
-          {cards.map((patient: any, i: number) => (
-            <InsuredNode key={i} patient={patient} index={i} />
-          ))}
-        </div>
-      </section>
-
-      {/* ── Section 3: Summary & Control ── */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div className="gmm-pill-card">
-          <h3 className="text-sm font-black text-gmm-text uppercase tracking-widest mb-8">Tendencia de Siniestros</h3>
-          <div className="h-64 flex items-end gap-6 px-4">
-             {[40, 60, 30, 90, 50, 70, 45].map((h, i) => (
-               <div key={i} className="flex-1 flex flex-col items-center gap-4">
-                  <motion.div 
-                    initial={{ height: 0 }}
-                    whileInView={{ height: `${h}%` }}
-                    className="w-full bg-gmm-accent/20 rounded-full relative group overflow-hidden"
-                  >
-                     <div className="absolute inset-0 bg-gmm-accent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </motion.div>
-                  <span className="text-[9px] font-bold text-gmm-text/20">M{i+1}</span>
-               </div>
-             ))}
+      {/* ── Section 0: Clinical Header (Monitor Mode) ── */}
+      <div className="gmm-pill-card bg-gmm-text border-none py-8 px-10 flex flex-wrap justify-between items-center gap-8 shadow-2xl">
+        <div className="flex items-center gap-6">
+          <div className="p-3 bg-gmm-accent rounded-2xl">
+            <Shield className="text-white" size={24} />
+          </div>
+          <div>
+            <h2 className="text-white text-xl font-black tracking-tighter uppercase italic">Póliza #GMM-98765</h2>
+            <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-1">Estatus: Activa · MetLife Platinum</p>
           </div>
         </div>
+        
+        <div className="flex items-center gap-12">
+          <div className="text-center">
+            <p className="text-white/30 text-[9px] font-black uppercase tracking-widest mb-1">Suma Total</p>
+            <p className="text-white text-lg font-black">$5.0M</p>
+          </div>
+          <div className="w-px h-10 bg-white/10" />
+          <div className="text-center">
+            <p className="text-white/30 text-[9px] font-black uppercase tracking-widest mb-1">Disponible</p>
+            <p className="text-gmm-accent text-lg font-black">$3.8M</p>
+          </div>
+          <div className="w-px h-10 bg-white/10" />
+          <div className="text-center">
+            <p className="text-white/30 text-[9px] font-black uppercase tracking-widest mb-1">Deducible Gral</p>
+            <div className="flex items-center gap-2 text-green-400 font-black">
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              CUMPLIDO
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <div className="gmm-pill-card">
-           <h3 className="text-sm font-black text-gmm-text uppercase tracking-widest mb-8">Alertas de Gobernanza</h3>
+      {/* ── Section 1: 4-Unit Insured Grid ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {insuredData.map((patient, i) => (
+          <InsuredCard key={i} patient={patient} index={i} />
+        ))}
+      </div>
+
+      {/* ── Section 2: Critical Alerts & Expense Distribution ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Alerts Section (Siniestros en Peligro) */}
+        <div className="lg:col-span-2 gmm-pill-card bg-gmm-white/50 backdrop-blur-md">
+           <div className="flex justify-between items-center mb-8">
+             <h3 className="text-sm font-black text-gmm-text uppercase tracking-widest">Siniestros en Peligro</h3>
+             <span className="px-3 py-1 bg-gmm-danger text-white text-[9px] font-black rounded-full">2 CRÍTICOS</span>
+           </div>
+           
            <div className="space-y-4">
-              <div className="p-5 rounded-[2rem] bg-gmm-danger/10 border-l-[6px] border-gmm-danger flex items-center gap-4">
-                 <Bell className="text-gmm-danger" size={20} />
-                 <p className="text-[10px] font-black uppercase tracking-wider text-gmm-danger/80">
-                   Alerta: Consumo crítico en el nodo 'Claudia Soto'
-                 </p>
-              </div>
-              <div className="p-5 rounded-[2rem] bg-gmm-accent/10 border-l-[6px] border-gmm-accent flex items-center gap-4">
-                 <Activity className="text-gmm-accent" size={20} />
-                 <p className="text-[10px] font-black uppercase tracking-wider text-gmm-text/60">
-                   Sistema de Auditoría Operativo: 4 trámites en validación
-                 </p>
-              </div>
+              <motion.div 
+                whileHover={{ x: 10 }}
+                className="p-5 rounded-[2rem] bg-gmm-danger/5 border border-gmm-danger/20 flex flex-wrap items-center justify-between gap-4 cursor-pointer"
+              >
+                 <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-gmm-danger/10 flex items-center justify-center text-gmm-danger">
+                       <FileText size={18} />
+                    </div>
+                    <div>
+                       <p className="text-[11px] font-black text-gmm-text uppercase tracking-tight">Factura Quimioterapia #FQ-991</p>
+                       <p className="text-[9px] font-bold text-gmm-danger uppercase mt-1">Rechazada: Falta Sello Digital</p>
+                    </div>
+                 </div>
+                 <button className="px-6 py-2 bg-gmm-danger text-white text-[9px] font-black rounded-full uppercase tracking-widest hover:scale-105 transition-all">Subir Documento</button>
+              </motion.div>
+
+              <motion.div 
+                whileHover={{ x: 10 }}
+                className="p-5 rounded-[2rem] bg-gmm-accent/5 border border-gmm-accent/20 flex items-center gap-4 cursor-pointer"
+              >
+                 <div className="w-10 h-10 rounded-full bg-gmm-accent/10 flex items-center justify-center text-gmm-accent">
+                    <Calendar size={18} />
+                 </div>
+                 <div>
+                    <p className="text-[11px] font-black text-gmm-text uppercase tracking-tight">Vencimiento de Pre-autorización</p>
+                    <p className="text-[9px] font-bold text-gmm-text-muted uppercase mt-1 italic">Vence en 48 horas · Cirugía Ana</p>
+                 </div>
+              </motion.div>
            </div>
         </div>
-      </section>
+
+        {/* Expense Distribution Visualizer */}
+        <div className="gmm-pill-card flex flex-col justify-between">
+           <div>
+              <h3 className="text-sm font-black text-gmm-text uppercase tracking-widest mb-8">Distribución de Gastos</h3>
+              <div className="space-y-6">
+                 {[
+                   { name: 'Juan', pct: 60, color: 'bg-gmm-danger' },
+                   { name: 'Ana', pct: 25, color: 'bg-gmm-accent' },
+                   { name: 'Luis', pct: 10, color: 'bg-blue-500' },
+                   { name: 'Mia', pct: 5, color: 'bg-green-500' }
+                 ].map((item, i) => (
+                   <div key={i} className="space-y-2">
+                     <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                       <span>{item.name}</span>
+                       <span className="text-gmm-text-muted">{item.pct}%</span>
+                     </div>
+                     <div className="h-4 w-full bg-gmm-bg rounded-full overflow-hidden shadow-inner">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          whileInView={{ width: `${item.pct}%` }}
+                          className={`h-full ${item.color} rounded-full`} 
+                        />
+                     </div>
+                   </div>
+                 ))}
+              </div>
+           </div>
+           
+           <div className="mt-8 p-4 bg-gmm-bg/30 rounded-3xl border border-gmm-border/10">
+              <p className="text-[9px] font-bold text-gmm-text/40 leading-relaxed text-center uppercase tracking-widest">
+                La distribución representa el impacto acumulado de siniestros sobre la póliza global.
+              </p>
+           </div>
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
 
     </div>
   );

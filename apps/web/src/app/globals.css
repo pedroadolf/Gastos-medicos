@@ -17,25 +17,32 @@
 }
 
 :root {
-  /* Light Theme (Folder Cartulina) */
-  --gmm-bg: #F5F3EF;
-  --gmm-card: #FFFFFF;
-  --gmm-text: #343434;
-  --gmm-text-muted: #8E8E8E;
-  --gmm-border: #D8D9D7;
-  --gmm-shadow: rgba(52, 52, 52, 0.05);
-  --gmm-dots: #D8D9D7;
+  /* Colores Obligatorios GMM */
+  --gmm-white: #FFFFFF;
+  --gmm-accent: #FFAA00; /* Amarillo */
+  --gmm-text: #343434;   /* Gris Oscuro */
+  --gmm-border: #D8D9D7; /* Gris Claro */
+  --gmm-danger: #B22B21; /* Rojo Crítico */
+
+  /* Semantic Tokens - Light (Expediente Médico / Carpeta Cartulina) */
+  --gmm-bg: #f4f2ee; /* Color cálido suave tipo cartulina */
+  --gmm-card: var(--gmm-white);
+  --gmm-header: #efebdb; 
+  --gmm-text-muted: #6b6b6b;
+  --gmm-shadow: rgba(52, 52, 52, 0.08);
+  --gmm-gradient: linear-gradient(135deg, #efebdb 0%, #f4f2ee 100%);
 }
 
 [data-theme='dark'] {
-  /* Dark Theme (Clinical Night Mode) */
-  --gmm-bg: #121212;
-  --gmm-card: #1E1E1E;
-  --gmm-text: #F5F3EF;
-  --gmm-text-muted: #A0A0A0;
-  --gmm-border: #2A2A2A;
+  /* Semantic Tokens - Dark (Monitor Quirófano) */
+  --gmm-bg: #1a1a1a;
+  --gmm-card: #242424;
+  --gmm-header: #121212;
+  --gmm-text: #e0e0e0;
+  --gmm-text-muted: #888888;
+  --gmm-border: #333333;
   --gmm-shadow: rgba(0, 0, 0, 0.4);
-  --gmm-dots: #2A2A2A;
+  --gmm-gradient: linear-gradient(135deg, #121212 0%, #1a1a1a 100%);
 }
 
 /* ── Custom Layers ── */
@@ -43,12 +50,10 @@
   body {
     background-color: var(--gmm-bg);
     color: var(--gmm-text);
-    -webkit-font-smoothing: antialiased;
-    /* Clinical Grid/Folder Pattern */
-    background-image: radial-gradient(var(--gmm-dots) 1px, transparent 1px);
+    background-image: radial-gradient(var(--gmm-border) 1px, transparent 1px);
     background-size: 40px 40px;
     background-attachment: fixed;
-    transition: background-color 0.4s ease, color 0.4s ease;
+    transition: background 0.5s ease, color 0.5s ease;
   }
 }
 
