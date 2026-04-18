@@ -1,56 +1,74 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── GMM Clinical Palette (Phase 2 Unification) ── */
-  --color-gmm-bg: #E9E4D9;
-  /* Soft Folder Beige */
-  --color-gmm-card: #FFFFFF;
-  /* Card surface */
+  /* ── GMM Medical Folder Palette (Light/Dark ready) ── */
+  --color-gmm-bg: var(--gmm-bg);
+  --color-gmm-card: var(--gmm-card);
   --color-gmm-accent: #FFAA00;
-  /* Amber - primary action/status */
-  --color-gmm-text: #343434;
-  /* Deep Charcoal Gray */
-  --color-gmm-text-muted: #6B7280;
-  /* Secondary / muted text */
-  --color-gmm-border: #D8D9D7;
-  /* Borders, dividers */
+  --color-gmm-text: var(--gmm-text);
+  --color-gmm-text-muted: var(--gmm-text-muted);
+  --color-gmm-border: var(--gmm-border);
   --color-gmm-danger: #B22B21;
-  /* Critical alerts, rejections */
   --color-gmm-success: #22c55e;
-  /* Approvals, healthy state */
 
   /* ── Fonts ── */
   --font-plus-jakarta: var(--font-plus-jakarta-sans);
   --font-inter: var(--font-inter);
 }
 
+:root {
+  /* Light Theme (Folder Cartulina) */
+  --gmm-bg: #F5F3EF;
+  --gmm-card: #FFFFFF;
+  --gmm-text: #343434;
+  --gmm-text-muted: #8E8E8E;
+  --gmm-border: #D8D9D7;
+  --gmm-shadow: rgba(52, 52, 52, 0.05);
+  --gmm-dots: #D8D9D7;
+}
+
+[data-theme='dark'] {
+  /* Dark Theme (Clinical Night Mode) */
+  --gmm-bg: #121212;
+  --gmm-card: #1E1E1E;
+  --gmm-text: #F5F3EF;
+  --gmm-text-muted: #A0A0A0;
+  --gmm-border: #2A2A2A;
+  --gmm-shadow: rgba(0, 0, 0, 0.4);
+  --gmm-dots: #2A2A2A;
+}
+
 /* ── Custom Layers ── */
 @layer base {
   body {
-    background-color: #E9E4D9;
-    color: #343434;
+    background-color: var(--gmm-bg);
+    color: var(--gmm-text);
     -webkit-font-smoothing: antialiased;
-    background-image: radial-gradient(#343434 1px, transparent 1px);
-    background-size: 30px 30px;
+    /* Clinical Grid/Folder Pattern */
+    background-image: radial-gradient(var(--gmm-dots) 1px, transparent 1px);
+    background-size: 40px 40px;
     background-attachment: fixed;
+    transition: background-color 0.4s ease, color 0.4s ease;
   }
 }
 
 @layer utilities {
 
-  /* GMM Pill Card — Image 1 organic style */
+  /* GMM Pill Card — Ultra-rounded "Sticker" style */
   .gmm-pill-card {
-    @apply bg-white/80 backdrop-blur-md border border-white/60 rounded-[32px] p-8 shadow-xl shadow-black/5 transition-all duration-500 hover:shadow-2xl hover:shadow-black/10;
+    @apply bg-gmm-card border border-gmm-border/50 rounded-[40px] p-8 shadow-2xl transition-all duration-500 hover:scale-[1.01];
+    box-shadow: 0 20px 40px -15px var(--gmm-shadow);
   }
 
   /* The Central Timeline Line backbone */
   .timeline-line {
-    @apply absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] bg-gmm-text/5 -z-10;
+    @apply absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2.5px] bg-gmm-text/10 -z-10 opacity-50;
   }
 
-  /* GMM Header Nav — Glassmorphism pill */
+  /* GMM Header Nav — Pill style with separation */
   .gmm-header-nav {
-    @apply bg-white/70 backdrop-blur-md border border-white/50 rounded-full px-8 py-3 shadow-xl;
+    @apply bg-gmm-card/80 backdrop-blur-xl border border-gmm-border/50 rounded-[24px] px-8 py-4 shadow-xl;
+    box-shadow: 0 10px 30px -10px var(--gmm-shadow);
   }
 
   /* Custom scrollbar */
@@ -66,8 +84,9 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-gmm-text/10 rounded-full hover:bg-gmm-accent/20 transition-all;
   }
-  
-  .bg-folder {
-     background-color: #E9E4D9;
+
+  /* Typography shortcuts */
+  .text-clinical-mono {
+    font-family: 'JetBrains Mono', monospace;
   }
 }

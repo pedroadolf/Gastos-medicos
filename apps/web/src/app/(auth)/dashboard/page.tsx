@@ -13,6 +13,88 @@ import { motion } from 'framer-motion';
 
 // ─── Componentes de UI Soft Clinical (Imagen 1) ──────────────
 
+function ClinicalTabs() {
+  const tabs = ['Resumen', 'Tratamientos', 'Visitas', 'Medicamentos', 'Laboratorios', 'Genética'];
+  return (
+    <div className="flex flex-wrap gap-2 mb-12">
+      {tabs.map((tab, i) => (
+        <button key={tab} className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+          i === 0 ? 'bg-gmm-text text-white shadow-lg' : 'bg-gmm-card border border-gmm-border/40 text-gmm-text/40 hover:text-gmm-accent'
+        }`}>
+          {tab}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function InsuredNode({ patient, index }: any) {
+  const isRight = index % 2 === 0;
+  const pct = Math.min((patient.consumed / patient.sublimit) * 100, 100);
+  const statusColor = pct > 70 ? 'text-gmm-danger' : 'text-gmm-accent';
+
+  return (
+    <div className={`relative flex items-center justify-center gap-12 mb-24 ${isRight ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+      
+      {/* Targeta del Asegurado (Nivel Nodo "Cardiology" Style) */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        className="w-full md:w-[48%]"
+      >
+        <div className="gmm-pill-card relative group flex items-center gap-8 py-6">
+            <div className="w-24 h-24 rounded-full bg-gmm-bg/50 border-4 border-white shadow-inner flex items-center justify-center text-4xl shrink-0 overflow-hidden">
+                {patient.role === 'Titular' ? '🧑' : patient.role === 'Esposo' ? '👨' : '👧'}
+            </div>
+            
+            <div className="flex-1 min-w-0">
+               <div className="flex justify-between items-start mb-2">
+                 <div>
+                    <h3 className="text-xl font-black text-gmm-text tracking-tighter leading-none">{patient.name}</h3>
+                    <p className="text-[10px] font-bold text-gmm-text-muted uppercase tracking-[0.2em] mt-1 italic">{patient.role}</p>
+                 </div>
+                 <div className="text-right">
+                    <p className="text-[9px] font-black text-gmm-text-muted uppercase tracking-widest">Presión</p>
+                    <p className="text-sm font-black text-gmm-text leading-none">120 / 80</p>
+                 </div>
+               </div>
+
+               <div className="bg-gmm-bg/30 rounded-3xl p-4 border border-gmm-border/20 flex gap-6 items-center">
+                  <div className="flex-1">
+                    <p className="text-[9px] font-black text-gmm-text-muted uppercase mb-1">Padecimiento</p>
+                    <p className="text-[11px] font-bold text-gmm-text uppercase truncate">{patient.padecimiento}</p>
+                  </div>
+                  <div className="w-px h-8 bg-gmm-border/30" />
+                  <div className="flex-1">
+                    <p className="text-[9px] font-black text-gmm-text-muted uppercase mb-1">Consumo</p>
+                    <p className={`text-[11px] font-black ${statusColor}`}>${(patient.consumed / 1000).toFixed(1)}k</p>
+                  </div>
+               </div>
+            </div>
+        </div>
+      </motion.div>
+
+      {/* Nodo Central (Amber junction) */}
+      <div className="hidden md:flex w-14 h-14 bg-gmm-card border-[8px] border-gmm-bg rounded-full z-10 items-center justify-center shadow-lg">
+        <div className="w-10 h-10 rounded-full bg-gmm-accent/10 flex items-center justify-center text-gmm-accent">
+          <Pill size={16} />
+        </div>
+      </div>
+
+      {/* Info Flotante Visual Indicator */}
+      <div className={`hidden md:block w-[48%] ${isRight ? 'text-left' : 'text-right'}`}>
+         <div className="inline-block p-4 bg-white/40 backdrop-blur-sm rounded-3xl border border-white shadow-sm">
+           <svg width="120" height="30" viewBox="0 0 120 30" className="opacity-40">
+              <path d="M0 15 L10 15 L15 5 L20 25 L25 15 L40 15 L45 5 L50 25 L55 15 L70 15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-gmm-accent animate-pulse" />
+           </svg>
+           <p className="text-[9px] font-bold text-gmm-text/30 uppercase tracking-[0.3em] mt-2">Monitoreo de Gasto Activo</p>
+         </div>
+      </div>
+
+    </div>
+  );
+}
+
 function GlobalKPI({ title, value, subtext, color = 'accent', progress }: any) {
   return (
     <div className="gmm-pill-card flex flex-col justify-between min-h-[160px]">
@@ -35,76 +117,6 @@ function GlobalKPI({ title, value, subtext, color = 'accent', progress }: any) {
   );
 }
 
-function InsuredNode({ patient, index }: any) {
-  const isRight = index % 2 === 0;
-  const pct = Math.min((patient.consumed / patient.sublimit) * 100, 100);
-  const statusColor = pct > 70 ? 'text-gmm-danger' : 'text-gmm-accent';
-
-  return (
-    <div className={`relative flex items-center justify-center gap-12 mb-20 ${isRight ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-      
-      {/* Targeta del Asegurado (Nivel Nodo) */}
-      <motion.div 
-        initial={{ opacity: 0, x: isRight ? -50 : 50 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        className="w-full md:w-[45%]"
-      >
-        <div className="gmm-pill-card group">
-            <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 rounded-3xl bg-gmm-text/5 flex items-center justify-center text-3xl">
-                    {patient.role === 'Titular' ? '🧑' : patient.role === 'Esposo' ? '👨' : '👧'}
-                </div>
-                <div>
-                   <h3 className="text-xl font-black text-gmm-text tracking-tighter uppercase italic">{patient.name}</h3>
-                   <p className="text-[10px] font-bold text-gmm-text-muted uppercase tracking-widest">{patient.role} · Póliza VIP</p>
-                </div>
-            </div>
-
-            <div className="space-y-4">
-                <div className="p-4 rounded-3xl bg-gmm-bg/30 border border-gmm-text/5">
-                    <p className="text-[9px] font-black text-gmm-text-muted uppercase mb-1">Diagnóstico en Seguimiento</p>
-                    <p className="text-xs font-bold text-gmm-text uppercase">{patient.padecimiento}</p>
-                </div>
-
-                <div>
-                    <div className="flex justify-between text-[10px] font-black uppercase mb-1">
-                        <span className="text-gmm-text-muted">Desgaste de Sub-límite</span>
-                        <span className={statusColor}>{pct.toFixed(0)}%</span>
-                    </div>
-                    <div className="h-2 rounded-full bg-gmm-text/5 overflow-hidden">
-                        <div className={`h-full rounded-full transition-all duration-1000 ${pct > 70 ? 'bg-gmm-danger' : 'bg-gmm-accent'}`} style={{ width: `${pct}%` }} />
-                    </div>
-                </div>
-            </div>
-
-            <button className="mt-8 w-full py-4 bg-gmm-text text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-full hover:bg-gmm-accent transition-all duration-300">
-                Ver Historial Clínico
-            </button>
-        </div>
-      </motion.div>
-
-      {/* Nodo Central (Eje Timeline) */}
-      <div className="hidden md:flex w-14 h-14 bg-white border-[10px] border-gmm-bg rounded-full z-10 items-center justify-center shadow-lg">
-        <div className={`w-3 h-3 rounded-full ${pct > 70 ? 'bg-gmm-danger' : 'bg-gmm-accent'}`} />
-      </div>
-
-      {/* Info Flotante Complementaria */}
-      <div className={`hidden md:block w-[45%] ${isRight ? 'text-left' : 'text-right'}`}>
-         <h4 className="text-[11px] font-black text-gmm-text uppercase tracking-[0.4em] mb-3">Resumen del Estado</h4>
-         <div className="flex items-center gap-4 text-[10px] font-black uppercase text-gmm-text-muted">
-            <div className="flex items-center gap-1.5">
-                <div className={`w-2 h-2 rounded-full ${patient.deducibleStatus === 'cumplido' ? 'bg-gmm-success' : 'bg-gmm-accent'}`} />
-                Deducible {patient.deducibleStatus === 'cumplido' ? 'Ok' : 'En proceso'}
-            </div>
-            <span>•</span>
-            <span>{patient.openSiniestrosCount} Siniestros Abiertos</span>
-         </div>
-      </div>
-
-    </div>
-  );
-}
-
 export default function DashboardPage() {
   const [data, setData] = useState<any>(null);
   const [metrics, setMetrics] = useState<any>(null);
@@ -122,7 +134,7 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-folder flex items-center justify-center">
+      <div className="min-h-screen bg-gmm-bg flex items-center justify-center">
          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-10 h-10 border-t-2 border-gmm-accent rounded-full" />
       </div>
     );
@@ -132,7 +144,16 @@ export default function DashboardPage() {
   const cards = data?.insuredCards || [];
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-24 pb-20">
+    <div className="max-w-[1400px] mx-auto space-y-16 pb-20">
+      
+      {/* ── Section 0: Header & Tabs ── */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
+        <div>
+          <h2 className="text-4xl font-black text-gmm-text tracking-tighter mb-2">Timeline Clínico</h2>
+          <p className="text-[10px] font-black text-gmm-text-muted uppercase tracking-[0.4em]">Vista General de la Póliza MetLife</p>
+        </div>
+        <ClinicalTabs />
+      </div>
       
       {/* ── Section 1: KPI Floating Nodes ── */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
