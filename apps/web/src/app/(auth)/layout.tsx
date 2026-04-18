@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { 
-  Shield, Activity, Plus, Moon, Sun, User, FileText, Settings, BarChart3, Bell 
+  Shield, Activity, Plus, Moon, Sun, User, FileText, Settings, BarChart3, Bell, Search 
 } from 'lucide-react';
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Copilot } from "@/components/layout/Copilot";
