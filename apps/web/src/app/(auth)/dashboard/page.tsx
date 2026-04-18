@@ -43,7 +43,7 @@ export default function DashboardPage() {
            .select('patient_name, photo_url');
          
          if (profiles && profiles.length > 0) {
-           const profileMap = profiles.reduce((acc, p) => ({
+           const profileMap = profiles.reduce((acc, p: any) => ({
              ...acc, [p.patient_name]: p.photo_url
            }), {});
            setPatientPhotos((prev) => ({ ...prev, ...profileMap }));
@@ -57,14 +57,14 @@ export default function DashboardPage() {
     loadData();
   }, [session]);
 
-  const handlePhotoUpload = async (patientName, file) => {
+  const handlePhotoUpload = async (patientName: string, file: File) => {
     try {
       if (!session?.user) throw new Error('No sesion activa');
       const userId = (session.user as any).id || (session.user as any).sub || session.user.email;
 
       const fileExt = file.name.split('.').pop();
-      const fileName = \`\${patientName.toLowerCase()}-\${Date.now()}.\${fileExt}\`;
-      const filePath = \`insured-photos/\${fileName}\`;
+      const fileName = `${patientName.toLowerCase()}-${Date.now()}.${fileExt}`;
+      const filePath = `insured-photos/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('gmm-uploads')
@@ -114,31 +114,31 @@ export default function DashboardPage() {
     {
       claimId: '02250211464-000',
       diagnosis: 'PRESIÓN (Hipertensión)',
-      patientName: 'Claudia', patientPhoto: patientPhotos['Claudia'] || '/patients/claudia.png', role: 'Titular', age: '57',
+      patientName: 'Claudia', patientPhoto: (patientPhotos as any)['Claudia'] || '/patients/claudia.png', role: 'Titular', age: '57',
       consumed: 9300, sublimit: 5000000, status: 'OPERATIVO'
     },
     {
       claimId: '01210200485-018',
       diagnosis: 'RESPIRATORIAS (nCoV)',
-      patientName: 'Pedro', patientPhoto: patientPhotos['Pedro'] || '/patients/pedro.png', role: 'Conyuge', age: '62',
+      patientName: 'Pedro', patientPhoto: (patientPhotos as any)['Pedro'] || '/patients/pedro.png', role: 'Conyuge', age: '62',
       consumed: 1250000, sublimit: 5000000, status: 'OPERATIVO', openClaims: 1
     },
     {
       claimId: '03230261780-009',
       diagnosis: 'DIABETES (Diabetes Mellitus)',
-      patientName: 'Pedro', patientPhoto: patientPhotos['Pedro'] || '/patients/pedro.png', role: 'Conyuge', age: '62',
+      patientName: 'Pedro', patientPhoto: (patientPhotos as any)['Pedro'] || '/patients/pedro.png', role: 'Conyuge', age: '62',
       consumed: 450000, sublimit: 5000000, status: 'EN PROCESO'
     },
     {
       claimId: '042024-PED-001',
       diagnosis: 'RODILLA (Rehabilitación)',
-      patientName: 'Sebastian', patientPhoto: patientPhotos['Sebastian'] || '/patients/sebastian.png', role: 'Hijo', age: '19',
+      patientName: 'Sebastian', patientPhoto: (patientPhotos as any)['Sebastian'] || '/patients/sebastian.png', role: 'Hijo', age: '19',
       consumed: 85000, sublimit: 5000000, status: 'OPERATIVO'
     },
     {
       claimId: '052024-EMI-001',
       diagnosis: 'NARIZ (Fisura)',
-      patientName: 'Emilio', patientPhoto: patientPhotos['Emilio'] || '/patients/emilio.png', role: 'Hijo', age: '18',
+      patientName: 'Emilio', patientPhoto: (patientPhotos as any)['Emilio'] || '/patients/emilio.png', role: 'Hijo', age: '18',
       consumed: 15000, sublimit: 5000000, status: 'OPERATIVO'
     }
   ];
