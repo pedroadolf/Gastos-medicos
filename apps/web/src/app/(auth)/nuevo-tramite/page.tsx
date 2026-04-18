@@ -19,7 +19,7 @@ export default function NuevoTramitePage() {
           Sigue la línea para completar el registro del expediente médico.
         </p>
       </div>
-
+      <div className="relative">
         {/* Timeline Indicator Line */}
         <div className="absolute left-[1.75rem] top-7 bottom-7 w-1 bg-gmm-border/30 rounded-full" />
 
