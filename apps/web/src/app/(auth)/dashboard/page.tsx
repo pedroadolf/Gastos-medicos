@@ -8,7 +8,8 @@ import { supabase } from '@/services/supabase';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer, AreaChart, Area,
-  BarChart, Bar, Cell, ComposedChart, Legend
+  BarChart, Bar, Cell, ComposedChart, Legend,
+  PieChart, Pie
 } from 'recharts';
 import { 
   Activity, Shield, FileText, AlertCircle, 
@@ -27,23 +28,21 @@ const historicalData = [
   { month: 'Mar', consumed: 1250000 },
 ];
 
-const waterfallData = [
-  { name: 'Facturado', value: 1250000, display: '$1.25M', fill: '#343434', start: 0, end: 1250000 },
-  { name: 'Deducible', value: -6602, display: '-$6.6k', fill: '#B22B21', start: 1243398, end: 1250000 },
-  { name: 'Coaseguro', value: -125000, display: '-$125k', fill: '#B22B21', start: 1118398, end: 1243398 },
-  { name: 'No Cubiertos', value: -45000, display: '-$45k', fill: '#B22B21', start: 1073398, end: 1118398 },
-  { name: 'Reembolso', value: 1073398, display: '$1.07M', fill: '#FFAA00', start: 0, end: 1073398 },
+const spendingByMemberData = [
+  { name: 'Pedro', value: 1700000, fill: '#343434' },
+  { name: 'Claudia', value: 9300, fill: '#B22B21' },
+  { name: 'Sebastian', value: 85000, fill: '#FFAA00' },
+  { name: 'Emilio', value: 15000, fill: '#D8D9D7' },
 ];
 
 const categoryData = [
-  { name: 'Pedro', Hospital: 850000, Farmacia: 250000, Honorarios: 150000, Estudios: 0 },
-  { name: 'Claudia', Hospital: 0, Farmacia: 5000, Honorarios: 2300, Estudios: 2000 },
-  { name: 'Sebastian', Hospital: 0, Farmacia: 45000, Honorarios: 20000, Estudios: 20000 },
+  { name: 'Claudia', Hospital: 2000, Farmacia: 5000, Honorarios: 2300, Estudios: 0 },
+  { name: 'Pedro', Hospital: 1100000, Farmacia: 400000, Honorarios: 200000, Estudios: 0 },
+  { name: 'Sebastian', Hospital: 45000, Farmacia: 20000, Honorarios: 20000, Estudios: 0 },
+  { name: 'Emilio', Hospital: 5000, Farmacia: 5000, Honorarios: 5000, Estudios: 0 },
 ];
 
-// ─── Componentes de UI ──────────────
-
-function EventMonitorCard({ event, index, onPhotoUpload }: any) {
+// ─�function EventMonitorCard({ event, index, onPhotoUpload }: any) {
   const pct = Math.min((event.consumed / event.sublimit) * 100, 100);
   const statusColor = event.status === 'REQUERIMIENTO' ? 'bg-gmm-danger' : 
                       pct > 80 ? 'bg-gmm-danger' : 
@@ -87,7 +86,7 @@ function EventMonitorCard({ event, index, onPhotoUpload }: any) {
         </div>
         <div className="min-w-0">
            <h3 className="text-sm font-black text-gmm-text truncate uppercase tracking-tight">{event.patientName} {event.patientName.charAt(0)}.</h3>
-           <p className="text-[8px] font-black text-gmm-text-muted uppercase tracking-widest">{event.role} · {event.age || '45'} años</p>
+           <p className="text-[8px] font-black text-gmm-text-muted uppercase tracking-widest">{event.role} · {event.age} años</p>
         </div>
       </div>
 
@@ -96,19 +95,19 @@ function EventMonitorCard({ event, index, onPhotoUpload }: any) {
          <span className="text-[9px] font-black uppercase tracking-tight truncate max-w-[180px]">{event.diagnosis}</span>
       </div>
 
-      {/* Numerical Data Monitor */}
+      {/* Numerical Data Monitor - Suma Asegurada vs Pagado */}
       <div className="space-y-4 mb-6">
          <div className="flex justify-between items-end">
             <div>
-               <p className="text-[7px] font-black text-gmm-text-muted uppercase tracking-widest mb-1">Sub-límite {event.patientName === 'Pedro' ? 'Oncología' : 'General'}</p>
+               <p className="text-[7px] font-black text-gmm-text-muted uppercase tracking-widest mb-1">Suma Asegurada vs pagado hasta el momento</p>
                <p className="text-xs font-black text-gmm-text tracking-tighter">${(event.consumed / 1000).toFixed(0)}k / ${(event.sublimit / 1000000).toFixed(1)}M</p>
             </div>
          </div>
          <div className="h-1.5 w-full bg-gmm-text/5 rounded-full overflow-hidden">
             <motion.div 
-              initial={{ width: 0 }}
-              whileInView={{ width: `${pct}%` }}
-              className={`h-full rounded-full ${statusColor}`} 
+               initial={{ width: 0 }}
+               whileInView={{ width: `${pct}%` }}
+               className={`h-full rounded-full ${statusColor}`} 
             />
          </div>
       </div>
@@ -116,8 +115,8 @@ function EventMonitorCard({ event, index, onPhotoUpload }: any) {
       {/* Footer Status (Solid Green Bar logic from Image 1) */}
       <div className="space-y-3">
          <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-widest">
-            <span className="text-gmm-text">Deducible Anual Cumplido</span>
-            <span className="text-green-500">Full</span>
+            <span className="text-gmm-text">Estatus Siniestro</span>
+            <span className="text-green-500">OPERATIVO</span>
          </div>
          <div className="h-1 w-full bg-green-500 rounded-full" />
          
@@ -128,12 +127,17 @@ function EventMonitorCard({ event, index, onPhotoUpload }: any) {
             </div>
             <div className="flex flex-col text-right">
                <span className="text-[7px] font-bold text-gmm-text-muted uppercase">Coaseguro</span>
-               <span className="text-[10px] font-black">$0</span>
+               <span className="text-[10px] font-black">10%</span>
             </div>
          </div>
       </div>
 
       <Link href={`/tramites?id=${event.claimId}`} className="w-full mt-6 py-2 rounded-xl border border-gmm-text/20 text-gmm-text text-[9px] font-black uppercase tracking-widest hover:bg-gmm-text hover:text-white transition-all flex items-center justify-center">
+        Ver Detalle
+      </Link>
+    </motion.div>
+  );
+}tify-center">
         Ver Detalle
       </Link>
     </motion.div>
@@ -225,37 +229,75 @@ export default function DashboardPage() {
     );
   }
 
-  // Clinical Data Architecture (Augmented with photos)
+  // Clinical Data Architecture (Augmented with photos and family data)
   const clinicalEvents = [
     {
+      claimId: '02250211464-000',
+      diagnosis: 'PRESIÓN (Hipertensión)',
+      patientName: 'Claudia', patientPhoto: patientPhotos['Claudia'] || '/patients/claudia.png', role: 'Titular', age: '57',
+      consumed: 9300, sublimit: 5000000, status: 'OPERATIVO'
+    },
+    {
       claimId: '01210200485-018',
-      diagnosis: 'Enfermedad respiratoria aguda por 2019_nCoV',
-      patientName: 'Pedro', patientPhoto: patientPhotos['Pedro'] || '/patients/pedro.png', role: 'Titular', age: '48',
-      consumed: 1250000, sublimit: 3961725, deducible: 6602, status: 'OPERATIVO', openClaims: 2
+      diagnosis: 'RESPIRATORIAS (nCoV)',
+      patientName: 'Pedro', patientPhoto: patientPhotos['Pedro'] || '/patients/pedro.png', role: 'Conyuje', age: '62',
+      consumed: 1250000, sublimit: 5000000, status: 'OPERATIVO', openClaims: 1
     },
     {
       claimId: '03230261780-009',
-      diagnosis: 'Diabetes mellitus no insulinodependiente',
-      patientName: 'Pedro', patientPhoto: patientPhotos['Pedro'] || '/patients/pedro.png', role: 'Titular', age: '48',
-      consumed: 450000, sublimit: 1651380, deducible: 3692, status: 'EN PROCESO'
-    },
-    {
-      claimId: '02250211464-000',
-      diagnosis: 'Seguimiento General / Requerimiento Info',
-      patientName: 'Claudia', patientPhoto: patientPhotos['Claudia'] || '/patients/claudia.png', role: 'Esposa', age: '45',
-      consumed: 9300, sublimit: 500000, deducible: 15000, status: 'REQUERIMIENTO'
+      diagnosis: 'DIABETES (Diabetes Mellitus)',
+      patientName: 'Pedro', patientPhoto: patientPhotos['Pedro'] || '/patients/pedro.png', role: 'Conyuje', age: '62',
+      consumed: 450000, sublimit: 5000000, status: 'EN PROCESO'
     },
     {
       claimId: '042024-PED-001',
-      diagnosis: 'Tratamiento Pediátrico / Respiratorias',
-      patientName: 'Sebastian', patientPhoto: patientPhotos['Sebastian'] || '/patients/sebastian.png', role: 'Hijo', age: '14',
-      consumed: 85000, sublimit: 1000000, deducible: 10000, status: 'OPERATIVO'
+      diagnosis: 'RODILLA (Rehabilitación)',
+      patientName: 'Sebastian', patientPhoto: patientPhotos['Sebastian'] || '/patients/sebastian.png', role: 'Hijo', age: '19',
+      consumed: 85000, sublimit: 5000000, status: 'OPERATIVO'
+    },
+    {
+      claimId: '052024-EMI-001',
+      diagnosis: 'NARIZ (Fisura)',
+      patientName: 'Emilio', patientPhoto: patientPhotos['Emilio'] || '/patients/emilio.png', role: 'Hijo', age: '18',
+      consumed: 15000, sublimit: 5000000, status: 'OPERATIVO'
     }
   ];
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-12 pb-20 px-4">
       
+      {/* ── Section -1: Póliza de Exceso (Master Info) ── */}
+      <div className="gmm-pill-card bg-gmm-text text-white p-6 shadow-2xl relative overflow-hidden group">
+         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <Shield size={120} />
+         </div>
+         <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-4">
+               <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <Plus size={24} className="text-gmm-accent" />
+               </div>
+               <div>
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-1">Póliza de Excesos Protegida</h4>
+                  <p className="text-xl font-black tracking-tighter">Póliza M172 1011 · Inicio 1 Oct 25</p>
+               </div>
+            </div>
+            <div className="flex gap-8">
+               <div className="text-center">
+                  <p className="text-[8px] font-black uppercase text-white/40 mb-1">Suma Asegurada</p>
+                  <p className="text-xs font-black uppercase text-gmm-accent">Sin Límite</p>
+               </div>
+               <div className="text-center">
+                  <p className="text-[8px] font-black uppercase text-white/40 mb-1">Deducible Exceso</p>
+                  <p className="text-xs font-black ">$2,000,000</p>
+               </div>
+               <div className="text-center">
+                  <p className="text-[8px] font-black uppercase text-white/40 mb-1">Coaseguro</p>
+                  <p className="text-xs font-black ">10%</p>
+               </div>
+            </div>
+         </div>
+      </div>
+
       {/* ── Section 0: Main Clinical KPI Monitor ── */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {[
@@ -305,64 +347,49 @@ export default function DashboardPage() {
          </div>
       </div>
 
-      {/* ── Section 2: Financial Intelligence Section (Waterfall & Breakdown) ── */}
+      {/* ── Section 2: Financial Intelligence Section (Donut & Stacked Bars) ── */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-         {/* Waterfall Chart */}
+         {/* Spending Distribution Donut (Replaces Waterfall) */}
          <div className="gmm-pill-card bg-white dark:bg-[#1A1A1A] border-none shadow-2xl p-8">
-            <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em] mb-8">Waterfall: Desglose de Reembolso</h3>
-            <div className="h-[300px] w-full">
+            <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em] mb-8">Distribución de Gasto por Asegurado</h3>
+            <div className="h-[300px] w-full flex items-center">
                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={waterfallData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                     <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
-                     <XAxis dataKey="name" fontSize={9} fontWeight="black" axisLine={false} tickLine={false} />
-                     <YAxis hide domain={[0, 1400000]} />
+                  <PieChart>
                      <Tooltip 
-                        cursor={{ fill: 'transparent' }}
-                        content={({ active, payload }: any) => {
-                           if (active && payload && payload.length) {
-                              return (
-                                 <div className="bg-[#1A1A1A] p-3 rounded-xl border border-white/10 shadow-2xl">
-                                    <p className="text-[10px] font-black text-white uppercase">{payload[0].payload.name}</p>
-                                    <p className="text-sm font-black text-gmm-accent">{payload[0].payload.display}</p>
-                                 </div>
-                              );
-                           }
-                           return null;
-                        }}
+                        contentStyle={{ backgroundColor: '#1A1A1A', border: 'none', borderRadius: '12px', fontSize: '10px', color: '#FFF' }}
                      />
-                     <Bar dataKey="end">
-                        {waterfallData.map((entry, index) => (
+                     <Legend verticalAlign="middle" align="right" layout="vertical" iconType="circle" wrapperStyle={{ paddingLeft: '20px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }} />
+                     <Pie
+                        data={spendingByMemberData}
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={5}
+                        dataKey="value"
+                     >
+                        {spendingByMemberData.map((entry, index) => (
                            <Cell key={`cell-${index}`} fill={entry.fill} />
                         ))}
-                     </Bar>
-                     {/* The range effect is simulated by the 'end' value and we'll use a background for the waterfall if needed, 
-                         but for simpler clinical UI, we use the end values. To do true waterfall we need the dual range.
-                         Actually, Recharts Bar supports array dataKey for range: [start, end] */}
-                     <Bar dataKey={(d: any) => [d.start, d.end]} fill="#B22B21">
-                        {waterfallData.map((entry, index) => (
-                           <Cell key={`cell-range-${index}`} fill={entry.fill} />
-                        ))}
-                     </Bar>
-                  </BarChart>
+                     </Pie>
+                  </PieChart>
                </ResponsiveContainer>
             </div>
          </div>
 
-         {/* Category Breakdown Chart */}
+         {/* Category Breakdown Chart (Stacked Bars) */}
          <div className="gmm-pill-card bg-white dark:bg-[#1A1A1A] border-none shadow-2xl p-8">
-            <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em] mb-8">Gasto por Tipo de Servicio</h3>
+            <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em] mb-8">Gasto Acumulado por Tipo de Servicio</h3>
             <div className="h-[300px] w-full">
                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={categoryData} barGap={8}>
+                  <BarChart data={categoryData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                      <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
                      <XAxis dataKey="name" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} />
                      <YAxis hide />
                      <Tooltip contentStyle={{ backgroundColor: '#1A1A1A', border: 'none', borderRadius: '12px', fontSize: '10px' }} />
                      <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase' }} />
-                     <Bar dataKey="Hospital" fill="#343434" radius={[4, 4, 0, 0]} />
-                     <Bar dataKey="Farmacia" fill="#FFAA00" radius={[4, 4, 0, 0]} />
-                     <Bar dataKey="Honorarios" fill="#B22B21" radius={[4, 4, 0, 0]} />
-                     <Bar dataKey="Estudios" fill="#D8D9D7" radius={[4, 4, 0, 0]} />
+                     <Bar dataKey="Hospital" stackId="a" fill="#343434" radius={[0, 0, 0, 0]} />
+                     <Bar dataKey="Farmacia" stackId="a" fill="#FFAA00" radius={[0, 0, 0, 0]} />
+                     <Bar dataKey="Honorarios" stackId="a" fill="#B22B21" radius={[0, 0, 0, 0]} />
+                     <Bar dataKey="Estudios" stackId="a" fill="#D8D9D7" radius={[4, 4, 0, 0]} />
                   </BarChart>
                </ResponsiveContainer>
             </div>
