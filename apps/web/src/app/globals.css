@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 @theme {
   /* ── GMM Medical Folder Palette (Light/Dark ready) ── */
   --color-gmm-bg: var(--gmm-bg);
@@ -35,16 +37,16 @@
 }
 
 [data-theme='dark'] {
-  /* Dark Theme - Surgical Operating Room Monitor */
-  --gmm-bg: #0d0d0d;
-  --gmm-card: #161616;
+  /* Dark Theme - Surgical Operating Room Monitor (OLED Black) */
+  --gmm-bg: #000000;
+  --gmm-card: #0a0a0a;
   --gmm-header: #050505;
-  --gmm-text: #e0e0e0;
-  --gmm-text-muted: #666666;
-  --gmm-border: #2a2a2a;
-  --gmm-shadow: rgba(0, 0, 0, 0.6);
-  --gmm-texture: linear-gradient(0deg, transparent 24%, rgba(255, 170, 0, 0.03) 25%, rgba(255, 170, 0, 0.03) 26%, transparent 27%, transparent 74%, rgba(255, 170, 0, 0.03) 75%, rgba(255, 170, 0, 0.03) 76%, transparent 77%, transparent);
-  --gmm-texture-size: 50px 50px;
+  --gmm-text: #ffffff;
+  --gmm-text-muted: #71717a;
+  --gmm-border: #27272a;
+  --gmm-shadow: rgba(0, 0, 0, 0.8);
+  --gmm-texture: linear-gradient(0deg, transparent 24%, rgba(255, 170, 0, 0.02) 25%, rgba(255, 170, 0, 0.02) 26%, transparent 27%, transparent 74%, rgba(255, 170, 0, 0.02) 75%, rgba(255, 170, 0, 0.02) 76%, transparent 77%, transparent);
+  --gmm-texture-size: 60px 60px;
 }
 
 /* ── Custom Layers ── */

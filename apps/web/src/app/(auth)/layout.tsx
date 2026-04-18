@@ -1,5 +1,4 @@
-'use client';
-
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { 
@@ -16,13 +15,15 @@ function GlobalTopNav({ theme, toggleTheme }: { theme: string, toggleTheme: () =
       <nav className="gmm-header-nav flex justify-between items-center max-w-[1500px] mx-auto backdrop-blur-3xl bg-white/70 dark:bg-black/40">
         {/* Left: Branding */}
         <div className="flex items-center gap-6">
-           <div className="w-10 h-10 bg-gmm-text rounded-2xl flex items-center justify-center text-gmm-accent shadow-xl">
-             <Activity size={20} />
-           </div>
-           <div>
-             <h1 className="text-xl font-black tracking-tighter text-gmm-text leading-none">Diagnostic</h1>
-             <p className="text-[9px] font-black text-gmm-text-muted uppercase tracking-[0.3em] mt-1">GMM PLATFORM V12</p>
-           </div>
+           <Link href="/dashboard" className="flex items-center gap-6 group">
+             <div className="w-10 h-10 bg-gmm-text rounded-2xl flex items-center justify-center text-gmm-accent shadow-xl group-hover:scale-110 transition-transform">
+               <Activity size={20} />
+             </div>
+             <div>
+               <h1 className="text-xl font-black tracking-tighter text-gmm-text leading-none">Diagnostic</h1>
+               <p className="text-[9px] font-black text-gmm-text-muted uppercase tracking-[0.3em] mt-1">GMM PLATFORM V12</p>
+             </div>
+           </Link>
         </div>
 
         {/* Center: Search / Ops Monitor */}
@@ -45,8 +46,9 @@ function GlobalTopNav({ theme, toggleTheme }: { theme: string, toggleTheme: () =
               { name: 'Observabilidad', path: '/observabilidad', icon: <Activity size={14} /> },
               { name: 'Configuración', path: '/configuracion', icon: <Settings size={14} /> },
             ].map(item => (
-              <button 
+              <Link
                 key={item.name} 
+                href={item.path}
                 className={`px-4 py-2 rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all border border-transparent
                   ${pathname === item.path 
                     ? 'bg-gmm-text text-white shadow-lg' 
@@ -54,7 +56,7 @@ function GlobalTopNav({ theme, toggleTheme }: { theme: string, toggleTheme: () =
               >
                 {item.icon}
                 {item.name}
-              </button>
+              </Link>
             ))}
           </div>
           
@@ -82,14 +84,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     const savedTheme = localStorage.getItem('gmm-theme') || 'light';
     setTheme(savedTheme);
-    document.body.setAttribute('data-theme', savedTheme);
+    document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     localStorage.setItem('gmm-theme', newTheme);
-    document.body.setAttribute('data-theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
   };
 
   return (
