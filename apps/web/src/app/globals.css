@@ -17,32 +17,34 @@
 }
 
 :root {
-  /* Colores Obligatorios GMM */
+  /* GMM Mandatory Palette */
   --gmm-white: #FFFFFF;
-  --gmm-accent: #FFAA00; /* Amarillo */
-  --gmm-text: #343434;   /* Gris Oscuro */
-  --gmm-border: #D8D9D7; /* Gris Claro */
-  --gmm-danger: #B22B21; /* Rojo Crítico */
+  --gmm-accent: #FFAA00; 
+  --gmm-text: #343434;   
+  --gmm-border: #D8D9D7; 
+  --gmm-danger: #B22B21; 
 
-  /* Semantic Tokens - Light (Expediente Médico / Carpeta Cartulina) */
-  --gmm-bg: #f4f2ee; /* Color cálido suave tipo cartulina */
-  --gmm-card: var(--gmm-white);
-  --gmm-header: #efebdb; 
-  --gmm-text-muted: #6b6b6b;
-  --gmm-shadow: rgba(52, 52, 52, 0.08);
-  --gmm-gradient: linear-gradient(135deg, #efebdb 0%, #f4f2ee 100%);
+  /* Light Theme - Textured Medical Folder */
+  --gmm-bg: #f2efea; 
+  --gmm-card: #ffffff;
+  --gmm-header: #efebdb;
+  --gmm-text-muted: #8a8376;
+  --gmm-shadow: rgba(52, 52, 52, 0.12);
+  --gmm-texture: radial-gradient(#d1ccc0 0.5px, transparent 0.5px);
+  --gmm-texture-size: 24px 24px;
 }
 
 [data-theme='dark'] {
-  /* Semantic Tokens - Dark (Monitor Quirófano) */
-  --gmm-bg: #1a1a1a;
-  --gmm-card: #242424;
-  --gmm-header: #121212;
+  /* Dark Theme - Surgical Operating Room Monitor */
+  --gmm-bg: #0d0d0d;
+  --gmm-card: #161616;
+  --gmm-header: #050505;
   --gmm-text: #e0e0e0;
-  --gmm-text-muted: #888888;
-  --gmm-border: #333333;
-  --gmm-shadow: rgba(0, 0, 0, 0.4);
-  --gmm-gradient: linear-gradient(135deg, #121212 0%, #1a1a1a 100%);
+  --gmm-text-muted: #666666;
+  --gmm-border: #2a2a2a;
+  --gmm-shadow: rgba(0, 0, 0, 0.6);
+  --gmm-texture: linear-gradient(0deg, transparent 24%, rgba(255, 170, 0, 0.03) 25%, rgba(255, 170, 0, 0.03) 26%, transparent 27%, transparent 74%, rgba(255, 170, 0, 0.03) 75%, rgba(255, 170, 0, 0.03) 76%, transparent 77%, transparent);
+  --gmm-texture-size: 50px 50px;
 }
 
 /* ── Custom Layers ── */
@@ -50,10 +52,10 @@
   body {
     background-color: var(--gmm-bg);
     color: var(--gmm-text);
-    background-image: radial-gradient(var(--gmm-border) 1px, transparent 1px);
-    background-size: 40px 40px;
+    background-image: var(--gmm-texture);
+    background-size: var(--gmm-texture-size);
     background-attachment: fixed;
-    transition: background 0.5s ease, color 0.5s ease;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 

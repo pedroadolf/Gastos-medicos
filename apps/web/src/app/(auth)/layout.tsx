@@ -36,11 +36,24 @@ function GlobalTopNav({ theme, toggleTheme }: { theme: string, toggleTheme: () =
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-3">
-          <div className="hidden lg:flex gap-2">
-            {['Visitas', 'Medicamentos', 'Labs', 'Genética'].map(item => (
-              <button key={item} className="px-4 py-2 rounded-xl bg-gmm-bg/30 text-[9px] font-black uppercase tracking-widest text-gmm-text-muted hover:bg-white hover:text-gmm-text transition-all border border-transparent hover:border-gmm-border/50">
-                {item}
+        <div className="flex items-center gap-4">
+          <div className="hidden lg:flex gap-3">
+            {[
+              { name: 'Dashboard', path: '/dashboard', icon: <BarChart3 size={14} /> },
+              { name: 'Nuevo Trámite', path: '/nuevo-tramite', icon: <Plus size={14} /> },
+              { name: 'Mis Trámites', path: '/tramites', icon: <FileText size={14} /> },
+              { name: 'Observabilidad', path: '/observabilidad', icon: <Activity size={14} /> },
+              { name: 'Configuración', path: '/configuracion', icon: <Settings size={14} /> },
+            ].map(item => (
+              <button 
+                key={item.name} 
+                className={`px-4 py-2 rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all border border-transparent
+                  ${pathname === item.path 
+                    ? 'bg-gmm-text text-white shadow-lg' 
+                    : 'bg-gmm-bg/30 text-gmm-text-muted hover:bg-white hover:text-gmm-text hover:border-gmm-border/50'}`}
+              >
+                {item.icon}
+                {item.name}
               </button>
             ))}
           </div>
@@ -54,10 +67,6 @@ function GlobalTopNav({ theme, toggleTheme }: { theme: string, toggleTheme: () =
             {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
           </button>
           
-          <button className="bg-gmm-danger text-white p-2.5 rounded-xl hover:scale-105 transition-all shadow-lg shadow-gmm-danger/20">
-            <Plus size={18} />
-          </button>
-
           <div className="w-10 h-10 rounded-full border-2 border-white shadow-md overflow-hidden bg-gmm-bg flex items-center justify-center text-gmm-text">
             <User size={20} />
           </div>
