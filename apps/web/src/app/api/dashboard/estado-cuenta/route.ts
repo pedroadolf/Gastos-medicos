@@ -21,7 +21,6 @@ export async function GET() {
                 numero_siniestro,
                 user_id,
                 nombre_siniestro,
-                descripcion,
                 fecha_apertura,
                 tramites (
                     id,
@@ -77,7 +76,6 @@ export async function GET() {
             // Active condition (first siniestro name)
             const activeSiniestro = userSiniestros[0];
             const padecimiento = activeSiniestro?.nombre_siniestro || 'Sin siniestros activos';
-            const descripcion = activeSiniestro?.descripcion || '';
 
             return {
                 userId: u.user_id,
@@ -89,7 +87,6 @@ export async function GET() {
                 sublimit: 1_000_000,
                 openSiniestrosCount: openSiniestros.length,
                 padecimiento,
-                descripcion,
                 deducibleStatus: consumed > 0 ? 'cumplido' : 'pendiente',
                 siniestros: userSiniestros.map(s => ({
                     id: s.id,
