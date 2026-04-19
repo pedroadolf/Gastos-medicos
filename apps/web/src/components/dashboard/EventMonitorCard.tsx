@@ -35,7 +35,7 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
       viewport={{ once: true }}
-      className="gmm-pill-card relative overflow-hidden group hover:shadow-2xl transition-all duration-500 border-gmm-border/30 bg-white dark:bg-[#1A1A1A]"
+      className="gmm-card-premium p-6 relative overflow-hidden group hover:scale-[1.02] transition-all duration-500"
     >
       {/* Patient Header */}
       <div className="flex items-center gap-3 mb-6">
@@ -71,16 +71,21 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       </div>
 
       {/* Diagnosis Pill */}
-      <div className={`inline-flex px-4 py-1.5 rounded-full ${event.status === 'REQUERIMIENTO' ? 'bg-gmm-danger/10 text-gmm-danger' : 'bg-gmm-accent/10 text-gmm-accent'} mb-6 border border-current/20`}>
-         <span className="text-[9px] font-black uppercase tracking-tight truncate max-w-[180px]">{event.diagnosis}</span>
+      <div className="mb-6">
+        <div className={`inline-flex px-4 py-1 rounded-lg ${event.status === 'REQUERIMIENTO' ? 'bg-gmm-danger/10 text-gmm-danger' : 'bg-gmm-accent/10 text-gmm-accent'} border border-current/20 mb-2`}>
+           <span className="text-[10px] font-black uppercase tracking-tight">#{event.claimId.split('-')[0]}</span>
+        </div>
+        <h4 className="text-[11px] font-black text-gmm-text uppercase tracking-tight leading-tight">
+          {event.diagnosis.replace(/\([^)]*\)/, '').trim()}
+        </h4>
       </div>
 
       {/* Numerical Data Monitor */}
       <div className="space-y-4 mb-6">
          <div className="flex justify-between items-end">
             <div>
-               <p className="text-[7px] font-black text-gmm-text-muted uppercase tracking-widest mb-1">Estatus Gasto</p>
-               <p className="text-xs font-black text-gmm-text tracking-tighter">${(event.consumed / 1000).toFixed(0)}k / ${(event.sublimit / 1000000).toFixed(1)}M</p>
+               <p className="text-[8px] font-black text-gmm-text-muted uppercase tracking-widest mb-1">Consumo Siniestro</p>
+               <p className="text-xl font-black text-gmm-text italic tracking-tighter">${(event.consumed / 1000).toLocaleString()}k <span className="text-[10px] text-gmm-text-muted">/ ${(event.sublimit / 1000000).toFixed(0)}M</span></p>
             </div>
             <div className="text-right">
                <span className={`text-[10px] font-black ${pct > 80 ? 'text-gmm-danger' : 'text-gmm-text'}`}>{pct.toFixed(1)}%</span>
@@ -97,28 +102,22 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       </div>
 
       {/* Footer Status */}
-      <div className="space-y-3">
-         <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-widest">
-            <span className="text-gmm-text">Estatus Siniestro</span>
-            <span className="text-green-500 font-bold">ACTIVO</span>
-         </div>
-         <div className="h-1 w-full bg-green-500 rounded-full" />
-         
-         <div className="flex justify-between items-center pt-2">
-            <div className="flex flex-col">
-               <span className="text-[7px] font-bold text-gmm-text-muted uppercase">Siniestros</span>
-               <span className="text-[10px] font-black">{event.openClaims || 1} Abiertos</span>
-            </div>
-            <div className="flex flex-col text-right">
-               <span className="text-[7px] font-bold text-gmm-text-muted uppercase">Coaseguro</span>
-               <span className="text-[10px] font-black">10%</span>
-            </div>
-         </div>
+      <div className="grid grid-cols-2 gap-4 pb-4 border-b border-gmm-text/5">
+        <div>
+           <span className="text-[7px] font-bold text-gmm-text-muted uppercase tracking-widest block mb-1">Estatus</span>
+           <span className={`text-[10px] font-black ${event.status === 'OPERATIVO' ? 'text-gmm-success' : 'text-gmm-yellow'}`}>{event.status}</span>
+        </div>
+        <div className="text-right">
+           <span className="text-[7px] font-bold text-gmm-text-muted uppercase tracking-widest block mb-1">Coaseguro</span>
+           <span className="text-[10px] font-black text-gmm-text">10%</span>
+        </div>
       </div>
 
-      <Link href={`/tramites?id=${event.claimId}`} className="w-full mt-6 py-2 rounded-xl border border-gmm-text/20 text-gmm-text text-[9px] font-black uppercase tracking-widest hover:bg-gmm-text hover:text-white transition-all flex items-center justify-center">
-        Ver Detalle
+      <Link href={`/tramites?id=${event.claimId}`} className="w-full mt-6 py-3 rounded-2xl border border-gmm-text/10 text-gmm-text text-[9px] font-black uppercase tracking-widest hover:bg-gmm-text hover:text-white transition-all flex items-center justify-center gap-2 group/btn">
+        Ver Gestión Clínica
+        <motion.span animate={{ x: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>→</motion.span>
       </Link>
     </motion.div>
+
   );
 }

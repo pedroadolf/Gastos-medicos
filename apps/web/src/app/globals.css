@@ -27,27 +27,37 @@
   --gmm-danger: #B22B21; 
 
   /* Light Theme - Textured Medical Folder */
-  --gmm-bg: #f2efea; 
+  --gmm-bg: #f5f2ed; /* Warm neutral folder tone */
   --gmm-card: #ffffff;
-  --gmm-header: #efebdb;
-  --gmm-text-muted: #8a8376;
-  --gmm-shadow: rgba(52, 52, 52, 0.12);
+  --gmm-text: #343434;
+  --gmm-text-muted: #64748b;
+  --gmm-border: #d8d9d7;
+  --gmm-shadow: 0 10px 40px -10px rgba(52, 52, 52, 0.08);
+  --gmm-shadow-premium: 0 25px 80px -20px rgba(52, 52, 52, 0.12);
   --gmm-texture: radial-gradient(#d1ccc0 0.5px, transparent 0.5px);
   --gmm-texture-size: 24px 24px;
 }
 
 [data-theme='dark'] {
-  /* Dark Theme - Surgical Operating Room Monitor (OLED Black) */
-  --gmm-bg: #000000;
-  --gmm-card: #0a0a0a;
-  --gmm-header: #050505;
-  --gmm-text: #ffffff;
-  --gmm-text-muted: #71717a;
-  --gmm-border: #27272a;
-  --gmm-shadow: rgba(0, 0, 0, 0.8);
-  --gmm-texture: linear-gradient(0deg, transparent 24%, rgba(255, 170, 0, 0.02) 25%, rgba(255, 170, 0, 0.02) 26%, transparent 27%, transparent 74%, rgba(255, 170, 0, 0.02) 75%, rgba(255, 170, 0, 0.02) 76%, transparent 77%, transparent);
+  --gmm-bg: #1c1c1c; 
+  --gmm-card: #2d2d2d;
+  --gmm-text: #f8fafc;
+  --gmm-text-muted: #94a3b8;
+  --gmm-border: #3d3d3d;
+  --gmm-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+  --gmm-texture: linear-gradient(45deg, rgba(255, 170, 0, 0.02) 25%, transparent 25%);
   --gmm-texture-size: 60px 60px;
 }
+
+.gmm-card-premium {
+  background-color: var(--gmm-card);
+  color: var(--gmm-text);
+  border: 1px solid var(--gmm-border);
+  box-shadow: var(--gmm-shadow-premium);
+  border-radius: 40px;
+  backdrop-filter: blur(20px);
+}
+
 
 /* ── Custom Layers ── */
 @layer base {

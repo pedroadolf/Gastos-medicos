@@ -13,8 +13,8 @@ function GlobalTopNav({ theme, toggleTheme }: { theme: string, toggleTheme: () =
   const pathname = usePathname();
   
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
-      <nav className="gmm-header-nav flex justify-between items-center max-w-[1500px] mx-auto backdrop-blur-3xl bg-white/70 dark:bg-black/40">
+    <header className="fixed top-4 left-6 right-6 z-50">
+      <nav className="gmm-card-premium flex justify-between items-center max-w-[1500px] mx-auto p-4 bg-white/80 dark:bg-black/50 overflow-hidden">
         {/* Left: Branding */}
         <div className="flex items-center gap-6">
            <Link href="/dashboard" className="flex items-center gap-6 group">

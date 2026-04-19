@@ -1,22 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { supabase } from '@/services/supabase';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer, Legend
+  Tooltip, ResponsiveContainer, Legend, LabelList
 } from 'recharts';
 import { 
-  Shield, AlertCircle, Plus, Clock, Upload
+  Plus, Upload
 } from 'lucide-react';
 
-// Modular Components
 import { EventMonitorCard } from '@/components/dashboard/EventMonitorCard';
-import { ReimbursementWaterfall } from '@/components/dashboard/ReimbursementWaterfall';
+import { ConsumptionDonut } from '@/components/dashboard/ConsumptionDonut';
+import { ClaimsKanban } from '@/components/dashboard/ClaimsKanban';
+import { GlobalPolicyCard } from '@/components/dashboard/GlobalPolicyCard';
+import { getInsuredProfiles, upsertInsuredProfile } from '@/app/actions/dashboard';
 
 // ─── Data Helpers ──────────────
 
@@ -30,7 +30,14 @@ const categoryData = [
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
-  const [patientPhotos, setPatientPhotos] = useState({});
+  const [patientPhotos, setPatientPhotos] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('gmm-patient-photos');
+      return saved ? JSON.parse(saved) : {};
+    }
+    return {};
+  });
+
 
   useEffect(() => {
     async function loadData() {
@@ -38,12 +45,10 @@ export default function DashboardPage() {
        if (savedPhotos) setPatientPhotos(JSON.parse(savedPhotos));
        
        try {
-         const { data: profiles, error } = await supabase
-           .from('insured_profiles')
-           .select('patient_name, photo_url');
+         const profiles = await getInsuredProfiles();
          
          if (profiles && profiles.length > 0) {
-           const profileMap = profiles.reduce((acc, p: any) => ({
+           const profileMap = profiles.reduce((acc: any, p: any) => ({
              ...acc, [p.patient_name]: p.photo_url
            }), {});
            setPatientPhotos((prev) => ({ ...prev, ...profileMap }));
@@ -60,8 +65,6 @@ export default function DashboardPage() {
   const handlePhotoUpload = async (patientName: string, file: File) => {
     try {
       if (!session?.user) throw new Error('No sesion activa');
-      const userId = (session.user as any).id || (session.user as any).sub || session.user.email;
-
       const fileExt = file.name.split('.').pop();
       const fileName = `${patientName.toLowerCase()}-${Date.now()}.${fileExt}`;
       const filePath = `insured-photos/${fileName}`;
@@ -76,16 +79,7 @@ export default function DashboardPage() {
         .from('gmm-uploads')
         .getPublicUrl(filePath);
 
-      const { error: dbError } = await supabase
-        .from('insured_profiles')
-        .upsert({
-          user_id: userId,
-          patient_name: patientName,
-          photo_url: publicUrl,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'user_id, patient_name' });
-
-      if (dbError) throw dbError;
+      await upsertInsuredProfile(patientName, publicUrl);
 
       const newPhotos = { ...patientPhotos, [patientName]: publicUrl };
       setPatientPhotos(newPhotos);
@@ -93,12 +87,6 @@ export default function DashboardPage() {
       
     } catch (err) {
       console.error('Upload failed:', err);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const dataUrl = e.target?.result;
-        setPatientPhotos((p) => ({ ...p, [patientName]: dataUrl }));
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -121,7 +109,7 @@ export default function DashboardPage() {
       claimId: '01210200485-018',
       diagnosis: 'RESPIRATORIAS (nCoV)',
       patientName: 'Pedro', patientPhoto: (patientPhotos as any)['Pedro'] || '/patients/pedro.png', role: 'Conyuge', age: '62',
-      consumed: 1250000, sublimit: 5000000, status: 'OPERATIVO', openClaims: 1
+      consumed: 1250000, sublimit: 5000000, status: 'OPERATIVO'
     },
     {
       claimId: '03230261780-009',
@@ -143,47 +131,35 @@ export default function DashboardPage() {
     }
   ];
 
+  const totalSum = 5000000;
+  const consumedSum = clinicalEvents.reduce((acc, curr) => acc + curr.consumed, 0);
+
+  const distributionData = [
+    { name: 'Claudia', value: 9300, color: '#343434' },
+    { name: 'Pedro', value: 1700000, color: '#B22B21' },
+    { name: 'Sebastian', value: 85000, color: '#FFAA00' },
+    { name: 'Emilio', value: 15000, color: '#D8D9D7' },
+  ];
+
   return (
     <div className="max-w-[1400px] mx-auto space-y-12 pb-20 px-4">
       
-      <div className="gmm-pill-card bg-gmm-text text-white p-6 shadow-2xl relative overflow-hidden group">
-         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Shield size={120} />
-         </div>
-         <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-4">
-               <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
-                  <Plus size={24} className="text-gmm-accent" />
-               </div>
-               <div>
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-1">Póliza de Excesos Protegida</h4>
-                  <p className="text-xl font-black tracking-tighter">Póliza M172 1011 · Inicio 1 Oct 25</p>
-               </div>
-            </div>
-            <div className="flex gap-8">
-               <div className="text-center">
-                  <p className="text-[8px] font-black uppercase text-white/40 mb-1">Suma Asegurada</p>
-                  <p className="text-xs font-black uppercase text-gmm-accent">Sin Limite</p>
-               </div>
-               <div className="text-center">
-                  <p className="text-[8px] font-black uppercase text-white/40 mb-1">Deducible Exceso</p>
-                  <p className="text-xs font-black ">$2,000,000</p>
-               </div>
-               <div className="text-center">
-                  <p className="text-[8px] font-black uppercase text-white/40 mb-1">Coaseguro</p>
-                  <p className="text-xs font-black ">10%</p>
-               </div>
-            </div>
-         </div>
-      </div>
+      <GlobalPolicyCard 
+        totalSum={totalSum}
+        consumedSum={consumedSum}
+        policyNumber="M172 1011"
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-         <ReimbursementWaterfall />
+         <ConsumptionDonut data={distributionData} />
 
-         <div className="gmm-pill-card bg-white dark:bg-[#1A1A1A] border-none shadow-2xl p-8">
+         <div className="gmm-card-premium p-8 h-full">
             <div className="flex justify-between items-center mb-8">
-               <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em]">Concentracion por Categoria</h3>
-               <div className="px-3 py-1 bg-gmm-accent/10 rounded-full text-[8px] font-black text-gmm-accent uppercase tracking-widest">Top: Hospitalizacion</div>
+               <div>
+                  <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em]">Detalle por Categoría</h3>
+                  <p className="text-[10px] text-gmm-text-muted font-bold uppercase tracking-widest">Desglose de gastos médicos</p>
+               </div>
+               <div className="px-3 py-1 bg-gmm-accent/10 rounded-full text-[8px] font-black text-gmm-accent uppercase tracking-widest">Top: Hospitalización</div>
             </div>
             <div className="h-[300px] w-full">
                <ResponsiveContainer width="100%" height="100%">
@@ -192,22 +168,40 @@ export default function DashboardPage() {
                      <XAxis dataKey="name" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} />
                      <YAxis hide />
                      <Tooltip 
-                        contentStyle={{ backgroundColor: '#1A1A1A', border: 'none', borderRadius: '16px', fontSize: '10px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }} 
+                        contentStyle={{ 
+                          backgroundColor: 'var(--gmm-card)', 
+                          border: 'none', 
+                          borderRadius: '16px', 
+                          fontSize: '10px', 
+                          boxShadow: 'var(--gmm-shadow)',
+                          color: 'var(--gmm-text)'
+                        }} 
                         itemStyle={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '8px' }}
                      />
-                     <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase' }} />
-                     <Bar dataKey="Hospital" stackId="a" fill="#343434" radius={[0, 0, 0, 0]} />
-                     <Bar dataKey="Farmacia" stackId="a" fill="#FFAA00" radius={[0, 0, 0, 0]} />
-                     <Bar dataKey="Honorarios" stackId="a" fill="#B22B21" radius={[0, 0, 0, 0]} />
-                     <Bar dataKey="Estudios" stackId="a" fill="#D8D9D7" radius={[4, 4, 0, 0]} />
+                     <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--gmm-text)' }} />
+                     <Bar dataKey="Hospital" stackId="a" fill="#343434">
+                        <LabelList dataKey="Hospital" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                     </Bar>
+                     <Bar dataKey="Farmacia" stackId="a" fill="#FFAA00">
+                        <LabelList dataKey="Farmacia" position="center" fill="black" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                     </Bar>
+                     <Bar dataKey="Honorarios" stackId="a" fill="#B22B21">
+                        <LabelList dataKey="Honorarios" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                     </Bar>
+                     <Bar dataKey="Estudios" stackId="a" fill="#D8D9D7" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="Estudios" position="center" fill="black" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                     </Bar>
+
                   </BarChart>
                </ResponsiveContainer>
             </div>
          </div>
       </div>
 
+      <ClaimsKanban />
+
       <div className="space-y-6">
-        <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em] flex items-center gap-3">
+        <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em] flex items-center gap-3 px-2">
           ASEGURADOS <span className="text-[10px] font-bold text-gmm-text-muted">({clinicalEvents.length} Perfiles Activos)</span>
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -215,29 +209,6 @@ export default function DashboardPage() {
             <EventMonitorCard key={i} event={event} index={i} onPhotoUpload={handlePhotoUpload} />
           ))}
         </div>
-      </div>
-
-      <div className="space-y-6">
-         <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em]">ALERTAS CRITICAS</h3>
-         <div className="space-y-3">
-            <div className="flex items-center gap-4 p-4 bg-gmm-danger/10 border border-gmm-danger/20 rounded-[2rem] text-gmm-danger">
-               <AlertCircle size={20} className="shrink-0" />
-               <p className="text-[11px] font-black uppercase tracking-tight">
-                 <span className="font-black">ALERTA SUB-LIMITE:</span> Claudia ha consumido el 85% de cobertura oncologica. Acciones preventivas requeridas.
-               </p>
-               <button className="ml-auto px-6 py-2 bg-gmm-danger text-white text-[9px] font-black rounded-full uppercase tracking-widest hover:scale-105 transition-all">Priorizar</button>
-            </div>
-            
-            <div className="flex items-center gap-4 p-4 bg-gmm-accent/10 border border-gmm-accent/20 rounded-[2rem] text-gmm-accent">
-               <Clock size={20} className="shrink-0" />
-               <p className="text-[11px] font-black uppercase tracking-tight">
-                 <span className="font-black">PENDIENTE:</span> Siniestro #4521 vence plazo para subir facturacion de fisioterapia en 3 dias.
-               </p>
-               <button className="ml-auto px-6 py-2 bg-gmm-accent text-white text-[9px] font-black rounded-full uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-2">
-                 <Upload size={12} /> Gestionar
-               </button>
-            </div>
-         </div>
       </div>
 
     </div>
