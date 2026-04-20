@@ -64,6 +64,10 @@ export default function DashboardPage() {
 
   const handlePhotoUpload = async (patientName: string, file: File) => {
     try {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("El archivo es muy pesado. Máximo 2MB permitido por políticas de seguridad.");
+        return;
+      }
       if (!session?.user) throw new Error('No sesion activa');
       const fileExt = file.name.split('.').pop();
       const fileName = `${patientName.toLowerCase()}-${Date.now()}.${fileExt}`;
@@ -85,8 +89,9 @@ export default function DashboardPage() {
       setPatientPhotos(newPhotos);
       localStorage.setItem('gmm-patient-photos', JSON.stringify(newPhotos));
       
-    } catch (err) {
+    } catch (err: any) {
       console.error('Upload failed:', err);
+      alert("Error al subir foto: " + (err.message || "Tus permisos pueden estar limitados (RLS)."));
     }
   };
 
@@ -100,34 +105,52 @@ export default function DashboardPage() {
 
   const clinicalEvents = [
     {
-      claimId: '02250211464-000',
-      diagnosis: 'PRESIÓN (Hipertensión)',
-      patientName: 'Claudia', patientPhoto: (patientPhotos as any)['Claudia'] || '/patients/claudia.png', role: 'Titular', age: '57',
-      consumed: 9300, sublimit: 5000000, status: 'OPERATIVO'
-    },
-    {
-      claimId: '01210200485-018',
-      diagnosis: 'RESPIRATORIAS (nCoV)',
-      patientName: 'Pedro', patientPhoto: (patientPhotos as any)['Pedro'] || '/patients/pedro.png', role: 'Conyuge', age: '62',
-      consumed: 1250000, sublimit: 5000000, status: 'OPERATIVO'
-    },
-    {
-      claimId: '03230261780-009',
-      diagnosis: 'DIABETES (Diabetes Mellitus)',
-      patientName: 'Pedro', patientPhoto: (patientPhotos as any)['Pedro'] || '/patients/pedro.png', role: 'Conyuge', age: '62',
-      consumed: 450000, sublimit: 5000000, status: 'EN PROCESO'
+      claimId: '3230261780-4',
+      diagnosis: 'DIABETES MELLITUS',
+      chronic: true,
+      patientName: 'Pedro A. Soto H.', patientPhoto: (patientPhotos as any)['Pedro A. Soto H.'] || '/patients/pedro.png', role: 'Dependiente', age: '57',
+      consumed: 18239, sublimit: 5000000, 
+      deductibleStatus: 'Cumplido ($0)',
+      coaseguroPagado: 1824, coaseguroLimit: 17500,
+      lastUpdate: 'Jun 17, 2025',
+      status: 'OPERATIVO',
+      observations: 'Coaseguro 10%.\nRemanente para tope: $15,676. Sin deducible por condiciones de póliza.\nMeds: Jardiance, Atozet, Libre sensor.'
     },
     {
       claimId: '042024-PED-001',
       diagnosis: 'RODILLA (Rehabilitación)',
+      chronic: false,
       patientName: 'Sebastian', patientPhoto: (patientPhotos as any)['Sebastian'] || '/patients/sebastian.png', role: 'Hijo', age: '19',
-      consumed: 85000, sublimit: 5000000, status: 'OPERATIVO'
+      consumed: 85000, sublimit: 5000000, 
+      deductibleStatus: 'En proceso',
+      coaseguroPagado: 8500, coaseguroLimit: 17500,
+      lastUpdate: 'May 04, 2025',
+      status: 'OPERATIVO',
+      observations: ''
+    },
+    {
+      claimId: '02250211464-000',
+      diagnosis: 'PRESIÓN (Hipertensión)',
+      chronic: true,
+      patientName: 'Claudia', patientPhoto: (patientPhotos as any)['Claudia'] || '/patients/claudia.png', role: 'Titular', age: '57',
+      consumed: 9300, sublimit: 5000000, 
+      deductibleStatus: 'En proceso',
+      coaseguroPagado: 930, coaseguroLimit: 17500,
+      lastUpdate: 'Feb 10, 2025',
+      status: 'OPERATIVO',
+      observations: ''
     },
     {
       claimId: '052024-EMI-001',
       diagnosis: 'NARIZ (Fisura)',
+      chronic: false,
       patientName: 'Emilio', patientPhoto: (patientPhotos as any)['Emilio'] || '/patients/emilio.png', role: 'Hijo', age: '18',
-      consumed: 15000, sublimit: 5000000, status: 'OPERATIVO'
+      consumed: 15000, sublimit: 5000000, 
+      deductibleStatus: 'No aplica',
+      coaseguroPagado: 0, coaseguroLimit: 17500,
+      lastUpdate: 'Nov 20, 2024',
+      status: 'REQUERIMIENTO',
+      observations: 'Falta informe médico interpretativo de radiología.'
     }
   ];
 

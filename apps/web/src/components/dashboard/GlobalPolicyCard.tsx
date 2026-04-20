@@ -1,7 +1,6 @@
 'use client';
 
-import { Shield, TrendingDown, TrendingUp, Info } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Shield, ShieldAlert, Users, FolderOpen, DollarSign, Activity } from 'lucide-react';
 
 interface GlobalPolicyCardProps {
   totalSum: number;
@@ -10,92 +9,146 @@ interface GlobalPolicyCardProps {
 }
 
 export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: GlobalPolicyCardProps) {
-  const availableSum = totalSum - consumedSum;
-  const availablePercentage = totalSum > 0 ? (availableSum / totalSum) * 100 : 0;
-
-  // Semaphore Logic
-  const getStatusColor = () => {
-    if (availablePercentage > 30) return 'text-gmm-success bg-gmm-success/10';
-    if (availablePercentage > 10) return 'text-gmm-yellow bg-gmm-yellow/10';
-    return 'text-gmm-danger bg-gmm-danger/10';
-  };
-
-  const getBarColor = () => {
-    if (availablePercentage > 30) return 'bg-gmm-success';
-    if (availablePercentage > 10) return 'bg-gmm-yellow';
-    return 'bg-gmm-danger';
-  };
-
   return (
-    <div className="gmm-card-premium p-8 relative overflow-hidden group">
-      {/* Decorative element */}
-      <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
-        <Shield size={120} />
+    <div className="gmm-card-premium relative overflow-hidden group">
+      {/* Background Decals */}
+      <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+        <Shield size={180} />
       </div>
 
-      <div className="flex flex-col lg:flex-row justify-between gap-8 relative z-10">
-        <div className="space-y-6 flex-1">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gmm-text-muted">Estado Global de Póliza</span>
-              <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-widest animate-pulse ${getStatusColor()}`}>
-                Activa / Bajo Control
-              </span>
-            </div>
-            <h2 className="text-3xl font-black tracking-tighter italic uppercase text-gmm-text">
-              Póliza {policyNumber}
+      <div className="flex flex-col lg:flex-row border-b border-gmm-text/5">
+        {/* Left Panel: Primary Policy */}
+        <div className="flex-1 p-8 lg:p-10 lg:border-r border-gmm-text/5">
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-[12px] font-black uppercase tracking-[0.2em] text-gmm-text">
+              Póliza Principal — MetLife GMM Colectivo
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase text-gmm-text-muted tracking-widest">Suma Asegurada Total</p>
-              <p className="text-3xl font-black tracking-tighter italic text-gmm-text">
-                ${(totalSum / 1_000_000).toFixed(0)}M <span className="text-xs font-bold text-gmm-text-muted">MXN</span>
-              </p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase text-gmm-text-muted tracking-widest">Suma Consumida</p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-3xl font-black tracking-tighter italic text-gmm-text">
-                  ${(consumedSum / 1_000).toLocaleString()}k
-                </p>
-                <TrendingDown className="text-gmm-danger" size={14} />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase text-gmm-text-muted tracking-widest">Suma Disponible</p>
-              <div className="flex items-baseline gap-2">
-                <p className={`text-3xl font-black tracking-tighter italic ${availablePercentage < 10 ? 'text-gmm-danger' : 'text-gmm-text'}`}>
-                  ${(availableSum / 1_000).toLocaleString()}k
-                </p>
-                <TrendingUp className="text-gmm-success" size={14} />
-              </div>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-y-4">
+               <div>
+                 <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-widest mb-1">No. de Póliza</p>
+                 <p className="text-[14px] font-black text-gmm-text uppercase">{policyNumber}</p>
+               </div>
+               <div>
+                 <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-widest mb-1">Contratante</p>
+                 <p className="text-[12px] font-black text-gmm-text">Colgate Palmolive, S.A. de C.V.</p>
+               </div>
+               <div>
+                 <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-widest mb-1">Certificado</p>
+                 <p className="text-[12px] font-black text-gmm-text">2001</p>
+               </div>
+               <div>
+                 <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-widest mb-1">Vigencia</p>
+                 <p className="text-[12px] font-black text-gmm-success">En vigor</p>
+               </div>
+               <div>
+                 <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-widest mb-1">Suma Asegurada</p>
+                 <p className="text-[14px] font-black text-gmm-text">${(totalSum/1000000).toFixed(0)},000,000 MXN</p>
+               </div>
+               <div>
+                 <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-widest mb-1">Deducible</p>
+                 <p className="text-[12px] font-black text-gmm-text">$15,000 MXN / siniestro</p>
+               </div>
+               <div>
+                 <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-widest mb-1">Coaseguro</p>
+                 <p className="text-[12px] font-black text-gmm-text">10% <span className="text-[10px] text-gmm-text-muted">(tope $17,500 MXN)</span></p>
+               </div>
+               <div>
+                 <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-widest mb-1">Asegurado Titular</p>
+                 <p className="text-[12px] font-black text-gmm-text">Fonseca Aguilar, Claudia</p>
+               </div>
             </div>
           </div>
         </div>
 
-        <div className="lg:w-1/3 flex flex-col justify-center">
-          <div className="space-y-4">
-            <div className="flex justify-between items-end">
-              <p className="text-[10px] font-black uppercase text-gmm-text-muted tracking-[0.2em]">Disponibilidad</p>
-              <p className="text-xl font-black italic tracking-tighter text-gmm-text">
-                {availablePercentage.toFixed(1)}%
+        {/* Right Panel: Excess Policy */}
+        <div className="lg:w-[400px] bg-blue-50/50 dark:bg-blue-900/10 p-8 lg:p-10 relative">
+          <div className="absolute top-0 right-0 p-6 opacity-[0.05] pointer-events-none">
+            <ShieldAlert size={120} />
+          </div>
+          
+          <div className="flex items-center gap-3 mb-6 relative z-10">
+            <h2 className="text-[12px] font-black uppercase tracking-[0.2em] text-blue-900 dark:text-blue-400">
+              Póliza de Excesos — Aplica por Siniestro
+            </h2>
+          </div>
+
+          <div className="space-y-4 relative z-10">
+            <div className="grid grid-cols-1 gap-y-4">
+               <div>
+                 <p className="text-[9px] font-bold text-blue-800/60 dark:text-blue-400/60 uppercase tracking-widest mb-1">No. de Póliza</p>
+                 <p className="text-[14px] font-black text-blue-950 dark:text-blue-300">M172 1011</p>
+               </div>
+               <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[9px] font-bold text-blue-800/60 dark:text-blue-400/60 uppercase tracking-widest mb-1">Inicio Vigencia</p>
+                    <p className="text-[12px] font-black text-blue-950 dark:text-blue-300">1 Oct 2025</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold text-blue-800/60 dark:text-blue-400/60 uppercase tracking-widest mb-1">Suma Asegurada</p>
+                    <p className="text-[12px] font-black text-blue-950 dark:text-blue-300">Sin límite</p>
+                  </div>
+               </div>
+               <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[9px] font-bold text-blue-800/60 dark:text-blue-400/60 uppercase tracking-widest mb-1">Deducible Excesos</p>
+                    <p className="text-[12px] font-black text-blue-950 dark:text-blue-300">$2,000,000 MXN</p>
+                  </div>
+                  <div>
+                    <p className="text-[9px] font-bold text-blue-800/60 dark:text-blue-400/60 uppercase tracking-widest mb-1">Coaseguro Excesos</p>
+                    <p className="text-[12px] font-black text-blue-950 dark:text-blue-300">10%</p>
+                  </div>
+               </div>
+            </div>
+
+            <div className="mt-6 p-4 bg-white/60 dark:bg-black/20 rounded-xl border border-blue-100 dark:border-white/5">
+              <p className="text-[10px] leading-relaxed font-bold text-blue-900/80 dark:text-blue-200/80">
+                La póliza de excesos entra en vigor cuando el gasto acumulado de un mismo siniestro supera <strong className="text-blue-950 dark:text-blue-100">$2,000,000</strong>. A partir de ese punto cubre el excedente con 10% de coaseguro.
               </p>
             </div>
-            <div className="h-4 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden p-0.5">
-               <motion.div 
-                 initial={{ width: 0 }}
-                 animate={{ width: `${availablePercentage}%` }}
-                 transition={{ duration: 1, ease: "easeOut" }}
-                 className={`h-full rounded-full ${getBarColor()} shadow-[0_0_15px_rgba(0,0,0,0.1)]`}
-               />
-            </div>
-            <div className="flex items-center gap-2 text-gmm-text-muted">
-               <Info size={12} />
-               <p className="text-[9px] font-bold uppercase tracking-widest">Protección de Excesos Activada (Ilimitado tras $5M)</p>
-            </div>
           </div>
+        </div>
+      </div>
+
+      {/* Footer KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-gmm-text/5 bg-gmm-bg/50">
+        <div className="p-6 flex items-center gap-4">
+           <div className="w-10 h-10 rounded-full bg-gmm-text/5 flex items-center justify-center shrink-0">
+             <Users size={16} className="text-gmm-text" />
+           </div>
+           <div>
+             <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-widest mb-1">Total Asegurados</p>
+             <p className="text-[16px] font-black tracking-tighter text-gmm-text">4 <span className="text-[9px] font-bold text-gmm-text-muted">En la póliza</span></p>
+           </div>
+        </div>
+        <div className="p-6 flex items-center gap-4">
+           <div className="w-10 h-10 rounded-full bg-gmm-danger/10 flex items-center justify-center shrink-0">
+             <FolderOpen size={16} className="text-gmm-danger" />
+           </div>
+           <div>
+             <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-widest mb-1">Siniestros Activos</p>
+             <p className="text-[16px] font-black tracking-tighter text-gmm-text">3 <span className="text-[9px] font-bold text-gmm-text-muted">Con trámites</span></p>
+           </div>
+        </div>
+        <div className="p-6 flex items-center gap-4">
+           <div className="w-10 h-10 rounded-full bg-gmm-accent/10 flex items-center justify-center shrink-0">
+             <DollarSign size={16} className="text-gmm-accent" />
+           </div>
+           <div>
+             <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-widest mb-1">Coaseg. Acumulado</p>
+             <p className="text-[16px] font-black tracking-tighter text-gmm-text">$42k <span className="text-[9px] font-bold text-gmm-text-muted">Pagado este año</span></p>
+           </div>
+        </div>
+        <div className="p-6 flex items-center gap-4">
+           <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+             <Activity size={16} className="text-blue-500" />
+           </div>
+           <div>
+             <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-widest mb-1">Excesos Activos</p>
+             <p className="text-[16px] font-black tracking-tighter text-gmm-text">0 <span className="text-[9px] font-bold text-gmm-text-muted">Siniestros >$2M</span></p>
+           </div>
         </div>
       </div>
     </div>

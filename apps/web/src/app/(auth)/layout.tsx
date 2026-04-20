@@ -45,6 +45,7 @@ function GlobalTopNav({ theme, toggleTheme }: { theme: string, toggleTheme: () =
               { name: 'Dashboard', path: '/dashboard', icon: <BarChart3 size={14} /> },
               { name: 'Nuevo Trámite', path: '/nuevo-tramite', icon: <Plus size={14} /> },
               { name: 'Mis Trámites', path: '/tramites', icon: <FileText size={14} /> },
+              { name: 'Registrar Respuesta', path: '/registro-respuesta', icon: <Plus size={14} /> },
               { name: 'Observabilidad', path: '/observabilidad', icon: <Activity size={14} /> },
               { name: 'Configuración', path: '/configuracion', icon: <Settings size={14} /> },
             ].map(item => (

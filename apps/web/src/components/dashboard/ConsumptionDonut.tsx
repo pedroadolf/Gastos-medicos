@@ -16,14 +16,26 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
   const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-  if (percent < 0.05) return null;
+  // If extremely small, just push it a bit outwards so it doesn't overlap text as much
+  const isSmall = percent < 0.05;
+  const adjustedRadius = isSmall ? outerRadius * 1.05 : radius;
+  const adjX = cx + adjustedRadius * Math.cos(-midAngle * RADIAN);
+  const adjY = cy + adjustedRadius * Math.sin(-midAngle * RADIAN);
 
   return (
-    <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className="text-[10px] font-black italic">
+    <text 
+      x={adjX} 
+      y={adjY} 
+      fill="white" 
+      textAnchor="middle" 
+      dominantBaseline="central" 
+      className="text-[12px] font-black italic drop-shadow-md"
+    >
       {`${(percent * 100).toFixed(0)}%`}
     </text>
   );
 };
+
 
 export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
   const total = data.reduce((acc, curr) => acc + curr.value, 0);
