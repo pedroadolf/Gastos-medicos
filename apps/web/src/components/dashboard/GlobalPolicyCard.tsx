@@ -147,7 +147,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
            </div>
            <div>
              <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-widest mb-1">Excesos Activos</p>
-             <p className="text-[16px] font-black tracking-tighter text-gmm-text">0 <span className="text-[9px] font-bold text-gmm-text-muted">Siniestros >$2M</span></p>
+             <p className="text-[16px] font-black tracking-tighter text-gmm-text">0 <span className="text-[9px] font-bold text-gmm-text-muted">Siniestros &gt;$2M</span></p>
            </div>
         </div>
       </div>
