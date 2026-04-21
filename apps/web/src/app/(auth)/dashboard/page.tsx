@@ -195,10 +195,9 @@ export default function DashboardPage() {
   const consumedSum = clinicalEvents.reduce((acc, curr) => acc + curr.consumed, 0);
 
   const distributionData = [
-    { name: 'Claudia', value: 9300, color: '#343434' },
-    { name: 'Pedro', value: 1700000, color: '#B22B21' },
-    { name: 'Sebastian', value: 85000, color: '#FFAA00' },
-    { name: 'Emilio', value: 15000, color: '#D8D9D7' },
+    { name: 'Pedro', value: 1700000, color: '#2563EB' },
+    { name: 'Sebastian', value: 85000, color: '#F59E0B' },
+    { name: 'Otros', value: 24300, color: '#64748B' },
   ];
 
   return (
@@ -239,17 +238,17 @@ export default function DashboardPage() {
                         itemStyle={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '8px' }}
                      />
                      <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--gmm-text)' }} />
-                     <Bar dataKey="Hospital" stackId="a" fill="#343434">
+                     <Bar dataKey="Hospital" stackId="a" fill="#2563EB">
                         <LabelList dataKey="Hospital" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
                      </Bar>
-                     <Bar dataKey="Farmacia" stackId="a" fill="#FFAA00">
-                        <LabelList dataKey="Farmacia" position="center" fill="black" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                     <Bar dataKey="Farmacia" stackId="a" fill="#22C55E">
+                        <LabelList dataKey="Farmacia" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
                      </Bar>
-                     <Bar dataKey="Honorarios" stackId="a" fill="#B22B21">
+                     <Bar dataKey="Honorarios" stackId="a" fill="#F59E0B">
                         <LabelList dataKey="Honorarios" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
                      </Bar>
-                     <Bar dataKey="Estudios" stackId="a" fill="#D8D9D7" radius={[4, 4, 0, 0]}>
-                        <LabelList dataKey="Estudios" position="center" fill="black" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                     <Bar dataKey="Estudios" stackId="a" fill="#64748B" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="Estudios" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
                      </Bar>
 
                   </BarChart>

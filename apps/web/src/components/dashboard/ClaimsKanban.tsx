@@ -78,7 +78,7 @@ export function ClaimsKanban() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto pb-4">
         {columns.map((col) => (
           <div key={col.id} className="flex flex-col gap-4 min-w-[280px]">
-            <div className="flex justify-between items-center p-4 bg-gmm-card gmm-shadow-premium rounded-[24px] border border-white/5">
+            <div className="flex justify-between items-center p-4 bg-gmm-card rounded-[16px] border border-gmm-border">
               <div className="flex items-center gap-2">
                 <div className={`p-1.5 rounded-lg ${col.color} text-black`}>
                   {col.icon}
@@ -94,7 +94,7 @@ export function ClaimsKanban() {
                   <motion.div
                     key={claim.id}
                     layoutId={claim.id}
-                    className="p-4 bg-gmm-card gmm-shadow-premium rounded-[24px] border border-white/5 group hover:border-gmm-accent/30 transition-colors"
+                    className="p-4 bg-gmm-card rounded-[16px] border border-gmm-border hover:border-gmm-text transition-colors"
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div>
@@ -113,8 +113,8 @@ export function ClaimsKanban() {
                   </motion.div>
                 ))
               ) : (
-                <div className="h-24 border-2 border-dashed border-white/5 rounded-[24px] flex items-center justify-center">
-                  <p className="text-[9px] font-black text-white/10 uppercase tracking-[0.2em]">Cero Siniestros</p>
+                <div className="h-24 border border-dashed border-gmm-border rounded-[16px] flex items-center justify-center bg-gmm-bg">
+                  <p className="text-[9px] font-black text-gmm-text-muted uppercase tracking-[0.2em]">Cero Siniestros</p>
                 </div>
               )}
             </div>

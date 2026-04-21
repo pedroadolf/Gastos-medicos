@@ -55,7 +55,7 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.6 }}
       viewport={{ once: true }}
-      className="bg-white dark:bg-zinc-900/50 border border-gmm-border/50 rounded-[40px] p-8 shadow-2xl transition-all duration-500 hover:shadow-premium group"
+      className="bg-gmm-card border border-gmm-border rounded-[16px] p-6 transition-all duration-300 group"
     >
       {/* Header: Identity & Status */}
       <div className="flex justify-between items-start mb-6">
@@ -107,19 +107,19 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
 
       {/* KPI Matrix: Quick Access */}
       <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="bg-gmm-bg/30 p-4 rounded-3xl border border-white/50 dark:border-white/5 backdrop-blur-sm">
+        <div className="bg-gmm-bg p-4 rounded-[16px] border border-gmm-border">
           <p className="text-[8px] font-black text-gmm-text-muted uppercase tracking-widest mb-1">Disponible</p>
           <p className={`text-lg font-black tracking-tighter ${availableColor}`}>
             ${available.toLocaleString()}
           </p>
         </div>
-        <div className="bg-gmm-bg/30 p-4 rounded-3xl border border-white/50 dark:border-white/5 backdrop-blur-sm">
+        <div className="bg-gmm-bg p-4 rounded-[16px] border border-gmm-border">
           <p className="text-[8px] font-black text-gmm-text-muted uppercase tracking-widest mb-1">A tu cargo</p>
           <p className="text-lg font-black tracking-tighter text-gmm-danger">
             ${(event.coaseguroPagado || 0).toLocaleString()}
           </p>
         </div>
-        <div className="bg-gmm-bg/30 p-4 rounded-3xl border border-white/50 dark:border-white/5 backdrop-blur-sm">
+        <div className="bg-gmm-bg p-4 rounded-[16px] border border-gmm-border">
           <p className="text-[8px] font-black text-gmm-text-muted uppercase tracking-widest mb-1">Coaseguro %</p>
           <p className="text-lg font-black tracking-tighter text-amber-500">
             {coaPct.toFixed(1)}%
@@ -128,10 +128,10 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       </div>
 
       {/* Intelligent Excess Policy Alert */}
-      <div className={`mb-8 p-4 rounded-3xl border transition-all duration-500 flex items-center justify-between group/excess cursor-pointer
+      <div className={`mb-8 p-4 rounded-[16px] border transition-all duration-500 flex items-center justify-between group/excess cursor-pointer
         ${available < sublimit * 0.2 
           ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800/30 text-amber-800 dark:text-amber-300' 
-          : 'bg-green-50/50 border-green-100 dark:bg-green-900/10 dark:border-green-800/20 text-green-700 dark:text-green-400 opacity-60 hover:opacity-100'}`}
+          : 'bg-green-50 border-green-100 dark:bg-green-900/10 dark:border-green-800/20 text-green-700 dark:text-green-400 opacity-80 hover:opacity-100'}`}
       >
         <div className="flex items-center gap-3">
           {available < sublimit * 0.2 ? <AlertCircle size={16} className="animate-pulse" /> : <CheckCircle2 size={16} />}
@@ -210,7 +210,7 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
               exit={{ opacity: 0, x: -10 }}
               className="space-y-4"
             >
-              <div className="bg-gmm-accent/5 p-4 rounded-2xl border border-gmm-accent/10">
+              <div className="bg-gmm-bg p-4 rounded-[16px] border border-gmm-border">
                 <div className="flex justify-between items-center mb-3">
                   <p className="text-[10px] font-black text-gmm-text uppercase">Tope de Coaseguro</p>
                   <p className="text-[10px] font-bold text-gmm-accent">${event.coaseguroLimit?.toLocaleString()}</p>
@@ -243,7 +243,7 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
             >
               {event.medications && event.medications.length > 0 ? (
                 event.medications.map((med, i) => (
-                  <div key={i} className="flex items-center justify-between p-2 rounded-xl bg-gmm-bg/50 border border-gmm-border/30">
+                  <div key={i} className="flex items-center justify-between p-2 rounded-[16px] bg-gmm-bg border border-gmm-border">
                     <div className="flex items-center gap-3">
                       <div className="p-1.5 rounded-lg bg-white dark:bg-zinc-800 text-gmm-accent shadow-sm">
                         <Pill size={12} />
@@ -269,14 +269,14 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
 
       {/* Primary Actions */}
       <div className="flex gap-3">
-        <button className="flex-1 py-3.5 rounded-2xl bg-gmm-accent-tidal text-white text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-lg shadow-gmm-accent-tidal/20 flex items-center justify-center gap-2 group/btn">
+        <button className="flex-1 py-3.5 rounded-[16px] bg-gmm-accent text-white text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all flex items-center justify-center gap-2 group/btn">
           Subir Informe
           <ChevronRight size={12} className="group-hover/btn:translate-x-1 transition-transform" />
         </button>
-        <button className="p-3.5 rounded-2xl border border-gmm-border text-gmm-text-muted hover:text-gmm-text hover:bg-gmm-bg transition-all">
+        <button className="p-3.5 rounded-[16px] border border-gmm-border text-gmm-text-muted hover:text-gmm-text hover:bg-gmm-bg transition-all">
           <History size={16} />
         </button>
-        <button className="p-3.5 rounded-2xl border border-gmm-border text-gmm-text-muted hover:text-gmm-text hover:bg-gmm-bg transition-all">
+        <button className="p-3.5 rounded-[16px] border border-gmm-border text-gmm-text-muted hover:text-gmm-text hover:bg-gmm-bg transition-all">
           <Calculator size={16} />
         </button>
       </div>

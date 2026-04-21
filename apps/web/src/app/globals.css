@@ -21,41 +21,42 @@
 :root {
   /* GMM Mandatory Palette - Serenidad Digital 2026 */
   --gmm-white: #FFFFFF;
-  --gmm-accent: #FFAA00; 
-  --gmm-accent-tidal: #64B5F6; /* Tidal Foam */
-  --gmm-text: #2C3E50;         /* Baltic Sea */
-  --gmm-border: #D8D9D7; 
-  --gmm-danger: #B22B21; 
+  --gmm-accent: #2563EB; 
+  --gmm-accent-tidal: #3B82F6; 
+  --gmm-text: #0F172A;         
+  --gmm-border: rgba(0, 0, 0, 0.05); 
+  --gmm-danger: #EF4444; 
+  --gmm-success: #22C55E;
+  --gmm-warning: #F59E0B;
 
   /* Light Theme - Gallery Neutral */
-  --gmm-bg: #F0EFEB; /* Cloud Dancer */
-  --gmm-card: #ffffff;
-  --gmm-text-muted: #64748b;
-  --gmm-border: #d8d9d7;
-  --gmm-shadow: 0 10px 40px -10px rgba(44, 62, 80, 0.08);
-  --gmm-shadow-premium: 0 25px 80px -20px rgba(44, 62, 80, 0.12);
-  --gmm-texture: radial-gradient(#d1ccc0 0.5px, transparent 0.5px);
-  --gmm-texture-size: 24px 24px;
+  --gmm-bg: #F5F6F7; 
+  --gmm-card: #FFFFFF;
+  --gmm-text-muted: #64748B;
+  --gmm-shadow: none;
+  --gmm-shadow-premium: none;
+  --gmm-texture: none;
+  --gmm-texture-size: none;
 }
 
 [data-theme='dark'] {
-  --gmm-bg: #121212; 
-  --gmm-card: #1e1e1e;
-  --gmm-text: #f8fafc;
-  --gmm-text-muted: #94a3b8;
-  --gmm-border: #2d2d2d;
-  --gmm-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
-  --gmm-texture: linear-gradient(45deg, rgba(100, 181, 246, 0.02) 25%, transparent 25%);
-  --gmm-texture-size: 60px 60px;
+  --gmm-bg: #0F172A; 
+  --gmm-card: #1E293B;
+  --gmm-text: #F8FAFC;
+  --gmm-text-muted: #94A3B8;
+  --gmm-border: rgba(255, 255, 255, 0.05);
+  --gmm-shadow: none;
+  --gmm-texture: none;
+  --gmm-texture-size: none;
 }
 
 .gmm-card-premium {
   background-color: var(--gmm-card);
   color: var(--gmm-text);
   border: 1px solid var(--gmm-border);
-  box-shadow: var(--gmm-shadow-premium);
-  border-radius: 40px;
-  backdrop-filter: blur(20px);
+  box-shadow: none;
+  border-radius: 16px;
+  backdrop-filter: none;
 }
 
 
@@ -75,19 +76,19 @@
 
   /* GMM Pill Card — Ultra-rounded "Sticker" style */
   .gmm-pill-card {
-    @apply bg-gmm-card border border-gmm-border/50 rounded-[40px] p-8 shadow-2xl transition-all duration-500 hover:scale-[1.01];
-    box-shadow: 0 20px 40px -15px var(--gmm-shadow);
+    @apply bg-gmm-card border border-gmm-border rounded-[16px] p-8 transition-all duration-300;
+    box-shadow: none;
   }
 
   /* The Central Timeline Line backbone */
   .timeline-line {
-    @apply absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2.5px] bg-gmm-text/10 -z-10 opacity-50;
+    @apply absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2.5px] bg-gmm-border -z-10;
   }
 
   /* GMM Header Nav — Pill style with separation */
   .gmm-header-nav {
-    @apply bg-gmm-card/80 backdrop-blur-xl border border-gmm-border/50 rounded-[24px] px-8 py-4 shadow-xl;
-    box-shadow: 0 10px 30px -10px var(--gmm-shadow);
+    @apply bg-gmm-card border border-gmm-border rounded-[16px] px-8 py-4;
+    box-shadow: none;
   }
 
   /* Custom scrollbar */
