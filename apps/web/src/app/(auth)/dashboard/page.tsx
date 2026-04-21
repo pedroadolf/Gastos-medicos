@@ -109,60 +109,85 @@ export default function DashboardPage() {
       diagnosis: 'DIABETES MELLITUS',
       chronic: true,
       patientName: 'Pedro A. Soto H.', patientPhoto: (patientPhotos as any)['Pedro A. Soto H.'] || '/patients/pedro.png', role: 'Dependiente', age: '57',
-      consumed: 18239, sublimit: 5000000, 
+      consumed: 18239, 
+      pendingAmount: 2500,
+      sublimit: 5000000, 
       deductibleStatus: 'Cumplido ($0)',
       coaseguroPagado: 1824, coaseguroLimit: 17500,
       lastUpdate: 'Jun 17, 2025',
       status: 'OPERATIVO',
-      observations: 'Coaseguro 10%.\nRemanente para tope: $15,676. Sin deducible por condiciones de póliza.\nMeds: Jardiance, Atozet, Libre sensor.'
+      observations: 'Coaseguro 10%.\nRemanente para tope: $15,676. Sin deducible por condiciones de póliza.',
+      medications: [
+        { name: 'Jardiance 25mg', period: 'Diario', status: 'Surtido' },
+        { name: 'Atozet 10/20mg', period: 'Diario', status: 'Surtido' },
+        { name: 'Libre Sensor 2', period: 'Cada 14 días', status: 'Pendiente' }
+      ]
     },
     {
       claimId: '01210200485-018',
       diagnosis: 'RESPIRATORIAS (nCoV)',
       chronic: false,
       patientName: 'Pedro A. Soto H.', patientPhoto: (patientPhotos as any)['Pedro A. Soto H.'] || '/patients/pedro.png', role: 'Dependiente', age: '57',
-      consumed: 1250000, sublimit: 5000000, 
+      consumed: 1250000, 
+      pendingAmount: 50167,
+      sublimit: 5000000, 
       deductibleStatus: 'Cumplido',
       coaseguroPagado: 17500, coaseguroLimit: 17500,
       lastUpdate: 'Mar 12, 2025',
       status: 'OPERATIVO',
-      observations: 'Siniestro de alta cuantía. Coaseguro topado al 100%.'
+      observations: 'Siniestro de alta cuantía. Coaseguro topado al 100%.',
+      medications: [
+        { name: 'Inhaladores (Varios)', period: 'SOS', status: 'Surtido' }
+      ]
     },
     {
       claimId: '042024-PED-001',
       diagnosis: 'RODILLA (Rehabilitación)',
       chronic: false,
       patientName: 'Sebastian', patientPhoto: (patientPhotos as any)['Sebastian'] || '/patients/sebastian.png', role: 'Hijo', age: '19',
-      consumed: 85000, sublimit: 5000000, 
+      consumed: 85000, 
+      pendingAmount: 12000,
+      sublimit: 5000000, 
       deductibleStatus: 'En proceso',
       coaseguroPagado: 8500, coaseguroLimit: 17500,
       lastUpdate: 'May 04, 2025',
       status: 'OPERATIVO',
-      observations: ''
+      observations: 'Fisioterapia en curso (sesión 12/20).',
+      medications: [
+        { name: 'Celebrex 200mg', period: '15 días', status: 'Surtido' }
+      ]
     },
     {
       claimId: '02250211464-000',
       diagnosis: 'PRESIÓN (Hipertensión)',
       chronic: true,
       patientName: 'Claudia', patientPhoto: (patientPhotos as any)['Claudia'] || '/patients/claudia.png', role: 'Titular', age: '57',
-      consumed: 9300, sublimit: 5000000, 
+      consumed: 9300, 
+      pendingAmount: 0,
+      sublimit: 5000000, 
       deductibleStatus: 'En proceso',
       coaseguroPagado: 930, coaseguroLimit: 17500,
       lastUpdate: 'Feb 10, 2025',
       status: 'OPERATIVO',
-      observations: ''
+      observations: '',
+      medications: [
+        { name: 'Concor 5mg', period: 'Diario', status: 'Surtido' }
+      ]
     },
     {
       claimId: '052024-EMI-001',
       diagnosis: 'NARIZ (Fisura)',
       chronic: false,
       patientName: 'Emilio', patientPhoto: (patientPhotos as any)['Emilio'] || '/patients/emilio.png', role: 'Hijo', age: '18',
-      consumed: 15000, sublimit: 5000000, 
+      consumed: 15000, 
+      pendingAmount: 0,
+      sublimit: 5000000, 
       deductibleStatus: 'No aplica',
       coaseguroPagado: 0, coaseguroLimit: 17500,
       lastUpdate: 'Nov 20, 2024',
       status: 'REQUERIMIENTO',
-      observations: 'Falta informe médico interpretativo de radiología.'
+      observations: 'Falta informe médico interpretativo de radiología.',
+      medications: []
     }
   ];
 
