@@ -78,7 +78,7 @@ export function ClaimsKanban() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto pb-4">
         {columns.map((col) => (
           <div key={col.id} className="flex flex-col gap-4 min-w-[280px]">
-            <div className="flex justify-between items-center p-4 bg-gmm-card rounded-[16px] border border-gmm-border">
+            <div className="flex justify-between items-center p-4 gmm-box">
               <div className="flex items-center gap-2">
                 <div className={`p-1.5 rounded-lg ${col.color} text-black`}>
                   {col.icon}
@@ -94,7 +94,7 @@ export function ClaimsKanban() {
                   <motion.div
                     key={claim.id}
                     layoutId={claim.id}
-                    className="p-4 bg-gmm-card rounded-[16px] border border-gmm-border hover:border-gmm-text transition-colors"
+                    className="p-4 gmm-box hover:border-gmm-text transition-colors"
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div>

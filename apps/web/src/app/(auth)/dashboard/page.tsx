@@ -201,74 +201,105 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-12 pb-20 px-4">
+    <div className="max-w-[1400px] mx-auto space-y-12 pb-20 px-4 pt-6">
       
-      <GlobalPolicyCard 
-        totalSum={totalSum}
-        consumedSum={consumedSum}
-        policyNumber="M172 1011"
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-         <ConsumptionDonut data={distributionData} />
-
-         <div className="gmm-card-premium p-8 h-full">
-            <div className="flex justify-between items-center mb-8">
-               <div>
-                  <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em]">Detalle por Categoría</h3>
-                  <p className="text-[10px] text-gmm-text-muted font-bold uppercase tracking-widest">Desglose de gastos médicos</p>
-               </div>
-               <div className="px-3 py-1 bg-gmm-accent/10 rounded-full text-[8px] font-black text-gmm-accent uppercase tracking-widest">Top: Hospitalización</div>
-            </div>
-            <div className="h-[300px] w-full">
-               <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={categoryData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                     <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
-                     <XAxis dataKey="name" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} />
-                     <YAxis hide />
-                     <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: 'var(--gmm-card)', 
-                          border: 'none', 
-                          borderRadius: '16px', 
-                          fontSize: '10px', 
-                          boxShadow: 'var(--gmm-shadow)',
-                          color: 'var(--gmm-text)'
-                        }} 
-                        itemStyle={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '8px' }}
-                     />
-                     <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--gmm-text)' }} />
-                     <Bar dataKey="Hospital" stackId="a" fill="#2563EB">
-                        <LabelList dataKey="Hospital" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
-                     </Bar>
-                     <Bar dataKey="Farmacia" stackId="a" fill="#22C55E">
-                        <LabelList dataKey="Farmacia" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
-                     </Bar>
-                     <Bar dataKey="Honorarios" stackId="a" fill="#F59E0B">
-                        <LabelList dataKey="Honorarios" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
-                     </Bar>
-                     <Bar dataKey="Estudios" stackId="a" fill="#64748B" radius={[4, 4, 0, 0]}>
-                        <LabelList dataKey="Estudios" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
-                     </Bar>
-
-                  </BarChart>
-               </ResponsiveContainer>
-            </div>
-         </div>
-      </div>
-
-      <ClaimsKanban />
-
-      <div className="space-y-6">
-        <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em] flex items-center gap-3 px-2">
-          ASEGURADOS <span className="text-[10px] font-bold text-gmm-text-muted">({clinicalEvents.length} Perfiles Activos)</span>
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {clinicalEvents.map((event, i) => (
-            <EventMonitorCard key={i} event={event} index={i} onPhotoUpload={handlePhotoUpload} />
-          ))}
+      {/* SECCIÓN 1: PANORAMA GLOBAL */}
+      <section className="space-y-6">
+        <div className="flex items-center gap-4 mb-2">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gmm-text text-gmm-bg font-black text-sm">1</div>
+          <div>
+            <h2 className="text-sm font-black text-gmm-text uppercase tracking-[0.2em]">Panorama de Póliza</h2>
+            <p className="text-xs text-gmm-text-muted mt-0.5 font-medium">Resumen general de tu cobertura y límites</p>
+          </div>
         </div>
-      </div>
+        <GlobalPolicyCard 
+          totalSum={totalSum}
+          consumedSum={consumedSum}
+          policyNumber="M172 1011"
+        />
+      </section>
+
+      {/* SECCIÓN 2: ESTADO FINANCIERO */}
+      <section className="space-y-6 pt-8 border-t border-gmm-border/50">
+        <div className="flex items-center gap-4 mb-2">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gmm-text text-gmm-bg font-black text-sm">2</div>
+          <div>
+            <h2 className="text-sm font-black text-gmm-text uppercase tracking-[0.2em]">Estado Financiero</h2>
+            <p className="text-xs text-gmm-text-muted mt-0.5 font-medium">Distribución del gasto y consumo por categoría médica</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+           <ConsumptionDonut data={distributionData} />
+
+           <div className="gmm-box p-8 h-full flex flex-col">
+              <div className="flex justify-between items-center mb-8">
+                 <div>
+                    <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em]">Detalle por Categoría</h3>
+                    <p className="text-[10px] text-gmm-text-muted font-bold uppercase tracking-widest">Desglose de gastos médicos</p>
+                 </div>
+                 <div className="px-3 py-1 bg-gmm-accent/10 rounded-full text-[8px] font-black text-gmm-accent uppercase tracking-widest">Top: Hospitalización</div>
+              </div>
+              <div className="h-[300px] w-full">
+                 <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={categoryData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                       <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
+                       <XAxis dataKey="name" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} />
+                       <YAxis hide />
+                       <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: 'var(--gmm-card)', 
+                            border: '1px solid var(--gmm-border)', 
+                            borderRadius: '16px', 
+                            fontSize: '10px', 
+                            boxShadow: 'var(--gmm-shadow)',
+                            color: 'var(--gmm-text)'
+                          }} 
+                          itemStyle={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '8px' }}
+                       />
+                       <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--gmm-text)' }} />
+                       <Bar dataKey="Hospital" stackId="a" fill="#2563EB">
+                          <LabelList dataKey="Hospital" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                       </Bar>
+                       <Bar dataKey="Farmacia" stackId="a" fill="#22C55E">
+                          <LabelList dataKey="Farmacia" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                       </Bar>
+                       <Bar dataKey="Honorarios" stackId="a" fill="#F59E0B">
+                          <LabelList dataKey="Honorarios" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                       </Bar>
+                       <Bar dataKey="Estudios" stackId="a" fill="#64748B" radius={[4, 4, 0, 0]}>
+                          <LabelList dataKey="Estudios" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                       </Bar>
+
+                    </BarChart>
+                 </ResponsiveContainer>
+              </div>
+           </div>
+        </div>
+      </section>
+
+      {/* SECCIÓN 3: OPERACIONES Y ASEGURADOS */}
+      <section className="space-y-8 pt-8 border-t border-gmm-border/50">
+        <div className="flex items-center gap-4 mb-2">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gmm-text text-gmm-bg font-black text-sm">3</div>
+          <div>
+            <h2 className="text-sm font-black text-gmm-text uppercase tracking-[0.2em]">Operación y Asegurados</h2>
+            <p className="text-xs text-gmm-text-muted mt-0.5 font-medium">Gestión de trámites activos y perfiles familiares</p>
+          </div>
+        </div>
+
+        <ClaimsKanban />
+
+        <div className="space-y-6 pt-4">
+          <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em] flex items-center gap-3 px-2">
+            Perfiles Familiares <span className="text-[10px] font-bold text-gmm-text-muted">({clinicalEvents.length} Activos)</span>
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {clinicalEvents.map((event, i) => (
+              <EventMonitorCard key={i} event={event} index={i} onPhotoUpload={handlePhotoUpload} />
+            ))}
+          </div>
+        </div>
+      </section>
 
     </div>
   );

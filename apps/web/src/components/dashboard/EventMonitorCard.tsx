@@ -55,7 +55,7 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.6 }}
       viewport={{ once: true }}
-      className="bg-gmm-card border border-gmm-border rounded-[16px] p-6 transition-all duration-300 group"
+      className="gmm-box p-6 transition-all duration-300 group"
     >
       {/* Header: Identity & Status */}
       <div className="flex justify-between items-start mb-6">
