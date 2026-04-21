@@ -117,6 +117,18 @@ export default function DashboardPage() {
       observations: 'Coaseguro 10%.\nRemanente para tope: $15,676. Sin deducible por condiciones de póliza.\nMeds: Jardiance, Atozet, Libre sensor.'
     },
     {
+      claimId: '01210200485-018',
+      diagnosis: 'RESPIRATORIAS (nCoV)',
+      chronic: false,
+      patientName: 'Pedro A. Soto H.', patientPhoto: (patientPhotos as any)['Pedro A. Soto H.'] || '/patients/pedro.png', role: 'Dependiente', age: '57',
+      consumed: 1250000, sublimit: 5000000, 
+      deductibleStatus: 'Cumplido',
+      coaseguroPagado: 17500, coaseguroLimit: 17500,
+      lastUpdate: 'Mar 12, 2025',
+      status: 'OPERATIVO',
+      observations: 'Siniestro de alta cuantía. Coaseguro topado al 100%.'
+    },
+    {
       claimId: '042024-PED-001',
       diagnosis: 'RODILLA (Rehabilitación)',
       chronic: false,
