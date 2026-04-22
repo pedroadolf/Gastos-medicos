@@ -23,7 +23,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className={`min-h-screen bg-[#E5E5E5] flex justify-center items-start py-10 px-4 font-plus-jakarta`}>
+    <div className={`min-h-screen bg-[#A1A4A6] flex justify-center items-start py-10 px-4 font-plus-jakarta`}>
        
        <div className="w-full max-w-[1300px] relative">
           
