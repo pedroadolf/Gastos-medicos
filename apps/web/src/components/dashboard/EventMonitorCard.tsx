@@ -55,20 +55,21 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
       viewport={{ once: true }}
-      className="gmm-box p-6 mb-8 group"
+      className="gmm-box group"
     >
       <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
         
         {/* AVATAR Y NOMBRE */}
-        <div className="flex items-center gap-5 w-full lg:w-1/4">
+        <div className="flex items-center gap-6 w-full lg:w-1/3">
           <div className="relative group/photo shrink-0">
-             <div className="h-16 w-16 rounded-full overflow-hidden ring-4 ring-slate-50 dark:ring-zinc-800 shadow-inner bg-gray-100 dark:bg-zinc-800 flex items-center justify-center transition-transform duration-500 group-hover/photo:scale-110">
+             <div className="h-20 w-20 rounded-full overflow-hidden ring-4 ring-gray-100 dark:ring-white/10 shadow-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center transition-transform duration-500 group-hover/photo:scale-110">
                {event.patientPhoto ? (
                  <img src={event.patientPhoto} alt={event.patientName} className="h-full w-full object-cover" />
                ) : (
-                 <span className="text-xl font-black text-gray-900 dark:text-white uppercase">{initials}</span>
+                 <span className="text-2xl font-black text-gray-900 dark:text-white uppercase">{initials}</span>
                )}
              </div>
+             <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 rounded-full border-4 border-white dark:border-[#1C1C1E]"></div>
              <button 
                onClick={() => {
                  const input = document.createElement('input');
@@ -80,67 +81,39 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
                  };
                  input.click();
                }}
-               className="absolute -bottom-1 -right-1 bg-zinc-900 text-white p-1.5 rounded-full opacity-0 group-hover/photo:opacity-100 transition-all shadow-lg border border-white/20"
+               className="absolute top-0 right-0 bg-zinc-900 text-white p-1.5 rounded-full opacity-0 group-hover/photo:opacity-100 transition-all shadow-lg border border-white/20"
              >
-               <Upload size={12} />
+               <Upload size={10} />
              </button>
           </div>
           <div className="min-w-0">
-            <h3 className="font-bold text-slate-900 dark:text-white text-lg tracking-tight uppercase truncate">
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
                {event.patientName}
             </h3>
-            <div className="flex gap-2 mt-1">
-              {event.chronic && (
-                <span className="text-[9px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 uppercase tracking-widest">
-                  CRÓNICO
-                </span>
-              )}
-              <span className="text-[9px] font-black px-2 py-0.5 rounded bg-green-100 text-green-600 dark:bg-green-500/10 dark:text-green-400 uppercase tracking-widest">
-                ACTIVO
-              </span>
-            </div>
+            <p className="text-blue-500 font-bold text-[10px] tracking-widest uppercase mt-1">
+              {event.chronic ? 'CRÓNICO • ' : ''}ACTIVO
+            </p>
           </div>
         </div>
 
-        {/* MÉTRICAS (Con separadores visuales) */}
-        <div className="flex-1 w-full grid grid-cols-3 gap-4 lg:px-8 py-2 lg:border-x border-slate-100 dark:border-zinc-800">
-          <div className="text-center lg:text-left">
-            <p className="text-[10px] uppercase font-black text-slate-400 dark:text-zinc-500 tracking-wider mb-1">Disponible</p>
-            <p className={`text-xl font-bold ${availableColor}`}>${available.toLocaleString()}</p>
+        {/* MÉTRICAS (Con fondo interno para separar más) */}
+        <div className="flex gap-12 bg-gray-50 dark:bg-white/[0.03] px-10 py-6 rounded-[30px] border border-gray-100 dark:border-white/[0.02]">
+          <div className="text-center">
+            <span className="block text-[10px] text-gray-400 font-black uppercase mb-1 tracking-widest">Disponible</span>
+            <span className={`text-xl font-bold ${availableColor}`}>${available.toLocaleString()}</span>
           </div>
-          <div className="text-center lg:text-left">
-            <p className="text-[10px] uppercase font-black text-slate-400 dark:text-zinc-500 tracking-wider mb-1">A tu cargo</p>
-            <p className="text-xl font-bold text-red-500">${(event.coaseguroPagado || 0).toLocaleString()}</p>
-          </div>
-          <div className="text-center lg:text-left">
-            <p className="text-[10px] uppercase font-black text-slate-400 dark:text-zinc-500 tracking-wider mb-1">Coaseguro</p>
-            <p className="text-xl font-bold text-orange-400">{coaPct.toFixed(1)}%</p>
+          <div className="text-center">
+            <span className="block text-[10px] text-gray-400 font-black uppercase mb-1 tracking-widest">A tu cargo</span>
+            <span className="text-xl font-bold text-red-500">${(event.coaseguroPagado || 0).toLocaleString()}</span>
           </div>
         </div>
 
-        {/* ACCIONES Y PROGRESO */}
-        <div className="w-full lg:w-1/4 flex flex-col gap-4">
-           <div className="space-y-1.5">
-             <div className="flex justify-between items-end">
-                <p className="text-[9px] font-black text-slate-400 dark:text-zinc-500 uppercase">Progreso Global</p>
-                <p className="text-[9px] font-bold text-slate-500">${sublimit.toLocaleString()}</p>
-             </div>
-             <div className="h-2.5 w-full bg-slate-50 dark:bg-zinc-800/50 rounded-full overflow-hidden flex p-[1.5px] border border-slate-100 dark:border-zinc-800">
-                <motion.div initial={{ width: 0 }} whileInView={{ width: `${consumedPct}%` }} viewport={{once: true}} className="h-full bg-red-500 rounded-l-full" />
-                <motion.div initial={{ width: 0 }} whileInView={{ width: `${pendingPct}%` }} viewport={{once: true}} className="h-full bg-amber-400" />
-                <motion.div initial={{ width: 0 }} whileInView={{ width: `${availablePct}%` }} viewport={{once: true}} className="h-full bg-green-500 rounded-r-full" />
-             </div>
-           </div>
-           
-           <div className="flex items-center gap-3">
-             <button className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-black py-3.5 rounded-2xl shadow-lg shadow-orange-500/30 transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 group/btn">
-               Detalle
-               <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
-             </button>
-             <button className="p-3.5 rounded-2xl border border-slate-100 dark:border-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all">
-               <History size={18} />
-             </button>
-           </div>
+        {/* ACCIÓN (Botón con sombra propia naranja) */}
+        <div className="flex items-center gap-4">
+          <button className="bg-orange-500 hover:bg-orange-600 text-white font-black px-10 py-5 rounded-[20px] shadow-[0_10px_20px_rgba(249,115,22,0.3)] transition-all uppercase text-[10px] tracking-widest flex items-center gap-2 group/btn">
+            Ver Detalle
+            <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+          </button>
         </div>
 
       </div>

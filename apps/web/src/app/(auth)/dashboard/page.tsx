@@ -224,7 +224,7 @@ export default function DashboardPage() {
   ];
 
    return (
-    <div className="max-w-7xl mx-auto space-y-20 pb-20 px-4 pt-6">
+    <div className="max-w-7xl mx-auto space-y-10 pb-20 px-4 pt-6">
       
       {/* SECCIÓN 1: PANORAMA GLOBAL */}
       <Section 
@@ -246,7 +246,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
            <ConsumptionDonut data={distributionData} />
 
-           <div className="gmm-box p-8 h-full flex flex-col">
+           <div className="gmm-box h-full flex flex-col">
               <div className="flex justify-between items-center mb-8">
                  <div>
                     <h3 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">Detalle por Categoría</h3>
@@ -294,10 +294,10 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-8">
-            <h3 className="text-[12px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em] flex items-center gap-3 px-2">
-              Perfiles Familiares <span className="text-[10px] font-bold text-gray-500 dark:text-neutral-400">({clinicalEvents.length} Activos)</span>
+            <h3 className="text-sm font-black tracking-widest text-gray-400 dark:text-zinc-500 uppercase ml-4">
+              Perfiles Familiares <span className="text-[10px] font-bold text-gray-300 dark:text-neutral-600">({clinicalEvents.length} Activos)</span>
             </h3>
-            <div className="grid grid-cols-1 gap-8">
+            <div className="flex flex-col gap-y-12">
               {clinicalEvents.map((event, i) => (
                 <EventMonitorCard key={i} event={event} index={i} onPhotoUpload={handlePhotoUpload} />
               ))}
