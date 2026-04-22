@@ -87,10 +87,10 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
              </button>
           </div>
           <div>
-            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
                {event.patientName}
             </h3>
-            <p className="text-blue-600 dark:text-blue-300 font-bold text-xs tracking-widest mt-1 uppercase">
+            <p className="text-blue-600 dark:text-blue-300 font-bold text-sm tracking-widest mt-1 uppercase">
               {event.chronic ? 'CRÓNICO • ' : ''}ACTIVO
             </p>
           </div>
@@ -99,24 +99,24 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
         {/* MÉTRICAS (Con fondo interno para separar más) */}
         <div className="flex-1 grid grid-cols-3 gap-6 bg-slate-100/50 dark:bg-black/20 p-8 rounded-[35px] border border-gray-100 dark:border-white/[0.02]">
           <div className="text-center">
-            <p className="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase mb-1 tracking-widest">Disponible</p>
+            <p className="text-[13px] font-black text-slate-400 dark:text-slate-200 uppercase mb-1 tracking-widest">Disponible</p>
             <p className={`text-2xl font-black ${availableColor}`}>${available.toLocaleString()}</p>
           </div>
           <div className="text-center">
-            <p className="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase mb-1 tracking-widest">A tu cargo</p>
+            <p className="text-[13px] font-black text-slate-400 dark:text-slate-200 uppercase mb-1 tracking-widest">A tu cargo</p>
             <p className="text-2xl font-black text-red-500">${(event.coaseguroPagado || 0).toLocaleString()}</p>
           </div>
           <div className="text-center">
-            <p className="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase mb-1 tracking-widest">Coaseguro</p>
+            <p className="text-[13px] font-black text-slate-400 dark:text-slate-200 uppercase mb-1 tracking-widest">Coaseguro</p>
             <p className="text-2xl font-black text-orange-400">{coaPct.toFixed(1)}%</p>
           </div>
         </div>
 
         {/* ACCIÓN (Botón con sombra propia naranja) */}
         <div className="flex items-center gap-4">
-          <button className="bg-[#FF6B00] hover:bg-orange-600 text-white font-black px-10 py-5 rounded-[22px] shadow-2xl shadow-orange-500/40 transition-all uppercase text-xs tracking-widest flex items-center gap-2 group/btn">
+          <button className="bg-[#FF6B00] hover:bg-orange-600 text-white font-black px-10 py-5 rounded-[22px] shadow-2xl shadow-orange-500/40 transition-all uppercase text-sm tracking-widest flex items-center gap-2 group/btn">
             Detalle
-            <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+            <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
           </button>
         </div>
 

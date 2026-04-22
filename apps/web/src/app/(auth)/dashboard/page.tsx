@@ -34,11 +34,11 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
     <section className="space-y-8">
       <div className="flex items-center justify-between gap-6 px-2">
         <div className="flex flex-col">
-          <h2 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">
+          <h2 className="text-[16px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">
             {title}
           </h2>
           {subtitle && (
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-1">
+            <p className="text-[12px] text-slate-400 dark:text-slate-300 font-bold uppercase tracking-widest mt-1">
               {subtitle}
             </p>
           )}
@@ -231,15 +231,13 @@ export default function DashboardPage() {
       {/* HEADER: BIENVENIDA */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
         <div className="space-y-1">
-          <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.4em]">Panel de Control GMM</p>
+          <p className="text-[13px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.4em]">Panel de Control GMM</p>
           <h1 className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">
             Hola, <span className="text-blue-600">Claudia</span>
           </h1>
-        </div>
-        <div className="flex items-center gap-4 text-right">
-           <div className="hidden sm:block">
-             <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">Status Global</p>
-             <p className="text-xs font-black text-emerald-500 flex items-center gap-2 justify-end">
+                    <div className="hidden sm:block">
+             <p className="text-[12px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-[0.2em] mb-1">Status Global</p>
+             <p className="text-sm font-black text-emerald-500 flex items-center gap-2 justify-end">
                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
                PÓLIZA ACTIVA
              </p>
@@ -274,16 +272,16 @@ export default function DashboardPage() {
            <div className="gmm-box h-full flex flex-col p-10">
               <div className="flex justify-between items-center mb-10">
                  <div>
-                    <h3 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">Consumo por Familiar</h3>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-1">Impacto presupuestal por integrante</p>
+                    <h3 className="text-[14px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">Consumo por Familiar</h3>
+                    <p className="text-[12px] text-slate-400 dark:text-slate-300 font-bold uppercase tracking-widest mt-1">Impacto presupuestal por integrante</p>
                  </div>
-                 <div className="px-4 py-1.5 bg-blue-600/10 rounded-full text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.1em]">Tiempo Real</div>
+                 <div className="px-4 py-1.5 bg-blue-600/10 rounded-full text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.1em]">Tiempo Real</div>
               </div>
               <div className="h-[320px] w-full">
                  <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={categoryData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
-                       <XAxis dataKey="name" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />
+                       <XAxis dataKey="name" fontSize={12} fontWeight="black" axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />
                        <YAxis hide />
                        <Tooltip 
                           cursor={{fill: 'transparent'}}
@@ -291,12 +289,13 @@ export default function DashboardPage() {
                             backgroundColor: 'rgba(255, 255, 255, 0.98)', 
                             border: 'none', 
                             borderRadius: '24px', 
-                            fontSize: '11px', 
+                            fontSize: '13px', 
                             boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
                             color: '#0f172a',
                             padding: '16px'
                           }} 
-                          itemStyle={{ fontWeight: '900', textTransform: 'uppercase', fontSize: '9px', padding: '2px 0' }}
+                          itemStyle={{ fontWeight: '900', textTransform: 'uppercase', fontSize: '11px', padding: '2px 0' }}
+                       />uppercase', fontSize: '9px', padding: '2px 0' }}
                        />
                        <Legend iconType="circle" wrapperStyle={{ paddingTop: '30px', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
                        <Bar dataKey="Hospital" fill="#2D6A4F" radius={[8, 8, 0, 0]} barSize={24} />
@@ -325,7 +324,7 @@ export default function DashboardPage() {
               <h3 className="text-sm font-black tracking-[0.2em] text-slate-900 dark:text-white uppercase">
                 Perfiles del Grupo
               </h3>
-              <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-full text-[12px] font-black text-slate-400 uppercase tracking-widest">
                 {clinicalEvents.length} Integrantes
               </span>
             </div>

@@ -45,7 +45,7 @@
   --gmm-bg: #000000; /* Negro Total */
   --gmm-card: #53535C; /* Gris Claro Dark */
   --gmm-text: #F8FAFC;
-  --gmm-text-muted: #94A3B8;
+  --gmm-text-muted: #CBD5E1; /* Brighter for dark mode visibility */
   --gmm-border: rgba(255, 255, 255, 0.05);
   --gmm-shadow: 0 40px 80px rgba(0,0,0,0.6);
   --gmm-texture: none;
