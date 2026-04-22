@@ -40,7 +40,7 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
   const sublimit = event.sublimit;
   const consumedPct = (consumed / sublimit) * 100;
 
-  const initials = event.patientName.split(' ').map(n => n[0]).join('').substring(0, 2);
+  const initials = (event.patientName || 'Asegurado').split(' ').map(n => n[0]).join('').substring(0, 2);
 
   return (
     <motion.div 
