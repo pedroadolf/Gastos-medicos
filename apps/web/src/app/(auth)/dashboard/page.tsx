@@ -295,7 +295,6 @@ export default function DashboardPage() {
                             padding: '16px'
                           }} 
                           itemStyle={{ fontWeight: '900', textTransform: 'uppercase', fontSize: '11px', padding: '2px 0' }}
-                       />uppercase', fontSize: '9px', padding: '2px 0' }}
                        />
                        <Legend iconType="circle" wrapperStyle={{ paddingTop: '30px', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
                        <Bar dataKey="Hospital" fill="#2D6A4F" radius={[8, 8, 0, 0]} barSize={24} />
