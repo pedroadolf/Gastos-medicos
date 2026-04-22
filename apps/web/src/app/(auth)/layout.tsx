@@ -28,10 +28,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
        <div className="w-full max-w-[1300px] relative">
           
           {/* FOLDER SHAPE BACKGROUND */}
-          <div className="absolute top-0 left-0 w-[380px] h-[180px] bg-[#F2F2F2] rounded-t-[32px] shadow-sm"></div>
-          <div className="absolute top-[60px] left-[380px] right-0 h-[120px] bg-[#F2F2F2] rounded-tr-[32px] rounded-tl-[24px] shadow-sm">
+          <div className="absolute top-0 left-0 w-[380px] h-[180px] bg-[#EBEBEB] rounded-t-[32px] shadow-sm"></div>
+          <div className="absolute top-[60px] left-[380px] right-0 h-[120px] bg-[#EBEBEB] rounded-tr-[32px] rounded-tl-[24px] shadow-sm">
              {/* Smooth inverse curve */}
-             <div className="absolute top-0 -left-[24px] w-[24px] h-[24px] bg-transparent" style={{ borderTopRightRadius: '24px', boxShadow: '12px -12px 0 0 #F2F2F2' }}></div>
+             <div className="absolute top-0 -left-[24px] w-[24px] h-[24px] bg-transparent" style={{ borderTopRightRadius: '24px', boxShadow: '12px -12px 0 0 #EBEBEB' }}></div>
           </div>
 
           {/* CONTENT LAYER */}
@@ -74,7 +74,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
 
               {/* INNER CANVAS */}
-              <div className="mt-8 bg-[#F2F2F2] rounded-[32px] p-8 shadow-inner min-h-[700px] border border-white">
+              <div className="mt-8 bg-[#EBEBEB] rounded-[32px] p-8 shadow-inner min-h-[700px] border border-white">
                  <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
                     {children}
                  </div>
