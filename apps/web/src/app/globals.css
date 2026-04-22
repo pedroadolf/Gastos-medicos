@@ -30,7 +30,7 @@
   --gmm-warning: #F59E0B;
 
   /* Light Theme - Gallery Neutral */
-  --gmm-bg: #F4F4F5; /* Fondo gris más profundo para mayor contraste con las tarjetas blancas */
+  --gmm-bg: #E8E8E8; /* Fondo gris para la estructura folder */
   --gmm-card: #FFFFFF;
   --gmm-text-muted: #71717A;
   --gmm-border: rgba(0, 0, 0, 0.08); /* Borde más definido */
