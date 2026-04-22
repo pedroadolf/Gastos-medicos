@@ -23,15 +23,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className={`min-h-screen bg-[#EBEBEB] flex justify-center items-start py-10 px-4 font-plus-jakarta`}>
+    <div className={`min-h-screen bg-[#E5E5E5] flex justify-center items-start py-10 px-4 font-plus-jakarta`}>
        
        <div className="w-full max-w-[1300px] relative">
           
           {/* FOLDER SHAPE BACKGROUND */}
-          <div className="absolute top-0 left-0 w-[380px] h-[180px] bg-[#D4D4D4] rounded-t-[32px] shadow-sm"></div>
-          <div className="absolute top-[60px] left-[380px] right-0 h-[120px] bg-[#D4D4D4] rounded-tr-[32px] rounded-tl-[24px] shadow-sm">
+          <div className="absolute top-0 left-0 w-[380px] h-[180px] bg-[#F2F2F2] rounded-t-[32px] shadow-sm"></div>
+          <div className="absolute top-[60px] left-[380px] right-0 h-[120px] bg-[#F2F2F2] rounded-tr-[32px] rounded-tl-[24px] shadow-sm">
              {/* Smooth inverse curve */}
-             <div className="absolute top-0 -left-[24px] w-[24px] h-[24px] bg-transparent" style={{ borderTopRightRadius: '24px', boxShadow: '12px -12px 0 0 #D4D4D4' }}></div>
+             <div className="absolute top-0 -left-[24px] w-[24px] h-[24px] bg-transparent" style={{ borderTopRightRadius: '24px', boxShadow: '12px -12px 0 0 #F2F2F2' }}></div>
           </div>
 
           {/* CONTENT LAYER */}
@@ -43,17 +43,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                  {/* Left Tab Content */}
                  <div className="w-full md:w-[340px] pl-6 pt-2">
                     <h1 className="text-[26px] font-medium text-[#1A2A3A] tracking-tight mb-6">Dashboard GMM</h1>
-                    
-                    {/* User Profile Card */}
-                    <div className="bg-[#EAEAEA] rounded-[24px] p-4 flex items-center gap-4 shadow-sm border border-white/50 w-[280px]">
-                       <div className="w-14 h-14 rounded-full overflow-hidden bg-white flex items-center justify-center font-bold text-xl text-gray-500 shadow-inner">
-                          C
-                       </div>
-                       <div>
-                          <p className="text-[11px] text-gray-500 mb-0.5">Titular, 57</p>
-                          <h2 className="text-sm font-bold text-gray-800 leading-tight">Claudia<br/>Rodríguez</h2>
-                       </div>
-                    </div>
                  </div>
 
                  {/* Right Area (Pills Menu) */}
@@ -85,7 +74,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
 
               {/* INNER CANVAS */}
-              <div className="mt-8 bg-[#F5F5F5] rounded-[32px] p-8 shadow-inner min-h-[700px] border border-white">
+              <div className="mt-8 bg-[#F2F2F2] rounded-[32px] p-8 shadow-inner min-h-[700px] border border-white">
                  <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
                     {children}
                  </div>

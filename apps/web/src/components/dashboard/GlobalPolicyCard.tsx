@@ -10,12 +10,12 @@ interface GlobalPolicyCardProps {
 
 export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: GlobalPolicyCardProps) {
   return (
-    <div className="gmm-card-premium relative overflow-hidden group">
+    <div className="gmm-box relative overflow-hidden group">
       {/* Removed background decals for cleaner UI */}
 
-      <div className="flex flex-col lg:flex-row border-b border-gmm-text/5">
+      <div className="flex flex-col lg:flex-row border-b border-[#E8E8E8]">
         {/* Left Panel: Primary Policy */}
-        <div className="flex-1 p-8 lg:p-10 lg:border-r border-gmm-border">
+        <div className="flex-1 p-8 lg:p-10 lg:border-r border-[#E8E8E8]">
           <div className="flex items-center gap-3 mb-6">
             <h2 className="text-[12px] font-black uppercase tracking-[0.2em] text-gmm-text">
               Póliza Principal — MetLife GMM Colectivo
@@ -61,7 +61,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
         </div>
 
         {/* Right Panel: Excess Policy */}
-        <div className="lg:w-[400px] bg-gmm-bg p-8 lg:p-10 relative">
+        <div className="lg:w-[400px] bg-[#FAFAFA] p-8 lg:p-10 relative">
           
           <div className="flex items-center gap-3 mb-6 relative z-10">
             <h2 className="text-[12px] font-black uppercase tracking-[0.2em] text-gmm-text">
@@ -97,7 +97,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
                </div>
             </div>
 
-            <div className="mt-6 p-4 bg-gmm-card rounded-[16px] border border-gmm-border">
+            <div className="mt-6 p-4 bg-[#FFFFFF] rounded-[16px] border border-[#E8E8E8]">
               <p className="text-[10px] leading-relaxed font-bold text-gmm-text-muted">
                 La póliza de excesos entra en vigor cuando el gasto acumulado de un mismo siniestro supera <strong className="text-gmm-text">$2,000,000</strong>. A partir de ese punto cubre el excedente con 10% de coaseguro.
               </p>
@@ -107,9 +107,9 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
       </div>
 
       {/* Footer KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-gmm-border bg-gmm-bg">
+      <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-[#E8E8E8] bg-[#FAFAFA]">
         <div className="p-6 flex items-center gap-4">
-           <div className="w-10 h-10 rounded-[16px] bg-gmm-card border border-gmm-border flex items-center justify-center shrink-0">
+           <div className="w-10 h-10 rounded-[16px] bg-[#FFFFFF] border border-[#E8E8E8] flex items-center justify-center shrink-0">
              <Users size={16} className="text-gmm-text" />
            </div>
            <div>
@@ -118,7 +118,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
            </div>
         </div>
         <div className="p-6 flex items-center gap-4">
-           <div className="w-10 h-10 rounded-[16px] bg-gmm-card border border-gmm-border flex items-center justify-center shrink-0">
+           <div className="w-10 h-10 rounded-[16px] bg-[#FFFFFF] border border-[#E8E8E8] flex items-center justify-center shrink-0">
              <FolderOpen size={16} className="text-gmm-danger" />
            </div>
            <div>
@@ -127,7 +127,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
            </div>
         </div>
         <div className="p-6 flex items-center gap-4">
-           <div className="w-10 h-10 rounded-[16px] bg-gmm-card border border-gmm-border flex items-center justify-center shrink-0">
+           <div className="w-10 h-10 rounded-[16px] bg-[#FFFFFF] border border-[#E8E8E8] flex items-center justify-center shrink-0">
              <DollarSign size={16} className="text-gmm-accent" />
            </div>
            <div>
@@ -136,7 +136,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
            </div>
         </div>
         <div className="p-6 flex items-center gap-4">
-           <div className="w-10 h-10 rounded-[16px] bg-gmm-card border border-gmm-border flex items-center justify-center shrink-0">
+           <div className="w-10 h-10 rounded-[16px] bg-[#FFFFFF] border border-[#E8E8E8] flex items-center justify-center shrink-0">
              <Activity size={16} className="text-gmm-text" />
            </div>
            <div>

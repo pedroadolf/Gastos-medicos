@@ -6,8 +6,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/services/supabase';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer, Legend, LabelList,
-  FunnelChart, Funnel
+  Tooltip, ResponsiveContainer, Legend, LabelList
 } from 'recharts';
 import { 
   Plus, Upload
@@ -26,13 +25,6 @@ const categoryData = [
   { name: 'Pedro', Hospital: 1100000, Farmacia: 400000, Honorarios: 200000, Estudios: 0 },
   { name: 'Sebastian', Hospital: 45000, Farmacia: 20000, Honorarios: 20000, Estudios: 0 },
   { name: 'Emilio', Hospital: 5000, Farmacia: 5000, Honorarios: 5000, Estudios: 0 },
-];
-
-const funnelData = [
-  { value: 100, name: 'Recepción', fill: '#E8E8E8' },
-  { value: 80, name: 'Revisión Médica', fill: '#D4D4D4' },
-  { value: 50, name: 'Dictamen', fill: '#6B7280' },
-  { value: 30, name: 'Aprobados', fill: '#2D6A4F' },
 ];
 
 export default function DashboardPage() {
@@ -293,39 +285,15 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-           <div className="lg:col-span-2">
-             <ClaimsKanban />
-           </div>
-           
-           <div className="gmm-box p-8 flex flex-col h-full min-h-[400px]">
-              <div className="mb-6">
-                 <h3 className="text-[12px] font-black text-[#1A2A3A] uppercase tracking-[0.3em]">Flujo de Siniestros</h3>
-                 <p className="text-[10px] text-[#6B7280] font-bold uppercase tracking-widest mt-1">Eficacia operativa</p>
-              </div>
-              <div className="flex-1 w-full relative -ml-4">
-                 <ResponsiveContainer width="100%" height="100%">
-                    <FunnelChart>
-                       <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                       <Funnel
-                          dataKey="value"
-                          data={funnelData}
-                          isAnimationActive
-                       >
-                          <LabelList position="right" fill="#6B7280" stroke="none" dataKey="name" fontSize={11} fontWeight="600" />
-                          <LabelList position="center" fill="#1A2A3A" stroke="none" dataKey="value" fontSize={14} fontWeight="bold" />
-                       </Funnel>
-                    </FunnelChart>
-                 </ResponsiveContainer>
-              </div>
-           </div>
+        <div className="w-full">
+           <ClaimsKanban />
         </div>
 
         <div className="space-y-6 pt-4">
           <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em] flex items-center gap-3 px-2">
             Perfiles Familiares <span className="text-[10px] font-bold text-gmm-text-muted">({clinicalEvents.length} Activos)</span>
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-4">
             {clinicalEvents.map((event, i) => (
               <EventMonitorCard key={i} event={event} index={i} onPhotoUpload={handlePhotoUpload} />
             ))}

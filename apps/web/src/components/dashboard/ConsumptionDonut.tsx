@@ -41,7 +41,7 @@ export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
   const total = data.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
-    <div className="gmm-card-premium p-8 h-full">
+    <div className="gmm-box p-8 h-full">
       <div className="flex justify-between items-center mb-8">
          <div>
             <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em]">Distribución del Consumo</h3>
