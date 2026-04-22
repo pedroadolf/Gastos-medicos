@@ -44,12 +44,12 @@ export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
     <div className="gmm-box p-8 h-full">
       <div className="flex justify-between items-center mb-8">
          <div>
-            <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em]">Distribución del Consumo</h3>
-            <p className="text-[10px] text-gmm-text-muted font-bold uppercase tracking-widest">Participación por Asegurado</p>
+            <h3 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">Distribución del Consumo</h3>
+            <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-widest">Participación por Asegurado</p>
          </div>
          <div className="text-right">
-            <p className="text-[8px] font-black text-gmm-text-muted uppercase mb-1">Total Consolidado</p>
-            <p className="text-xl font-black text-gmm-text italic tracking-tighter">${(total / 1_000).toLocaleString()}k</p>
+            <p className="text-[8px] font-black text-slate-400 dark:text-zinc-500 uppercase mb-1">Total Consolidado</p>
+            <p className="text-xl font-black text-slate-900 dark:text-white italic tracking-tighter">${(total / 1_000).toLocaleString()}k</p>
          </div>
       </div>
 

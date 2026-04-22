@@ -55,92 +55,94 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
       viewport={{ once: true }}
-      className="gmm-box p-4 transition-all duration-300 group flex flex-col lg:flex-row items-center gap-6"
+      className="gmm-box p-6 mb-8 group"
     >
-      {/* Identity (Left) */}
-      <div className="flex items-center gap-4 w-full lg:w-[280px] shrink-0">
-        <div className="relative group/photo">
-           <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-neutral-900 flex items-center justify-center border border-gray-200 dark:border-neutral-800 shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden transition-transform duration-500 group-hover/photo:scale-105">
-             {event.patientPhoto ? (
-               <img src={event.patientPhoto} alt={event.patientName} className="w-full h-full object-cover" />
-             ) : (
-               <span className="text-base font-black text-gray-900 dark:text-white uppercase">{initials}</span>
-             )}
-           </div>
-           <button 
-             onClick={() => {
-               const input = document.createElement('input');
-               input.type = 'file';
-               input.accept = 'image/*';
-               input.onchange = (e: any) => {
-                 const file = e.target.files?.[0];
-                 if (file) onPhotoUpload(event.patientName, file);
-               };
-               input.click();
-             }}
-             className="absolute -bottom-1 -right-1 bg-gmm-text text-white p-1 rounded-lg opacity-0 group-hover/photo:opacity-100 transition-all shadow-lg"
-           >
-             <Upload size={10} />
-           </button>
-        </div>
-        <div>
-          <h3 className="text-[13px] font-black text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">{event.patientName}</h3>
-          <p className="text-[9px] font-bold text-gray-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">{event.diagnosis}</p>
-          <div className="flex gap-1.5">
-            {event.chronic && (
-              <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[8px] font-black uppercase tracking-widest border border-blue-100">
-                Crónico
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+        
+        {/* AVATAR Y NOMBRE */}
+        <div className="flex items-center gap-5 w-full lg:w-1/4">
+          <div className="relative group/photo shrink-0">
+             <div className="h-16 w-16 rounded-full overflow-hidden ring-4 ring-slate-50 dark:ring-zinc-800 shadow-inner bg-gray-100 dark:bg-zinc-800 flex items-center justify-center transition-transform duration-500 group-hover/photo:scale-110">
+               {event.patientPhoto ? (
+                 <img src={event.patientPhoto} alt={event.patientName} className="h-full w-full object-cover" />
+               ) : (
+                 <span className="text-xl font-black text-gray-900 dark:text-white uppercase">{initials}</span>
+               )}
+             </div>
+             <button 
+               onClick={() => {
+                 const input = document.createElement('input');
+                 input.type = 'file';
+                 input.accept = 'image/*';
+                 input.onchange = (e: any) => {
+                   const file = e.target.files?.[0];
+                   if (file) onPhotoUpload(event.patientName, file);
+                 };
+                 input.click();
+               }}
+               className="absolute -bottom-1 -right-1 bg-zinc-900 text-white p-1.5 rounded-full opacity-0 group-hover/photo:opacity-100 transition-all shadow-lg border border-white/20"
+             >
+               <Upload size={12} />
+             </button>
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-bold text-slate-900 dark:text-white text-lg tracking-tight uppercase truncate">
+               {event.patientName}
+            </h3>
+            <div className="flex gap-2 mt-1">
+              {event.chronic && (
+                <span className="text-[9px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 uppercase tracking-widest">
+                  CRÓNICO
+                </span>
+              )}
+              <span className="text-[9px] font-black px-2 py-0.5 rounded bg-green-100 text-green-600 dark:bg-green-500/10 dark:text-green-400 uppercase tracking-widest">
+                ACTIVO
               </span>
-            )}
-            <span className="px-2 py-0.5 rounded-full bg-green-50 text-green-600 text-[8px] font-black uppercase tracking-widest border border-green-100">
-              Activo
-            </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* KPI Matrix (Middle) */}
-      <div className="flex-1 w-full grid grid-cols-3 gap-4 lg:border-l lg:border-r border-[#E8E8E8] lg:px-6">
-        <div>
-          <p className="text-[8px] font-black text-gmm-text-muted uppercase tracking-widest mb-0.5">Disponible</p>
-          <p className={`text-sm font-black tracking-tighter ${availableColor}`}>${available.toLocaleString()}</p>
+        {/* MÉTRICAS (Con separadores visuales) */}
+        <div className="flex-1 w-full grid grid-cols-3 gap-4 lg:px-8 py-2 lg:border-x border-slate-100 dark:border-zinc-800">
+          <div className="text-center lg:text-left">
+            <p className="text-[10px] uppercase font-black text-slate-400 dark:text-zinc-500 tracking-wider mb-1">Disponible</p>
+            <p className={`text-xl font-bold ${availableColor}`}>${available.toLocaleString()}</p>
+          </div>
+          <div className="text-center lg:text-left">
+            <p className="text-[10px] uppercase font-black text-slate-400 dark:text-zinc-500 tracking-wider mb-1">A tu cargo</p>
+            <p className="text-xl font-bold text-red-500">${(event.coaseguroPagado || 0).toLocaleString()}</p>
+          </div>
+          <div className="text-center lg:text-left">
+            <p className="text-[10px] uppercase font-black text-slate-400 dark:text-zinc-500 tracking-wider mb-1">Coaseguro</p>
+            <p className="text-xl font-bold text-orange-400">{coaPct.toFixed(1)}%</p>
+          </div>
         </div>
-        <div>
-          <p className="text-[8px] font-black text-gmm-text-muted uppercase tracking-widest mb-0.5">A tu cargo</p>
-          <p className="text-sm font-black tracking-tighter text-gmm-danger">${(event.coaseguroPagado || 0).toLocaleString()}</p>
-        </div>
-        <div>
-          <p className="text-[8px] font-black text-gmm-text-muted uppercase tracking-widest mb-0.5">Coaseguro %</p>
-          <p className="text-sm font-black tracking-tighter text-amber-500">{coaPct.toFixed(1)}%</p>
-        </div>
-      </div>
 
-      {/* Progress Bar (Middle Right) */}
-      <div className="w-full lg:w-[200px] shrink-0 flex flex-col justify-center">
-         <div className="flex justify-between items-end mb-1">
-            <p className="text-[8px] font-black text-gmm-text uppercase">Consumo total</p>
-            <p className="text-[8px] font-bold text-gmm-text-muted">${sublimit.toLocaleString()}</p>
-         </div>
-         <div className="h-2 w-full bg-[#FAFAFA] border border-[#E8E8E8] rounded-full overflow-hidden flex p-[1px]">
-            <motion.div initial={{ width: 0 }} whileInView={{ width: `${consumedPct}%` }} viewport={{once: true}} className="h-full bg-gmm-danger rounded-l-full relative group" />
-            <motion.div initial={{ width: 0 }} whileInView={{ width: `${pendingPct}%` }} viewport={{once: true}} className="h-full bg-amber-400 relative group" />
-            <motion.div initial={{ width: 0 }} whileInView={{ width: `${availablePct}%` }} viewport={{once: true}} className="h-full bg-green-500 rounded-r-full relative group" />
-         </div>
-         <div className="flex justify-between mt-1">
-            <p className="text-[7px] font-bold text-gmm-text-muted uppercase">{consumedPct.toFixed(0)}% Pagado</p>
-            <p className="text-[7px] font-bold text-gmm-text-muted uppercase text-right">{availablePct.toFixed(0)}% Disp.</p>
-         </div>
-      </div>
+        {/* ACCIONES Y PROGRESO */}
+        <div className="w-full lg:w-1/4 flex flex-col gap-4">
+           <div className="space-y-1.5">
+             <div className="flex justify-between items-end">
+                <p className="text-[9px] font-black text-slate-400 dark:text-zinc-500 uppercase">Progreso Global</p>
+                <p className="text-[9px] font-bold text-slate-500">${sublimit.toLocaleString()}</p>
+             </div>
+             <div className="h-2.5 w-full bg-slate-50 dark:bg-zinc-800/50 rounded-full overflow-hidden flex p-[1.5px] border border-slate-100 dark:border-zinc-800">
+                <motion.div initial={{ width: 0 }} whileInView={{ width: `${consumedPct}%` }} viewport={{once: true}} className="h-full bg-red-500 rounded-l-full" />
+                <motion.div initial={{ width: 0 }} whileInView={{ width: `${pendingPct}%` }} viewport={{once: true}} className="h-full bg-amber-400" />
+                <motion.div initial={{ width: 0 }} whileInView={{ width: `${availablePct}%` }} viewport={{once: true}} className="h-full bg-green-500 rounded-r-full" />
+             </div>
+           </div>
+           
+           <div className="flex items-center gap-3">
+             <button className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-black py-3.5 rounded-2xl shadow-lg shadow-orange-500/30 transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 group/btn">
+               Detalle
+               <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
+             </button>
+             <button className="p-3.5 rounded-2xl border border-slate-100 dark:border-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all">
+               <History size={18} />
+             </button>
+           </div>
+        </div>
 
-      {/* Actions (Right) */}
-      <div className="w-full lg:w-auto shrink-0 flex items-center justify-end gap-2">
-        <button className="p-2.5 rounded-xl border border-[#E8E8E8] bg-[#FAFAFA] text-gmm-text-muted hover:text-gmm-text hover:bg-white transition-all">
-          <History size={14} />
-        </button>
-        <button className="py-2.5 px-4 rounded-xl bg-gmm-accent text-white text-[9px] font-black uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2 group/btn">
-          Detalle
-          <ChevronRight size={12} className="group-hover/btn:translate-x-1 transition-transform" />
-        </button>
       </div>
     </motion.div>
   );

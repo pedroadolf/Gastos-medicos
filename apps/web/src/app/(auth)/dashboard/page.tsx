@@ -34,16 +34,16 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
     <section className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col">
-          <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-[0.2em]">
+          <h2 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">
             {title}
           </h2>
           {subtitle && (
-            <p className="text-[10px] text-gray-500 dark:text-neutral-400 font-bold uppercase tracking-wider mt-0.5">
+            <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-0.5">
               {subtitle}
             </p>
           )}
         </div>
-        <div className="h-px flex-1 bg-gray-200 dark:bg-neutral-800" />
+        <div className="h-px flex-1 bg-slate-200 dark:bg-zinc-800" />
       </div>
       {children}
     </section>
@@ -249,8 +249,8 @@ export default function DashboardPage() {
            <div className="gmm-box p-8 h-full flex flex-col">
               <div className="flex justify-between items-center mb-8">
                  <div>
-                    <h3 className="text-[12px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Detalle por Categoría</h3>
-                    <p className="text-[10px] text-gray-500 dark:text-neutral-400 font-bold uppercase tracking-widest">Desglose de gastos médicos</p>
+                    <h3 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">Detalle por Categoría</h3>
+                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-widest">Desglose de gastos médicos</p>
                  </div>
                  <div className="px-3 py-1 bg-blue-500/10 rounded-full text-[8px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Top: Hospitalización</div>
               </div>

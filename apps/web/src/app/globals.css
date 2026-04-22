@@ -77,14 +77,14 @@
 
 @layer utilities {
   .gmm-box {
-    @apply bg-white dark:bg-[#121212] 
-           rounded-[32px] 
-           border border-gray-100 dark:border-white/[0.06] 
-           shadow-[0_8px_30px_rgba(0,0,0,0.04)] 
-           dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]
-           hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)]
-           dark:hover:shadow-[0_20px_40px_rgba(0,0,0,0.6)]
-           hover:-translate-y-1
+    @apply bg-white dark:bg-zinc-900 
+           rounded-[2.5rem] 
+           border border-transparent dark:border-zinc-800 
+           shadow-[0_20px_50px_rgba(0,0,0,0.05)] 
+           dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)]
+           hover:scale-[1.01]
+           hover:shadow-[0_30px_60px_rgba(0,0,0,0.1)]
+           dark:hover:shadow-[0_30px_60px_rgba(0,0,0,0.7)]
            transition-all duration-300;
   }
 
