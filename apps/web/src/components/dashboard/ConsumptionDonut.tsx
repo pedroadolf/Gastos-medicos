@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 interface ConsumptionDonutProps {
@@ -38,7 +39,20 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 
 
 export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
+  const [mounted, setMounted] = useState(false);
   const total = data.reduce((acc, curr) => acc + curr.value, 0);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="gmm-box p-8 h-full flex items-center justify-center">
+        <div className="h-[300px] w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="gmm-box p-8 h-full">
@@ -54,7 +68,7 @@ export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
       </div>
 
       <div className="h-[300px] w-full">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+        <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
