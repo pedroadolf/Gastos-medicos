@@ -38,6 +38,7 @@
   --gmm-shadow-premium: none;
   --gmm-texture: none;
   --gmm-texture-size: none;
+  --folder-bg: #f9fafb; /* gray-50 */
 }
 
 [data-theme='dark'] {
@@ -49,6 +50,7 @@
   --gmm-shadow: none;
   --gmm-texture: none;
   --gmm-texture-size: none;
+  --folder-bg: #171717; /* neutral-900 */
 }
 
 .gmm-card-premium {
@@ -75,10 +77,25 @@
 
 @layer utilities {
   .gmm-box {
-    background-color: #FFFFFF;
-    border-radius: 16px;
-    border: 1px solid #E8E8E8;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    @apply bg-white dark:bg-neutral-950 
+           rounded-[20px] 
+           border border-gray-200 dark:border-neutral-800 
+           shadow-[0_1px_3px_rgba(0,0,0,0.02)] 
+           hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] 
+           dark:hover:shadow-[0_8px_24px_rgba(0,0,0,0.2)]
+           transition-all duration-300;
+  }
+
+  .gmm-section-header {
+    @apply flex items-center gap-4 mb-6;
+  }
+
+  .gmm-section-title {
+    @apply text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap;
+  }
+
+  .gmm-section-divider {
+    @apply h-px flex-1 bg-gray-200 dark:bg-neutral-800;
   }
 
   /* GMM Pill Card — Ultra-rounded "Sticker" style */

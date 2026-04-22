@@ -13,11 +13,11 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
     <div className="gmm-box relative overflow-hidden group">
       {/* Removed background decals for cleaner UI */}
 
-      <div className="flex flex-col lg:flex-row border-b border-[#E8E8E8]">
+      <div className="flex flex-col lg:flex-row border-b border-gray-200 dark:border-neutral-800">
         {/* Left Panel: Primary Policy */}
-        <div className="flex-1 p-8 lg:p-10 lg:border-r border-[#E8E8E8]">
+        <div className="flex-1 p-8 lg:p-10 lg:border-r border-gray-200 dark:border-neutral-800">
           <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-[12px] font-black uppercase tracking-[0.2em] text-gmm-text">
+            <h2 className="text-[12px] font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white">
               Póliza Principal — MetLife GMM Colectivo
             </h2>
           </div>
@@ -61,10 +61,10 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
         </div>
 
         {/* Right Panel: Excess Policy */}
-        <div className="lg:w-[400px] bg-[#FAFAFA] p-8 lg:p-10 relative">
+        <div className="lg:w-[400px] bg-gray-50 dark:bg-neutral-900 p-8 lg:p-10 relative">
           
           <div className="flex items-center gap-3 mb-6 relative z-10">
-            <h2 className="text-[12px] font-black uppercase tracking-[0.2em] text-gmm-text">
+            <h2 className="text-[12px] font-black uppercase tracking-[0.2em] text-gray-900 dark:text-white">
               Póliza de Excesos — Aplica por Siniestro
             </h2>
           </div>
@@ -97,7 +97,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
                </div>
             </div>
 
-            <div className="mt-6 p-4 bg-[#FFFFFF] rounded-[16px] border border-[#E8E8E8]">
+            <div className="mt-6 p-4 bg-white dark:bg-neutral-950 rounded-[16px] border border-gray-200 dark:border-neutral-800">
               <p className="text-[10px] leading-relaxed font-bold text-gmm-text-muted">
                 La póliza de excesos entra en vigor cuando el gasto acumulado de un mismo siniestro supera <strong className="text-gmm-text">$2,000,000</strong>. A partir de ese punto cubre el excedente con 10% de coaseguro.
               </p>

@@ -60,11 +60,11 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       {/* Identity (Left) */}
       <div className="flex items-center gap-4 w-full lg:w-[280px] shrink-0">
         <div className="relative group/photo">
-           <div className="w-12 h-12 rounded-xl bg-[#FAFAFA] flex items-center justify-center border border-[#E8E8E8] shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden transition-transform duration-500 group-hover/photo:scale-105">
+           <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-neutral-900 flex items-center justify-center border border-gray-200 dark:border-neutral-800 shadow-[0_2px_8px_rgba(0,0,0,0.04)] overflow-hidden transition-transform duration-500 group-hover/photo:scale-105">
              {event.patientPhoto ? (
                <img src={event.patientPhoto} alt={event.patientName} className="w-full h-full object-cover" />
              ) : (
-               <span className="text-base font-black text-gmm-text uppercase">{initials}</span>
+               <span className="text-base font-black text-gray-900 dark:text-white uppercase">{initials}</span>
              )}
            </div>
            <button 
@@ -84,8 +84,8 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
            </button>
         </div>
         <div>
-          <h3 className="text-[13px] font-black text-gmm-text uppercase tracking-tight leading-none mb-1">{event.patientName}</h3>
-          <p className="text-[9px] font-bold text-gmm-text-muted uppercase tracking-wider mb-1.5">{event.diagnosis}</p>
+          <h3 className="text-[13px] font-black text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">{event.patientName}</h3>
+          <p className="text-[9px] font-bold text-gray-500 dark:text-neutral-400 uppercase tracking-wider mb-1.5">{event.diagnosis}</p>
           <div className="flex gap-1.5">
             {event.chronic && (
               <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[8px] font-black uppercase tracking-widest border border-blue-100">

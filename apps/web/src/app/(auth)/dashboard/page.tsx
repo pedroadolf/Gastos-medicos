@@ -27,6 +27,29 @@ const categoryData = [
   { name: 'Emilio', Hospital: 5000, Farmacia: 5000, Honorarios: 5000, Estudios: 0 },
 ];
 
+// ─── Internal Components ────────
+
+function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-col">
+          <h2 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-[0.2em]">
+            {title}
+          </h2>
+          {subtitle && (
+            <p className="text-[10px] text-gray-500 dark:text-neutral-400 font-bold uppercase tracking-wider mt-0.5">
+              {subtitle}
+            </p>
+          )}
+        </div>
+        <div className="h-px flex-1 bg-gray-200 dark:bg-neutral-800" />
+      </div>
+      {children}
+    </section>
+  );
+}
+
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
@@ -200,45 +223,36 @@ export default function DashboardPage() {
     { name: 'Otros', value: 24300, color: '#64748B' },
   ];
 
-  return (
-    <div className="max-w-[1400px] mx-auto space-y-12 pb-20 px-4 pt-6">
+   return (
+    <div className="max-w-7xl mx-auto space-y-12 pb-20 px-4 pt-6">
       
       {/* SECCIÓN 1: PANORAMA GLOBAL */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-4 mb-2">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gmm-text text-gmm-bg font-black text-sm">1</div>
-          <div>
-            <h2 className="text-sm font-black text-gmm-text uppercase tracking-[0.2em]">Panorama de Póliza</h2>
-            <p className="text-xs text-gmm-text-muted mt-0.5 font-medium">Resumen general de tu cobertura y límites</p>
-          </div>
-        </div>
+      <Section 
+        title="1. Panorama de Póliza" 
+        subtitle="Resumen general de tu cobertura y límites"
+      >
         <GlobalPolicyCard 
           totalSum={totalSum}
           consumedSum={consumedSum}
           policyNumber="M172 1011"
         />
-      </section>
+      </Section>
 
       {/* SECCIÓN 2: ESTADO FINANCIERO */}
-      <hr className="border-[#E8E8E8] my-8" />
-      <section className="space-y-6">
-        <div className="flex items-center gap-4 mb-2">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gmm-text text-gmm-bg font-black text-sm">2</div>
-          <div>
-            <h2 className="text-sm font-black text-gmm-text uppercase tracking-[0.2em]">Estado Financiero</h2>
-            <p className="text-xs text-gmm-text-muted mt-0.5 font-medium">Distribución del gasto y consumo por categoría médica</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <Section 
+        title="2. Estado Financiero" 
+        subtitle="Distribución del gasto y consumo por categoría médica"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
            <ConsumptionDonut data={distributionData} />
 
            <div className="gmm-box p-8 h-full flex flex-col">
               <div className="flex justify-between items-center mb-8">
                  <div>
-                    <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em]">Detalle por Categoría</h3>
-                    <p className="text-[10px] text-gmm-text-muted font-bold uppercase tracking-widest">Desglose de gastos médicos</p>
+                    <h3 className="text-[12px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em]">Detalle por Categoría</h3>
+                    <p className="text-[10px] text-gray-500 dark:text-neutral-400 font-bold uppercase tracking-widest">Desglose de gastos médicos</p>
                  </div>
-                 <div className="px-3 py-1 bg-gmm-accent/10 rounded-full text-[8px] font-black text-gmm-accent uppercase tracking-widest">Top: Hospitalización</div>
+                 <div className="px-3 py-1 bg-blue-500/10 rounded-full text-[8px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Top: Hospitalización</div>
               </div>
               <div className="h-[300px] w-full">
                  <ResponsiveContainer width="100%" height="100%">
@@ -248,58 +262,49 @@ export default function DashboardPage() {
                        <YAxis hide />
                        <Tooltip 
                           contentStyle={{ 
-                            backgroundColor: 'var(--gmm-card)', 
-                            border: '1px solid var(--gmm-border)', 
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                            border: '1px solid #E8E8E8', 
                             borderRadius: '16px', 
                             fontSize: '10px', 
-                            boxShadow: 'var(--gmm-shadow)',
-                            color: 'var(--gmm-text)'
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                            color: '#111827'
                           }} 
                           itemStyle={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '8px' }}
                        />
-                       <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--gmm-text)' }} />
-                       <Bar dataKey="Hospital" fill="#2D6A4F" radius={[4, 4, 0, 0]}>
-                       </Bar>
-                       <Bar dataKey="Farmacia" fill="#4A90E2" radius={[4, 4, 0, 0]}>
-                       </Bar>
-                       <Bar dataKey="Honorarios" fill="#F5A623" radius={[4, 4, 0, 0]}>
-                       </Bar>
-                       <Bar dataKey="Estudios" fill="#9B59B6" radius={[4, 4, 0, 0]}>
-                       </Bar>
-
+                       <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase' }} />
+                       <Bar dataKey="Hospital" fill="#2D6A4F" radius={[4, 4, 0, 0]} />
+                       <Bar dataKey="Farmacia" fill="#4A90E2" radius={[4, 4, 0, 0]} />
+                       <Bar dataKey="Honorarios" fill="#F5A623" radius={[4, 4, 0, 0]} />
+                       <Bar dataKey="Estudios" fill="#9B59B6" radius={[4, 4, 0, 0]} />
                     </BarChart>
                  </ResponsiveContainer>
               </div>
            </div>
         </div>
-      </section>
+      </Section>
 
       {/* SECCIÓN 3: OPERACIONES Y ASEGURADOS */}
-      <hr className="border-[#E8E8E8] my-8" />
-      <section className="space-y-8">
-        <div className="flex items-center gap-4 mb-2">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gmm-text text-gmm-bg font-black text-sm">3</div>
-          <div>
-            <h2 className="text-sm font-black text-gmm-text uppercase tracking-[0.2em]">Operación y Asegurados</h2>
-            <p className="text-xs text-gmm-text-muted mt-0.5 font-medium">Gestión de trámites activos y perfiles familiares</p>
+      <Section 
+        title="3. Operación y Asegurados" 
+        subtitle="Gestión de trámites activos y perfiles familiares"
+      >
+        <div className="space-y-10">
+          <div className="w-full">
+             <ClaimsKanban />
+          </div>
+
+          <div className="space-y-6">
+            <h3 className="text-[12px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em] flex items-center gap-3 px-2">
+              Perfiles Familiares <span className="text-[10px] font-bold text-gray-500 dark:text-neutral-400">({clinicalEvents.length} Activos)</span>
+            </h3>
+            <div className="grid grid-cols-1 gap-6">
+              {clinicalEvents.map((event, i) => (
+                <EventMonitorCard key={i} event={event} index={i} onPhotoUpload={handlePhotoUpload} />
+              ))}
+            </div>
           </div>
         </div>
-
-        <div className="w-full">
-           <ClaimsKanban />
-        </div>
-
-        <div className="space-y-6 pt-4">
-          <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em] flex items-center gap-3 px-2">
-            Perfiles Familiares <span className="text-[10px] font-bold text-gmm-text-muted">({clinicalEvents.length} Activos)</span>
-          </h3>
-          <div className="grid grid-cols-1 gap-4">
-            {clinicalEvents.map((event, i) => (
-              <EventMonitorCard key={i} event={event} index={i} onPhotoUpload={handlePhotoUpload} />
-            ))}
-          </div>
-        </div>
-      </section>
+      </Section>
 
     </div>
   );
