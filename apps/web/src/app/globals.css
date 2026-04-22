@@ -30,24 +30,24 @@
   --gmm-warning: #F59E0B;
 
   /* Light Theme - Gallery Neutral */
-  --gmm-bg: #F0F2F5; /* Gris claro frío */
+  --gmm-bg: #DAE0E8; /* Gris Azulado */
   --gmm-card: #FFFFFF;
   --gmm-text-muted: #71717A;
   --gmm-border: rgba(0, 0, 0, 0.08); 
-  --gmm-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  --gmm-shadow: 0 25px 60px -15px rgba(0,0,0,0.1);
   --gmm-shadow-premium: none;
   --gmm-texture: none;
   --gmm-texture-size: none;
-  --folder-bg: #F0F2F5; 
+  --folder-bg: #DAE0E8; 
 }
 
 [data-theme='dark'] {
   --gmm-bg: #000000; /* Negro Total */
-  --gmm-card: #1C1C1E; /* Gris Apple Dark */
+  --gmm-card: #53535C; /* Gris Claro Dark */
   --gmm-text: #F8FAFC;
   --gmm-text-muted: #94A3B8;
   --gmm-border: rgba(255, 255, 255, 0.05);
-  --gmm-shadow: 0 30px 60px rgba(0,0,0,0.5);
+  --gmm-shadow: 0 40px 80px rgba(0,0,0,0.6);
   --gmm-texture: none;
   --gmm-texture-size: none;
   --folder-bg: #000000; 
@@ -77,11 +77,11 @@
 
 @layer utilities {
   .gmm-box {
-    @apply bg-white dark:bg-[#1C1C1E] 
-           rounded-[40px] 
-           border border-gray-200 dark:border-white/[0.05] 
-           shadow-[0_20px_40px_rgba(0,0,0,0.08)] 
-           dark:shadow-[0_30px_60px_rgba(0,0,0,0.5)]
+    @apply bg-white dark:bg-[#53535C] 
+           rounded-[50px] 
+           border-2 border-transparent dark:border-white/10 
+           shadow-[0_25px_60px_-15px_rgba(0,0,0,0.1)] 
+           dark:shadow-[0_40px_80px_rgba(0,0,0,0.6)]
            hover:-translate-y-2
            transition-all duration-300
            p-10;

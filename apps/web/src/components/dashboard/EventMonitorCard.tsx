@@ -60,16 +60,16 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
         
         {/* AVATAR Y NOMBRE */}
-        <div className="flex items-center gap-6 w-full lg:w-1/3">
+        <div className="flex items-center gap-6 min-w-[320px]">
           <div className="relative group/photo shrink-0">
-             <div className="h-20 w-20 rounded-full overflow-hidden ring-4 ring-gray-100 dark:ring-white/10 shadow-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center transition-transform duration-500 group-hover/photo:scale-110">
+             <div className="h-20 w-20 rounded-full overflow-hidden ring-4 ring-[#DAE0E8] dark:ring-white/20 shadow-xl bg-gray-100 dark:bg-zinc-800 flex items-center justify-center transition-transform duration-500 group-hover/photo:scale-110">
                {event.patientPhoto ? (
                  <img src={event.patientPhoto} alt={event.patientName} className="h-full w-full object-cover" />
                ) : (
                  <span className="text-2xl font-black text-gray-900 dark:text-white uppercase">{initials}</span>
                )}
              </div>
-             <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 rounded-full border-4 border-white dark:border-[#1C1C1E]"></div>
+             <div className="absolute top-0 right-0 w-6 h-6 bg-green-500 rounded-full border-4 border-white dark:border-[#53535C]"></div>
              <button 
                onClick={() => {
                  const input = document.createElement('input');
@@ -86,32 +86,36 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
                <Upload size={10} />
              </button>
           </div>
-          <div className="min-w-0">
-            <h3 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+          <div>
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
                {event.patientName}
             </h3>
-            <p className="text-blue-500 font-bold text-[10px] tracking-widest uppercase mt-1">
+            <p className="text-blue-600 dark:text-blue-300 font-bold text-xs tracking-widest mt-1 uppercase">
               {event.chronic ? 'CRÓNICO • ' : ''}ACTIVO
             </p>
           </div>
         </div>
 
         {/* MÉTRICAS (Con fondo interno para separar más) */}
-        <div className="flex gap-12 bg-gray-50 dark:bg-white/[0.03] px-10 py-6 rounded-[30px] border border-gray-100 dark:border-white/[0.02]">
+        <div className="flex-1 grid grid-cols-3 gap-6 bg-slate-100/50 dark:bg-black/20 p-8 rounded-[35px] border border-gray-100 dark:border-white/[0.02]">
           <div className="text-center">
-            <span className="block text-[10px] text-gray-400 font-black uppercase mb-1 tracking-widest">Disponible</span>
-            <span className={`text-xl font-bold ${availableColor}`}>${available.toLocaleString()}</span>
+            <p className="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase mb-1 tracking-widest">Disponible</p>
+            <p className={`text-2xl font-black ${availableColor}`}>${available.toLocaleString()}</p>
           </div>
           <div className="text-center">
-            <span className="block text-[10px] text-gray-400 font-black uppercase mb-1 tracking-widest">A tu cargo</span>
-            <span className="text-xl font-bold text-red-500">${(event.coaseguroPagado || 0).toLocaleString()}</span>
+            <p className="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase mb-1 tracking-widest">A tu cargo</p>
+            <p className="text-2xl font-black text-red-500">${(event.coaseguroPagado || 0).toLocaleString()}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase mb-1 tracking-widest">Coaseguro</p>
+            <p className="text-2xl font-black text-orange-400">{coaPct.toFixed(1)}%</p>
           </div>
         </div>
 
         {/* ACCIÓN (Botón con sombra propia naranja) */}
         <div className="flex items-center gap-4">
-          <button className="bg-orange-500 hover:bg-orange-600 text-white font-black px-10 py-5 rounded-[20px] shadow-[0_10px_20px_rgba(249,115,22,0.3)] transition-all uppercase text-[10px] tracking-widest flex items-center gap-2 group/btn">
-            Ver Detalle
+          <button className="bg-[#FF6B00] hover:bg-orange-600 text-white font-black px-10 py-5 rounded-[22px] shadow-2xl shadow-orange-500/40 transition-all uppercase text-xs tracking-widest flex items-center gap-2 group/btn">
+            Detalle
             <ChevronRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
           </button>
         </div>

@@ -31,21 +31,23 @@ const categoryData = [
 
 function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <section className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
+    <section className="space-y-8">
+      <div className="flex items-center justify-between gap-6 px-2">
         <div className="flex flex-col">
-          <h2 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">
+          <h2 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">
             {title}
           </h2>
           {subtitle && (
-            <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-0.5">
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-1">
               {subtitle}
             </p>
           )}
         </div>
-        <div className="h-px flex-1 bg-slate-200 dark:bg-zinc-800" />
+        <div className="h-[2px] flex-1 bg-slate-300/30 dark:bg-white/5 rounded-full" />
       </div>
-      {children}
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        {children}
+      </div>
     </section>
   );
 }
@@ -224,12 +226,35 @@ export default function DashboardPage() {
   ];
 
    return (
-    <div className="max-w-7xl mx-auto space-y-10 pb-20 px-4 pt-6">
+    <div className="max-w-7xl mx-auto space-y-20 pb-32 px-6 pt-12">
       
+      {/* HEADER: BIENVENIDA */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
+        <div className="space-y-1">
+          <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.4em]">Panel de Control GMM</p>
+          <h1 className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">
+            Hola, <span className="text-blue-600">Claudia</span>
+          </h1>
+        </div>
+        <div className="flex items-center gap-4 text-right">
+           <div className="hidden sm:block">
+             <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">Status Global</p>
+             <p className="text-xs font-black text-emerald-500 flex items-center gap-2 justify-end">
+               <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+               PÓLIZA ACTIVA
+             </p>
+           </div>
+           <div className="h-10 w-[1px] bg-slate-200 dark:bg-white/10 hidden sm:block mx-2"></div>
+           <button className="bg-white dark:bg-zinc-900 p-3 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 hover:scale-105 transition-transform">
+             <Plus size={20} className="text-slate-900 dark:text-white" />
+           </button>
+        </div>
+      </div>
+
       {/* SECCIÓN 1: PANORAMA GLOBAL */}
       <Section 
         title="1. Panorama de Póliza" 
-        subtitle="Resumen general de tu cobertura y límites"
+        subtitle="Estructura de suma asegurada y deducibles vigentes"
       >
         <GlobalPolicyCard 
           totalSum={totalSum}
@@ -240,42 +265,44 @@ export default function DashboardPage() {
 
       {/* SECCIÓN 2: ESTADO FINANCIERO */}
       <Section 
-        title="2. Estado Financiero" 
-        subtitle="Distribución del gasto y consumo por categoría médica"
+        title="2. Análisis Financiero" 
+        subtitle="Distribución inteligente del gasto y consumo acumulado"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
            <ConsumptionDonut data={distributionData} />
 
-           <div className="gmm-box h-full flex flex-col">
-              <div className="flex justify-between items-center mb-8">
+           <div className="gmm-box h-full flex flex-col p-10">
+              <div className="flex justify-between items-center mb-10">
                  <div>
-                    <h3 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">Detalle por Categoría</h3>
-                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-widest">Desglose de gastos médicos</p>
+                    <h3 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">Consumo por Familiar</h3>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-1">Impacto presupuestal por integrante</p>
                  </div>
-                 <div className="px-3 py-1 bg-blue-500/10 rounded-full text-[8px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Top: Hospitalización</div>
+                 <div className="px-4 py-1.5 bg-blue-600/10 rounded-full text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.1em]">Tiempo Real</div>
               </div>
-              <div className="h-[300px] w-full">
+              <div className="h-[320px] w-full">
                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={categoryData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <BarChart data={categoryData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
-                       <XAxis dataKey="name" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} />
+                       <XAxis dataKey="name" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />
                        <YAxis hide />
                        <Tooltip 
+                          cursor={{fill: 'transparent'}}
                           contentStyle={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                            border: '1px solid #E8E8E8', 
-                            borderRadius: '16px', 
-                            fontSize: '10px', 
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                            color: '#111827'
+                            backgroundColor: 'rgba(255, 255, 255, 0.98)', 
+                            border: 'none', 
+                            borderRadius: '24px', 
+                            fontSize: '11px', 
+                            boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
+                            color: '#0f172a',
+                            padding: '16px'
                           }} 
-                          itemStyle={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '8px' }}
+                          itemStyle={{ fontWeight: '900', textTransform: 'uppercase', fontSize: '9px', padding: '2px 0' }}
                        />
-                       <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase' }} />
-                       <Bar dataKey="Hospital" fill="#2D6A4F" radius={[4, 4, 0, 0]} />
-                       <Bar dataKey="Farmacia" fill="#4A90E2" radius={[4, 4, 0, 0]} />
-                       <Bar dataKey="Honorarios" fill="#F5A623" radius={[4, 4, 0, 0]} />
-                       <Bar dataKey="Estudios" fill="#9B59B6" radius={[4, 4, 0, 0]} />
+                       <Legend iconType="circle" wrapperStyle={{ paddingTop: '30px', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+                       <Bar dataKey="Hospital" fill="#2D6A4F" radius={[8, 8, 0, 0]} barSize={24} />
+                       <Bar dataKey="Farmacia" fill="#3B82F6" radius={[8, 8, 0, 0]} barSize={24} />
+                       <Bar dataKey="Honorarios" fill="#F59E0B" radius={[8, 8, 0, 0]} barSize={24} />
+                       <Bar dataKey="Estudios" fill="#8B5CF6" radius={[8, 8, 0, 0]} barSize={24} />
                     </BarChart>
                  </ResponsiveContainer>
               </div>
@@ -285,19 +312,25 @@ export default function DashboardPage() {
 
       {/* SECCIÓN 3: OPERACIONES Y ASEGURADOS */}
       <Section 
-        title="3. Operación y Asegurados" 
-        subtitle="Gestión de trámites activos y perfiles familiares"
+        title="3. Gestión Operativa" 
+        subtitle="Control de siniestros activos y grupo asegurado"
       >
-        <div className="space-y-12">
+        <div className="space-y-16">
           <div className="w-full">
              <ClaimsKanban />
           </div>
 
-          <div className="space-y-8">
-            <h3 className="text-sm font-black tracking-widest text-gray-400 dark:text-zinc-500 uppercase ml-4">
-              Perfiles Familiares <span className="text-[10px] font-bold text-gray-300 dark:text-neutral-600">({clinicalEvents.length} Activos)</span>
-            </h3>
-            <div className="flex flex-col gap-y-12">
+          <div className="space-y-10">
+            <div className="flex items-center gap-4 ml-4">
+              <h3 className="text-sm font-black tracking-[0.2em] text-slate-900 dark:text-white uppercase">
+                Perfiles del Grupo
+              </h3>
+              <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                {clinicalEvents.length} Integrantes
+              </span>
+            </div>
+            
+            <div className="flex flex-col gap-12">
               {clinicalEvents.map((event, i) => (
                 <EventMonitorCard key={i} event={event} index={i} onPhotoUpload={handlePhotoUpload} />
               ))}
