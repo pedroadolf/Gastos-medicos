@@ -75,8 +75,10 @@
 
 @layer utilities {
   .gmm-box {
-    @apply bg-gmm-card border border-gmm-border rounded-[16px];
-    box-shadow: var(--gmm-shadow);
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    border: 1px solid #E8E8E8;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   }
 
   /* GMM Pill Card — Ultra-rounded "Sticker" style */

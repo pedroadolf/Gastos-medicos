@@ -5,58 +5,8 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Copilot } from "@/components/layout/Copilot";
 
-function FolderCeja({ theme, toggleTheme }: { theme: string, toggleTheme: () => void }) {
-  const pathname = usePathname();
-  
-  return (
-    <div className="flex flex-wrap md:flex-nowrap justify-between items-center px-6 py-4 bg-white dark:bg-[#1E293B] border-b border-[#EFEDE8] dark:border-slate-700/50 gap-4">
-      {/* Izquierda */}
-      <div className="flex items-baseline gap-3">
-        <h1 className="text-[20px] font-bold text-[#1A2A3A] dark:text-white m-0">Dashboard GMM</h1>
-        <span className="text-[13px] text-[#6B7280] dark:text-slate-400">Claudia • Titular, 57 años</span>
-      </div>
-
-      {/* Centro: Menú Pills */}
-      <div className="flex-1 flex justify-center order-3 md:order-none w-full md:w-auto">
-        <nav className="flex gap-1.5 bg-[#F8F7F4] dark:bg-slate-800 p-1 rounded-[48px]">
-          {[
-            { name: 'Dashboard', path: '/dashboard' },
-            { name: 'Pólizas', path: '/polizas' },
-            { name: 'Siniestros', path: '/tramites' },
-            { name: 'Asegurados', path: '/asegurados' },
-            { name: 'Reportes', path: '/reportes' },
-            { name: 'Configuración', path: '/configuracion' },
-          ].map(item => (
-            <Link
-              key={item.name}
-              href={item.path}
-              className={`px-4 py-1.5 rounded-[40px] text-[13px] font-medium transition-all ${
-                pathname === item.path || (pathname === '/' && item.path === '/dashboard')
-                  ? 'bg-[#2D6A4F] text-white'
-                  : 'text-[#4B5563] dark:text-slate-300 hover:bg-[#E5E7EB] dark:hover:bg-slate-700'
-              }`}
-            >
-              {item.name}
-            </Link>
-          ))}
-        </nav>
-      </div>
-
-      {/* Derecha */}
-      <div className="flex items-center gap-3">
-        <span className="text-[13px] text-[#4B5563] dark:text-slate-300 cursor-pointer font-medium">Abr 2026 ▼</span>
-        <button onClick={toggleTheme} className="bg-transparent border-none text-[18px] cursor-pointer p-1">
-          {theme === 'light' ? '🌙' : '☀️'}
-        </button>
-        <div className="w-8 h-8 bg-[#2D6A4F] rounded-full flex items-center justify-center text-white text-[12px] font-semibold">
-          C
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
@@ -73,18 +23,75 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className={`min-h-screen bg-gmm-bg flex justify-center items-start pt-10 pb-10 px-4 font-plus-jakarta selection:bg-gmm-accent/30 selection:text-white transition-all duration-500`}>
+    <div className={`min-h-screen bg-[#EBEBEB] flex justify-center items-start py-10 px-4 font-plus-jakarta`}>
        
-       {/* El Folder Contenedor Principal */}
-       <div className="w-full max-w-[1200px] bg-white dark:bg-[#1E293B] rounded-[24px] shadow-[0px_12px_28px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col">
-           
-           <FolderCeja theme={theme} toggleTheme={toggleTheme} />
-           
-           <div className="p-6 md:p-8">
-              <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
-                {children}
+       <div className="w-full max-w-[1300px] relative">
+          
+          {/* FOLDER SHAPE BACKGROUND */}
+          <div className="absolute top-0 left-0 w-[380px] h-[180px] bg-[#D4D4D4] rounded-t-[32px] shadow-sm"></div>
+          <div className="absolute top-[60px] left-[380px] right-0 h-[120px] bg-[#D4D4D4] rounded-tr-[32px] rounded-tl-[24px] shadow-sm">
+             {/* Smooth inverse curve */}
+             <div className="absolute top-0 -left-[24px] w-[24px] h-[24px] bg-transparent" style={{ borderTopRightRadius: '24px', boxShadow: '12px -12px 0 0 #D4D4D4' }}></div>
+          </div>
+
+          {/* CONTENT LAYER */}
+          <div className="relative z-10 pt-[24px] px-6">
+              
+              {/* HEADER ROW */}
+              <div className="flex flex-col md:flex-row">
+                 
+                 {/* Left Tab Content */}
+                 <div className="w-full md:w-[340px] pl-6 pt-2">
+                    <h1 className="text-[26px] font-medium text-[#1A2A3A] tracking-tight mb-6">Dashboard GMM</h1>
+                    
+                    {/* User Profile Card */}
+                    <div className="bg-[#EAEAEA] rounded-[24px] p-4 flex items-center gap-4 shadow-sm border border-white/50 w-[280px]">
+                       <div className="w-14 h-14 rounded-full overflow-hidden bg-white flex items-center justify-center font-bold text-xl text-gray-500 shadow-inner">
+                          C
+                       </div>
+                       <div>
+                          <p className="text-[11px] text-gray-500 mb-0.5">Titular, 57</p>
+                          <h2 className="text-sm font-bold text-gray-800 leading-tight">Claudia<br/>Rodríguez</h2>
+                       </div>
+                    </div>
+                 </div>
+
+                 {/* Right Area (Pills Menu) */}
+                 <div className="flex-1 md:pl-12 pt-[50px] flex justify-between items-center pr-6">
+                    <nav className="flex gap-2">
+                      {[
+                        { name: 'Dashboard', path: '/dashboard' },
+                        { name: 'Pólizas', path: '/polizas' },
+                        { name: 'Siniestros', path: '/tramites' },
+                        { name: 'Asegurados', path: '/asegurados' },
+                        { name: 'Reportes', path: '/reportes' },
+                      ].map(item => {
+                        const isActive = pathname === item.path || (pathname === '/' && item.path === '/dashboard');
+                        return (
+                          <Link key={item.name} href={item.path} 
+                                className={`px-5 py-2.5 rounded-full text-[13px] font-medium transition-all flex items-center gap-2
+                                ${isActive ? 'bg-white shadow-sm text-gray-800' : 'text-gray-600 hover:bg-white/40'}`}>
+                            {item.name}
+                          </Link>
+                        )
+                      })}
+                    </nav>
+
+                    <div className="flex items-center gap-4">
+                       <span className="text-sm text-gray-600 font-medium cursor-pointer">Abr 2026 ▼</span>
+                       <button onClick={toggleTheme} className="w-10 h-10 rounded-full bg-white/60 hover:bg-white shadow-sm flex items-center justify-center text-gray-600 transition-all">🌙</button>
+                    </div>
+                 </div>
               </div>
-           </div>
+
+              {/* INNER CANVAS */}
+              <div className="mt-8 bg-[#F5F5F5] rounded-[32px] p-8 shadow-inner min-h-[700px] border border-white">
+                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
+                    {children}
+                 </div>
+              </div>
+
+          </div>
        </div>
 
        <Copilot />

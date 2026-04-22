@@ -6,7 +6,8 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/services/supabase';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
-  Tooltip, ResponsiveContainer, Legend, LabelList
+  Tooltip, ResponsiveContainer, Legend, LabelList,
+  FunnelChart, Funnel
 } from 'recharts';
 import { 
   Plus, Upload
@@ -25,6 +26,13 @@ const categoryData = [
   { name: 'Pedro', Hospital: 1100000, Farmacia: 400000, Honorarios: 200000, Estudios: 0 },
   { name: 'Sebastian', Hospital: 45000, Farmacia: 20000, Honorarios: 20000, Estudios: 0 },
   { name: 'Emilio', Hospital: 5000, Farmacia: 5000, Honorarios: 5000, Estudios: 0 },
+];
+
+const funnelData = [
+  { value: 100, name: 'Recepción', fill: '#E8E8E8' },
+  { value: 80, name: 'Revisión Médica', fill: '#D4D4D4' },
+  { value: 50, name: 'Dictamen', fill: '#6B7280' },
+  { value: 30, name: 'Aprobados', fill: '#2D6A4F' },
 ];
 
 export default function DashboardPage() {
@@ -220,7 +228,8 @@ export default function DashboardPage() {
       </section>
 
       {/* SECCIÓN 2: ESTADO FINANCIERO */}
-      <section className="space-y-6 pt-8 border-t border-gmm-border/50">
+      <hr className="border-[#E8E8E8] my-8" />
+      <section className="space-y-6">
         <div className="flex items-center gap-4 mb-2">
           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gmm-text text-gmm-bg font-black text-sm">2</div>
           <div>
@@ -257,17 +266,13 @@ export default function DashboardPage() {
                           itemStyle={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '8px' }}
                        />
                        <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase', color: 'var(--gmm-text)' }} />
-                       <Bar dataKey="Hospital" stackId="a" fill="#2563EB">
-                          <LabelList dataKey="Hospital" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                       <Bar dataKey="Hospital" fill="#2D6A4F" radius={[4, 4, 0, 0]}>
                        </Bar>
-                       <Bar dataKey="Farmacia" stackId="a" fill="#22C55E">
-                          <LabelList dataKey="Farmacia" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                       <Bar dataKey="Farmacia" fill="#4A90E2" radius={[4, 4, 0, 0]}>
                        </Bar>
-                       <Bar dataKey="Honorarios" stackId="a" fill="#F59E0B">
-                          <LabelList dataKey="Honorarios" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                       <Bar dataKey="Honorarios" fill="#F5A623" radius={[4, 4, 0, 0]}>
                        </Bar>
-                       <Bar dataKey="Estudios" stackId="a" fill="#64748B" radius={[4, 4, 0, 0]}>
-                          <LabelList dataKey="Estudios" position="center" fill="white" fontSize={8} formatter={(v: number) => v > 0 ? `$${Math.round(v/1000)}k` : ''} />
+                       <Bar dataKey="Estudios" fill="#9B59B6" radius={[4, 4, 0, 0]}>
                        </Bar>
 
                     </BarChart>
@@ -278,7 +283,8 @@ export default function DashboardPage() {
       </section>
 
       {/* SECCIÓN 3: OPERACIONES Y ASEGURADOS */}
-      <section className="space-y-8 pt-8 border-t border-gmm-border/50">
+      <hr className="border-[#E8E8E8] my-8" />
+      <section className="space-y-8">
         <div className="flex items-center gap-4 mb-2">
           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gmm-text text-gmm-bg font-black text-sm">3</div>
           <div>
@@ -287,7 +293,33 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <ClaimsKanban />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+           <div className="lg:col-span-2">
+             <ClaimsKanban />
+           </div>
+           
+           <div className="gmm-box p-8 flex flex-col h-full min-h-[400px]">
+              <div className="mb-6">
+                 <h3 className="text-[12px] font-black text-[#1A2A3A] uppercase tracking-[0.3em]">Flujo de Siniestros</h3>
+                 <p className="text-[10px] text-[#6B7280] font-bold uppercase tracking-widest mt-1">Eficacia operativa</p>
+              </div>
+              <div className="flex-1 w-full relative -ml-4">
+                 <ResponsiveContainer width="100%" height="100%">
+                    <FunnelChart>
+                       <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                       <Funnel
+                          dataKey="value"
+                          data={funnelData}
+                          isAnimationActive
+                       >
+                          <LabelList position="right" fill="#6B7280" stroke="none" dataKey="name" fontSize={11} fontWeight="600" />
+                          <LabelList position="center" fill="#1A2A3A" stroke="none" dataKey="value" fontSize={14} fontWeight="bold" />
+                       </Funnel>
+                    </FunnelChart>
+                 </ResponsiveContainer>
+              </div>
+           </div>
+        </div>
 
         <div className="space-y-6 pt-4">
           <h3 className="text-[12px] font-black text-gmm-text uppercase tracking-[0.3em] flex items-center gap-3 px-2">

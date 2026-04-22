@@ -90,11 +90,11 @@ export function ClaimsKanban() {
 
             <div className="flex flex-col gap-3">
               {col.claims.length > 0 ? (
-                col.claims.map((claim) => (
+                col.claims.map((claim, index) => (
                   <motion.div
                     key={claim.id}
                     layoutId={claim.id}
-                    className="p-4 gmm-box hover:border-gmm-text transition-colors"
+                    className={`p-4 gmm-box hover:border-gmm-text transition-colors ${index % 2 === 0 ? 'bg-[#FFFFFF]' : 'bg-[#FAFAFA]'}`}
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div>
