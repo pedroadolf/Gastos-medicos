@@ -224,7 +224,7 @@ export default function DashboardPage() {
   ];
 
    return (
-    <div className="max-w-7xl mx-auto space-y-12 pb-20 px-4 pt-6">
+    <div className="max-w-7xl mx-auto space-y-20 pb-20 px-4 pt-6">
       
       {/* SECCIÓN 1: PANORAMA GLOBAL */}
       <Section 
@@ -243,7 +243,7 @@ export default function DashboardPage() {
         title="2. Estado Financiero" 
         subtitle="Distribución del gasto y consumo por categoría médica"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
            <ConsumptionDonut data={distributionData} />
 
            <div className="gmm-box p-8 h-full flex flex-col">
@@ -288,16 +288,16 @@ export default function DashboardPage() {
         title="3. Operación y Asegurados" 
         subtitle="Gestión de trámites activos y perfiles familiares"
       >
-        <div className="space-y-10">
+        <div className="space-y-12">
           <div className="w-full">
              <ClaimsKanban />
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             <h3 className="text-[12px] font-black text-gray-900 dark:text-white uppercase tracking-[0.3em] flex items-center gap-3 px-2">
               Perfiles Familiares <span className="text-[10px] font-bold text-gray-500 dark:text-neutral-400">({clinicalEvents.length} Activos)</span>
             </h3>
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-8">
               {clinicalEvents.map((event, i) => (
                 <EventMonitorCard key={i} event={event} index={i} onPhotoUpload={handlePhotoUpload} />
               ))}

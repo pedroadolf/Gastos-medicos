@@ -23,13 +23,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className={`min-h-screen bg-[#A1A4A6] flex justify-center items-start py-10 px-4 font-plus-jakarta`}>
+    <div className={`min-h-screen bg-slate-200 dark:bg-black flex justify-center items-start py-10 px-4 font-plus-jakarta`}>
        
        <div className="w-full max-w-[1300px] relative">
           
           {/* FOLDER SHAPE BACKGROUND */}
-          <div className="absolute top-0 left-0 w-[380px] h-[180px] bg-gray-50 dark:bg-neutral-900 rounded-t-[32px] shadow-sm"></div>
-          <div className="absolute top-[60px] left-[380px] right-0 h-[120px] bg-gray-50 dark:bg-neutral-900 rounded-tr-[32px] rounded-tl-[24px] shadow-sm">
+          <div className="absolute top-0 left-0 w-[380px] h-[180px] bg-[var(--folder-bg)] rounded-t-[32px] shadow-sm"></div>
+          <div className="absolute top-[60px] left-[380px] right-0 h-[120px] bg-[var(--folder-bg)] rounded-tr-[32px] rounded-tl-[24px] shadow-sm">
              {/* Smooth inverse curve */}
              <div className="absolute top-0 -left-[24px] w-[24px] h-[24px] bg-transparent" style={{ borderTopRightRadius: '24px', boxShadow: '12px -12px 0 0 transparent' }}>
                 <div className="w-full h-full bg-transparent" style={{ borderTopRightRadius: '24px', boxShadow: '12px -12px 0 0 var(--folder-bg)' }}></div>
@@ -76,7 +76,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
 
               {/* INNER CANVAS */}
-              <div className="mt-8 bg-gray-50 dark:bg-neutral-900 rounded-[32px] p-8 shadow-inner min-h-[700px] border border-white/50 dark:border-neutral-800/50">
+              <div className="mt-8 bg-[var(--folder-bg)] rounded-[32px] p-8 shadow-inner min-h-[700px] border border-white/40 dark:border-white/5">
                  <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
                     {children}
                  </div>
