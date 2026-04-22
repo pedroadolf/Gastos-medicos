@@ -27,8 +27,7 @@ export function ReimbursementWaterfall() {
   const [mounted, setMounted] = React.useState(false);
   
   React.useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 150);
-    return () => clearTimeout(timer);
+    setMounted(true);
   }, []);
 
   // Transform data for Waterfall effect in Recharts
@@ -89,7 +88,7 @@ export function ReimbursementWaterfall() {
       </div>
 
       <div className="h-[300px] w-full mt-4">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+        <ResponsiveContainer id="waterfall-chart" width="99%" height="99%" debounce={100} minHeight={300}>
           <BarChart
             data={data}
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}

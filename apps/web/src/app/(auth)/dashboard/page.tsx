@@ -122,12 +122,18 @@ export default function DashboardPage() {
 
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
-    // Pequeño retraso para asegurar que el grid de Tailwind haya calculado dimensiones finales
-    const timer = setTimeout(() => setIsMounted(true), 150);
-    return () => clearTimeout(timer);
+    setIsMounted(true);
   }, []);
 
-  if (isLoading || !isMounted) {
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-gmm-bg flex items-center justify-center">
+         <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-10 h-10 border-t-2 border-gmm-accent rounded-full" />
+      </div>
+    );
+  }
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gmm-bg flex items-center justify-center">
          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-10 h-10 border-t-2 border-gmm-accent rounded-full" />
@@ -244,7 +250,7 @@ export default function DashboardPage() {
                  <div className="px-4 py-1.5 bg-blue-600/10 rounded-full text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.1em]">Tiempo Real</div>
               </div>
               <div className="h-[320px] w-full">
-                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                 <ResponsiveContainer id="main-category-chart" width="99%" height="99%" minHeight={300}>
                     <BarChart data={categoryData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
                        <XAxis dataKey="name" fontSize={12} fontWeight="black" axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />
