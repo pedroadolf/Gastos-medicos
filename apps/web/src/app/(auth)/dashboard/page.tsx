@@ -34,11 +34,11 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
     <section className="space-y-8">
       <div className="flex items-center justify-between gap-6 px-2">
         <div className="flex flex-col">
-          <h2 className="text-[16px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">
+          <h2 className="text-[22px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">
             {title}
           </h2>
           {subtitle && (
-            <p className="text-[12px] text-slate-400 dark:text-slate-300 font-bold uppercase tracking-widest mt-1">
+            <p className="text-[14px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-2">
               {subtitle}
             </p>
           )}
@@ -130,99 +130,67 @@ export default function DashboardPage() {
 
   const clinicalEvents = [
     {
-      claimId: '3230261780-4',
-      diagnosis: 'DIABETES MELLITUS',
-      chronic: true,
-      patientName: 'Pedro A. Soto H.', patientPhoto: (patientPhotos as any)['Pedro A. Soto H.'] || '/patients/pedro.png', role: 'Dependiente', age: '57',
-      consumed: 18239, 
-      pendingAmount: 2500,
-      sublimit: 5000000, 
-      deductibleStatus: 'Cumplido ($0)',
-      coaseguroPagado: 1824, coaseguroLimit: 17500,
-      lastUpdate: 'Jun 17, 2025',
-      status: 'OPERATIVO',
-      observations: 'Coaseguro 10%.\nRemanente para tope: $15,676. Sin deducible por condiciones de póliza.',
-      medications: [
-        { name: 'Jardiance 25mg', period: 'Diario', status: 'Surtido' },
-        { name: 'Atozet 10/20mg', period: 'Diario', status: 'Surtido' },
-        { name: 'Libre Sensor 2', period: 'Cada 14 días', status: 'Pendiente' }
-      ]
+      patient: "CLAUDIA FONSECA AGUILAR",
+      policy: "02001-2012432",
+      claim: "01210200485-018",
+      consumed: 566195.27,
+      totalLimit: 3961725.00,
+      deductible: 6602.88,
+      coaseguro: 0.10,
+      pending: 45000.00,
+      status: "Activo",
+      date: "2024-01-15",
+      description: "Tratamiento Oncológico"
     },
     {
-      claimId: '01210200485-018',
-      diagnosis: 'RESPIRATORIAS (nCoV)',
-      chronic: false,
-      patientName: 'Pedro A. Soto H.', patientPhoto: (patientPhotos as any)['Pedro A. Soto H.'] || '/patients/pedro.png', role: 'Dependiente', age: '57',
-      consumed: 1250000, 
-      pendingAmount: 50167,
-      sublimit: 5000000, 
-      deductibleStatus: 'Cumplido',
-      coaseguroPagado: 17500, coaseguroLimit: 17500,
-      lastUpdate: 'Mar 12, 2025',
-      status: 'OPERATIVO',
-      observations: 'Siniestro de alta cuantía. Coaseguro topado al 100%.',
-      medications: [
-        { name: 'Inhaladores (Varios)', period: 'SOS', status: 'Surtido' }
-      ]
+      patient: "PEDRO ADOLFO SOTO HERNANDEZ",
+      policy: "02001-2012432",
+      claim: "01210200486-019",
+      consumed: 85000.00,
+      totalLimit: 3961725.00,
+      deductible: 6602.88,
+      coaseguro: 0.10,
+      pending: 12000.00,
+      status: "Revision",
+      date: "2024-03-10",
+      description: "Cirugía General"
     },
     {
-      claimId: '042024-PED-001',
-      diagnosis: 'RODILLA (Rehabilitación)',
-      chronic: false,
-      patientName: 'Sebastian', patientPhoto: (patientPhotos as any)['Sebastian'] || '/patients/sebastian.png', role: 'Hijo', age: '19',
-      consumed: 85000, 
-      pendingAmount: 12000,
-      sublimit: 5000000, 
-      deductibleStatus: 'En proceso',
-      coaseguroPagado: 8500, coaseguroLimit: 17500,
-      lastUpdate: 'May 04, 2025',
-      status: 'OPERATIVO',
-      observations: 'Fisioterapia en curso (sesión 12/20).',
-      medications: [
-        { name: 'Celebrex 200mg', period: '15 días', status: 'Surtido' }
-      ]
+      patient: "SEBASTIAN SOTO FONSECA",
+      policy: "02001-2012432",
+      claim: "01210200487-020",
+      consumed: 24300.00,
+      totalLimit: 3961725.00,
+      deductible: 6602.88,
+      coaseguro: 0.10,
+      pending: 0,
+      status: "Cerrado",
+      date: "2024-02-20",
+      description: "Consulta Pediátrica"
     },
     {
-      claimId: '02250211464-000',
-      diagnosis: 'PRESIÓN (Hipertensión)',
-      chronic: true,
-      patientName: 'Claudia', patientPhoto: (patientPhotos as any)['Claudia'] || '/patients/claudia.png', role: 'Titular', age: '57',
-      consumed: 9300, 
-      pendingAmount: 0,
-      sublimit: 5000000, 
-      deductibleStatus: 'En proceso',
-      coaseguroPagado: 930, coaseguroLimit: 17500,
-      lastUpdate: 'Feb 10, 2025',
-      status: 'OPERATIVO',
-      observations: '',
-      medications: [
-        { name: 'Concor 5mg', period: 'Diario', status: 'Surtido' }
-      ]
-    },
-    {
-      claimId: '052024-EMI-001',
-      diagnosis: 'NARIZ (Fisura)',
-      chronic: false,
-      patientName: 'Emilio', patientPhoto: (patientPhotos as any)['Emilio'] || '/patients/emilio.png', role: 'Hijo', age: '18',
-      consumed: 15000, 
-      pendingAmount: 0,
-      sublimit: 5000000, 
-      deductibleStatus: 'No aplica',
-      coaseguroPagado: 0, coaseguroLimit: 17500,
-      lastUpdate: 'Nov 20, 2024',
-      status: 'REQUERIMIENTO',
-      observations: 'Falta informe médico interpretativo de radiología.',
-      medications: []
+      patient: "ISABELLA SOTO FONSECA",
+      policy: "02001-2012432",
+      claim: "---",
+      consumed: 0,
+      totalLimit: 3961725.00,
+      deductible: 6602.88,
+      coaseguro: 0.10,
+      pending: 0,
+      status: "Preventivo",
+      date: "---",
+      description: "Revision Anual"
     }
   ];
 
-  const totalSum = 5000000;
+  const totalSum = 3961725.00;
   const consumedSum = clinicalEvents.reduce((acc, curr) => acc + curr.consumed, 0);
 
   const distributionData = [
-    { name: 'Pedro', value: 1700000, color: '#2563EB' },
-    { name: 'Sebastian', value: 85000, color: '#F59E0B' },
-    { name: 'Otros', value: 24300, color: '#64748B' },
+    { name: 'Claudia', value: 566195.27, color: '#2563EB' },
+    { name: 'Pedro', value: 85000, color: '#F59E0B' },
+    { name: 'Sebastian', value: 24300, color: '#64748B' },
+    { name: 'Isabella', value: 0, color: '#E2E8F0' },
   ];
 
    return (

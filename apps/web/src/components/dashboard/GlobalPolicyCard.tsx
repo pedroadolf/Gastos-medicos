@@ -10,140 +10,115 @@ interface GlobalPolicyCardProps {
 
 export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: GlobalPolicyCardProps) {
   return (
-    <div className="gmm-box relative overflow-hidden group">
-      {/* Removed background decals for cleaner UI */}
-
-      <div className="flex flex-col lg:flex-row border-b border-slate-100 dark:border-zinc-800">
-        {/* Left Panel: Primary Policy */}
-        <div className="flex-1 p-10 lg:border-r border-slate-100 dark:border-zinc-800">
-          <div className="flex items-center gap-3 mb-8">
-            <h2 className="text-base font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">
-              Póliza Principal — MetLife GMM Colectivo
+    <div className="gmm-box relative overflow-hidden group border-none">
+      {/* Contenido Principal */}
+      <div className="flex flex-col lg:flex-row border-b border-slate-100 dark:border-white/5">
+        {/* Panel Izquierdo: Póliza Primaria */}
+        <div className="flex-1 p-12 lg:border-r border-slate-100 dark:border-white/5">
+          <div className="flex items-center gap-4 mb-10">
+            <div className="h-10 w-2 bg-blue-600 dark:bg-blue-500 rounded-full" />
+            <h2 className="text-2xl font-black uppercase tracking-[0.25em] text-slate-900 dark:text-white leading-none">
+              Póliza Colectiva <span className="text-blue-600 dark:text-blue-400">— MetLife 2026</span>
             </h2>
           </div>
 
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-y-6">
-               <div>
-                 <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">No. de Póliza</p>
-                 <p className="text-[22px] font-black text-slate-900 dark:text-white uppercase">{policyNumber}</p>
-               </div>
-               <div>
-                 <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Contratante</p>
-                 <p className="text-[18px] font-black text-slate-900 dark:text-white">Colgate Palmolive, S.A. de C.V.</p>
-               </div>
-               <div>
-                 <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Certificado</p>
-                 <p className="text-[18px] font-black text-slate-900 dark:text-white">2001</p>
-               </div>
-               <div>
-                 <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Vigencia</p>
-                 <p className="text-[15px] font-black text-emerald-500">En vigor</p>
-               </div>
-               <div>
-                 <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Suma Asegurada</p>
-                 <p className="text-[22px] font-black text-slate-900 dark:text-white">${(totalSum/1000000).toFixed(0)},000,000 MXN</p>
-               </div>
-               <div>
-                 <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Deducible</p>
-                 <p className="text-[18px] font-black text-slate-900 dark:text-white">$15,000 MXN / siniestro</p>
-               </div>
-               <div>
-                 <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Coaseguro</p>
-                 <p className="text-[18px] font-black text-slate-900 dark:text-white">10% <span className="text-sm text-slate-400 dark:text-slate-200">(tope $17,500 MXN)</span></p>
-               </div>
-               <div>
-                 <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Asegurado Titular</p>
-                 <p className="text-[18px] font-black text-slate-900 dark:text-white">Fonseca Aguilar, Claudia</p>
-               </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+            <div>
+              <p className="text-[14px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-3">No. de Póliza</p>
+              <p className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{policyNumber}</p>
+            </div>
+            <div>
+              <p className="text-[14px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-3">Contratante</p>
+              <p className="text-2xl font-black text-slate-900 dark:text-white leading-tight">Colgate Palmolive, S.A. de C.V.</p>
+            </div>
+            <div>
+              <p className="text-[14px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-3">Certificado / Vigencia</p>
+              <div className="flex items-center gap-4">
+                <p className="text-2xl font-black text-slate-900 dark:text-white">2001</p>
+                <span className="px-4 py-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-black uppercase rounded-lg border border-emerald-500/20">Vigente</span>
+              </div>
+            </div>
+            <div>
+              <p className="text-[14px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-3">Asegurado Titular</p>
+              <p className="text-2xl font-black text-slate-900 dark:text-white">Fonseca Aguilar, Claudia</p>
+            </div>
+            <div className="md:col-span-2 pt-8 border-t border-slate-50 dark:border-white/5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div>
+                  <p className="text-[14px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-3">Suma Asegurada</p>
+                  <p className="text-3xl font-black text-slate-900 dark:text-white">${(totalSum).toLocaleString()} <span className="text-sm font-bold text-slate-400 uppercase">MXN</span></p>
+                </div>
+                <div>
+                  <p className="text-[14px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-3">Deducible Base</p>
+                  <p className="text-2xl font-black text-slate-900 dark:text-white">$6,602.88 <span className="text-sm font-bold text-slate-400 uppercase">/ Año</span></p>
+                </div>
+                <div>
+                  <p className="text-[14px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-3">Coaseguro</p>
+                  <p className="text-2xl font-black text-slate-900 dark:text-white">10% <span className="text-[11px] font-bold text-slate-400 uppercase">(Tope $17,500)</span></p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Right Panel: Excess Policy */}
-        <div className="lg:w-[400px] bg-slate-100/30 dark:bg-black/20 p-10 relative">
+        {/* Panel Derecho: Excesos con fondo distinguido */}
+        <div className="lg:w-[480px] bg-slate-50/50 dark:bg-black/40 p-12 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-5">
+            <Shield size={120} className="text-slate-900 dark:text-white" />
+          </div>
           
-          <div className="flex items-center gap-3 mb-8 relative z-10">
-            <h2 className="text-base font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">
-              Póliza de Excesos — Aplica por Siniestro
+          <div className="flex items-center gap-4 mb-10 relative z-10">
+            <div className="h-10 w-2 bg-emerald-500 rounded-full" />
+            <h2 className="text-2xl font-black uppercase tracking-[0.25em] text-slate-900 dark:text-white leading-none">
+              Capa de Excesos <span className="text-emerald-500">— M172</span>
             </h2>
           </div>
 
-          <div className="space-y-6 relative z-10">
-             <div className="grid grid-cols-1 gap-y-6">
-               <div>
-                 <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">No. de Póliza</p>
-                 <p className="text-[18px] font-black text-slate-900 dark:text-white">M172 1011</p>
-               </div>
-               <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Inicio Vigencia</p>
-                    <p className="text-[18px] font-black text-slate-900 dark:text-white">1 Oct 2025</p>
-                  </div>
-                  <div>
-                    <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Suma Asegurada</p>
-                    <p className="text-[18px] font-black text-slate-900 dark:text-white">Sin límite</p>
-                  </div>
-               </div>
-               <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Deducible Excesos</p>
-                    <p className="text-[18px] font-black text-slate-900 dark:text-white">$2,000,000 MXN</p>
-                  </div>
-                  <div>
-                    <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Coaseguro Excesos</p>
-                    <p className="text-[18px] font-black text-slate-900 dark:text-white">10%</p>
-                  </div>
-               </div>
+          <div className="space-y-10 relative z-10">
+            <div>
+              <p className="text-[14px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-3">Póliza Individual de Respaldo</p>
+              <p className="text-3xl font-black text-slate-900 dark:text-white">M172 1011</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <p className="text-[14px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-3">Suma Excesos</p>
+                <p className="text-2xl font-black text-slate-900 dark:text-white uppercase">Sin límite</p>
+              </div>
+              <div>
+                <p className="text-[14px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-3">Deducible Exceso</p>
+                <p className="text-2xl font-black text-slate-900 dark:text-white">$2,000,000</p>
+              </div>
             </div>
 
-            <div className="mt-8 p-6 bg-white/50 dark:bg-black/30 rounded-[25px] border border-slate-100 dark:border-white/5">
-              <p className="text-sm leading-relaxed font-bold text-slate-500 dark:text-slate-200">
-                La póliza de excesos entra en vigor cuando el gasto acumulado de un mismo siniestro supera <strong className="text-slate-900 dark:text-white text-lg">$2,000,000</strong>. A partir de ese punto cubre el excedente con 10% de coaseguro.
+            <div className="bg-white/80 dark:bg-zinc-900/80 p-8 rounded-[30px] border border-slate-200/50 dark:border-white/5 shadow-sm">
+              <p className="text-[15px] leading-relaxed font-bold text-slate-700 dark:text-slate-300">
+                La cobertura de excesos activa automáticamente al superar <strong className="text-slate-900 dark:text-white font-black">$2.0M</strong> en un solo evento, eliminando el riesgo de ruina financiera.
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Footer KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 dark:divide-white/5 bg-slate-50/50 dark:bg-black/40">
-        <div className="p-8 flex items-center gap-5">
-           <div className="w-12 h-12 rounded-[18px] bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 flex items-center justify-center shrink-0 shadow-sm">
-             <Users size={20} className="text-slate-900 dark:text-white" />
-           </div>
-           <div>
-             <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Total Asegurados</p>
-             <p className="text-[28px] font-black tracking-tighter text-slate-900 dark:text-white">4 <span className="text-[13px] font-bold text-slate-400 dark:text-slate-300">En la póliza</span></p>
-           </div>
-        </div>
-        <div className="p-8 flex items-center gap-5">
-           <div className="w-12 h-12 rounded-[18px] bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 flex items-center justify-center shrink-0 shadow-sm">
-             <FolderOpen size={20} className="text-red-500" />
-           </div>
-           <div>
-             <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Siniestros Activos</p>
-             <p className="text-[28px] font-black tracking-tighter text-slate-900 dark:text-white">3 <span className="text-[13px] font-bold text-slate-400 dark:text-slate-300">Con trámites</span></p>
-           </div>
-        </div>
-        <div className="p-8 flex items-center gap-5">
-           <div className="w-12 h-12 rounded-[18px] bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 flex items-center justify-center shrink-0 shadow-sm">
-             <DollarSign size={20} className="text-blue-500" />
-           </div>
-           <div>
-             <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Coaseg. Acumulado</p>
-             <p className="text-[28px] font-black tracking-tighter text-slate-900 dark:text-white">$42k <span className="text-[13px] font-bold text-slate-400 dark:text-slate-300">Pagado este año</span></p>
-           </div>
-        </div>
-        <div className="p-8 flex items-center gap-5">
-           <div className="w-12 h-12 rounded-[18px] bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 flex items-center justify-center shrink-0 shadow-sm">
-             <Activity size={20} className="text-slate-900 dark:text-white" />
-           </div>
-           <div>
-             <p className="text-[14px] font-bold text-slate-500 dark:text-slate-200 uppercase tracking-widest mb-1.5">Excesos Activos</p>
-             <p className="text-[28px] font-black tracking-tighter text-slate-900 dark:text-white">0 <span className="text-[13px] font-bold text-slate-400 dark:text-slate-300">Siniestros &gt;$2M</span></p>
-           </div>
-        </div>
+      {/* Footer KPI Cards: Más grandes y claros */}
+    <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 dark:divide-white/5 bg-white dark:bg-zinc-900/50">
+        {[
+          { icon: <Users size={24} />, label: 'Integrantes', value: '4', sub: 'Claudia + Familia', color: 'text-blue-600' },
+          { icon: <FolderOpen size={24} />, label: 'Siniestros', value: '3', sub: 'Trámites en curso', color: 'text-orange-500' },
+          { icon: <DollarSign size={24} />, label: 'Coaseguro', value: '$42k', sub: 'Pagado este año', color: 'text-emerald-500' },
+          { icon: <Activity size={24} />, label: 'Alertas', value: '0', sub: 'Eventos críticos', color: 'text-slate-400' },
+        ].map((kpi, idx) => (
+          <div key={idx} className="p-10 flex items-center gap-6 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+            <div className={`w-16 h-16 rounded-[22px] bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800 flex items-center justify-center shrink-0 shadow-lg ${kpi.color}`}>
+              {kpi.icon}
+            </div>
+            <div>
+              <p className="text-[13px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-2">{kpi.label}</p>
+              <p className="text-4xl font-black tracking-tight text-slate-900 dark:text-white leading-none">{kpi.value}</p>
+              <p className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-widest mt-2">{kpi.sub}</p>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

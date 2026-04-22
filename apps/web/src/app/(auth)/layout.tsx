@@ -40,22 +40,21 @@ function GlobalTopNav({ theme, toggleTheme }: { theme: string, toggleTheme: () =
 
         {/* Right: Actions */}
         <div className="flex items-center gap-4">
-          <div className="hidden lg:flex gap-3">
+          <div className="hidden lg:flex gap-4">
             {[
-              { name: 'Dashboard', path: '/dashboard', icon: <BarChart3 size={14} /> },
-              { name: 'Nuevo Trámite', path: '/nuevo-tramite', icon: <Plus size={14} /> },
-              { name: 'Mis Trámites', path: '/tramites', icon: <FileText size={14} /> },
-              { name: 'Registrar Documento', path: '/registro-respuesta', icon: <Plus size={14} /> },
-              { name: 'Observabilidad', path: '/observabilidad', icon: <Activity size={14} /> },
-              { name: 'Configuración', path: '/configuracion', icon: <Settings size={14} /> },
+              { name: 'Dashboard', path: '/dashboard', icon: <BarChart3 size={16} /> },
+              { name: 'Nuevo Trámite', path: '/nuevo-tramite', icon: <Plus size={16} /> },
+              { name: 'Registrar Documento', path: '/registro-respuesta', icon: <FileText size={16} /> },
+              { name: 'Mis Trámites', path: '/tramites', icon: <Activity size={16} /> },
+              { name: 'Configuración', path: '/configuracion', icon: <Settings size={16} /> },
             ].map(item => (
               <Link
                 key={item.name} 
                 href={item.path}
-                className={`px-4 py-2 rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all border border-transparent
+                className={`px-5 py-2.5 rounded-xl flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest transition-all border border-transparent
                   ${pathname === item.path 
-                    ? 'bg-slate-900 dark:bg-white text-white dark:text-black shadow-lg' 
-                    : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white'}`}
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-black shadow-lg shadow-black/10' 
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white'}`}
               >
                 {item.icon}
                 {item.name}
@@ -98,14 +97,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-plus-jakarta transition-all duration-500`}>
+    <div className={`min-h-screen bg-gmm-bg flex flex-col font-plus-jakarta transition-all duration-500`}>
       
       <GlobalTopNav theme={theme} toggleTheme={toggleTheme} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 relative h-screen overflow-hidden pt-24">
+      <div className="flex-1 flex flex-col min-w-0 relative h-screen overflow-hidden pt-28">
         <main className="flex-1 overflow-y-auto relative z-10 p-8">
-          <div className="max-w-[1500px] mx-auto animate-in fade-in slide-in-from-bottom-2 duration-700">
+          <div className="max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-2 duration-700">
             {children}
           </div>
         </main>
