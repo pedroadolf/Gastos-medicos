@@ -3,10 +3,85 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { 
+  Shield, Activity, Plus, Moon, Sun, User, FileText, Settings, BarChart3, Bell, Search 
+} from 'lucide-react';
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Copilot } from "@/components/layout/Copilot";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+function GlobalTopNav({ theme, toggleTheme }: { theme: string, toggleTheme: () => void }) {
   const pathname = usePathname();
+  
+  return (
+    <header className="fixed top-4 left-6 right-6 z-50">
+      <nav className="flex justify-between items-center max-w-[1500px] mx-auto p-4 bg-white/90 dark:bg-black/80 backdrop-blur-md rounded-2xl border border-white/20 dark:border-white/5 shadow-xl">
+        {/* Left: Branding */}
+        <div className="flex items-center gap-6">
+           <Link href="/dashboard" className="flex items-center gap-6 group">
+             <div className="w-10 h-10 bg-slate-900 dark:bg-white rounded-2xl flex items-center justify-center text-white dark:text-black shadow-xl group-hover:scale-110 transition-transform">
+               <Activity size={20} />
+             </div>
+             <div>
+               <h1 className="text-xl font-black tracking-tighter text-slate-900 dark:text-white leading-none">Diagnostic</h1>
+               <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] mt-1">GMM PLATFORM V12</p>
+             </div>
+           </Link>
+        </div>
+
+        {/* Center: Search / Ops Monitor */}
+        <div className="hidden xl:flex items-center bg-slate-100 dark:bg-white/5 rounded-2xl px-6 py-2 border border-slate-200 dark:border-white/10 w-[400px] group transition-all focus-within:w-[500px] focus-within:border-blue-500">
+           <Search size={16} className="text-slate-400 group-focus-within:text-blue-500" />
+           <input 
+             type="text" 
+             placeholder="Buscar Siniestros, Asegurados o Facturas..." 
+             className="bg-transparent border-none outline-none px-4 text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white w-full placeholder:text-slate-400"
+           />
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-4">
+          <div className="hidden lg:flex gap-3">
+            {[
+              { name: 'Dashboard', path: '/dashboard', icon: <BarChart3 size={14} /> },
+              { name: 'Nuevo Trámite', path: '/nuevo-tramite', icon: <Plus size={14} /> },
+              { name: 'Mis Trámites', path: '/tramites', icon: <FileText size={14} /> },
+              { name: 'Registrar Documento', path: '/registro-respuesta', icon: <Plus size={14} /> },
+              { name: 'Observabilidad', path: '/observabilidad', icon: <Activity size={14} /> },
+              { name: 'Configuración', path: '/configuracion', icon: <Settings size={14} /> },
+            ].map(item => (
+              <Link
+                key={item.name} 
+                href={item.path}
+                className={`px-4 py-2 rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest transition-all border border-transparent
+                  ${pathname === item.path 
+                    ? 'bg-slate-900 dark:bg-white text-white dark:text-black shadow-lg' 
+                    : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white'}`}
+              >
+                {item.icon}
+                {item.name}
+              </Link>
+            ))}
+          </div>
+          
+          <div className="w-px h-8 bg-slate-200 dark:bg-white/10 mx-2" />
+
+          <button 
+            onClick={toggleTheme}
+            className="p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 transition-all shadow-sm"
+          >
+            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+          </button>
+          
+          <div className="w-10 h-10 rounded-full border-2 border-white dark:border-white/10 shadow-md overflow-hidden bg-slate-200 dark:bg-white/10 flex items-center justify-center text-slate-900 dark:text-white">
+            <User size={20} />
+          </div>
+        </div>
+      </nav>
+    </header>
+  );
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
@@ -23,69 +98,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className={`min-h-screen bg-[#DAE0E8] dark:bg-black flex justify-center items-start py-10 px-4 font-plus-jakarta transition-colors duration-300`}>
-       
-       <div className="w-full max-w-[1300px] relative">
-          
-          {/* FOLDER SHAPE BACKGROUND */}
-          <div className="absolute top-0 left-0 w-[380px] h-[180px] bg-[var(--folder-bg)] rounded-t-[32px] shadow-sm"></div>
-          <div className="absolute top-[60px] left-[380px] right-0 h-[120px] bg-[var(--folder-bg)] rounded-tr-[32px] rounded-tl-[24px] shadow-sm">
-             {/* Smooth inverse curve */}
-             <div className="absolute top-0 -left-[24px] w-[24px] h-[24px] bg-transparent" style={{ borderTopRightRadius: '24px', boxShadow: '12px -12px 0 0 transparent' }}>
-                <div className="w-full h-full bg-transparent" style={{ borderTopRightRadius: '24px', boxShadow: '12px -12px 0 0 var(--folder-bg)' }}></div>
-             </div>
+    <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-plus-jakarta transition-all duration-500`}>
+      
+      <GlobalTopNav theme={theme} toggleTheme={toggleTheme} />
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 relative h-screen overflow-hidden pt-24">
+        <main className="flex-1 overflow-y-auto relative z-10 p-8">
+          <div className="max-w-[1500px] mx-auto animate-in fade-in slide-in-from-bottom-2 duration-700">
+            {children}
           </div>
+        </main>
 
-          {/* CONTENT LAYER */}
-          <div className="relative z-10 pt-[24px] px-6">
-              
-              {/* HEADER ROW */}
-              <div className="flex flex-col md:flex-row">
-                 
-                 {/* Left Tab Content */}
-                 <div className="w-full md:w-[340px] pl-6 pt-2">
-                    <h1 className="text-[26px] font-medium text-[#1A2A3A] tracking-tight mb-6">Dashboard GMM</h1>
-                 </div>
-
-                 {/* Right Area (Pills Menu) */}
-                 <div className="flex-1 md:pl-12 pt-[50px] flex justify-between items-center pr-6">
-                    <nav className="flex gap-2">
-                      {[
-                        { name: 'Dashboard', path: '/dashboard' },
-                        { name: 'Pólizas', path: '/polizas' },
-                        { name: 'Siniestros', path: '/tramites' },
-                        { name: 'Asegurados', path: '/asegurados' },
-                        { name: 'Reportes', path: '/reportes' },
-                      ].map(item => {
-                        const isActive = pathname === item.path || (pathname === '/' && item.path === '/dashboard');
-                        return (
-                          <Link key={item.name} href={item.path} 
-                                className={`px-5 py-2.5 rounded-full text-[13px] font-medium transition-all flex items-center gap-2
-                                ${isActive ? 'bg-white shadow-sm text-gray-800' : 'text-gray-600 hover:bg-white/40'}`}>
-                            {item.name}
-                          </Link>
-                        )
-                      })}
-                    </nav>
-
-                    <div className="flex items-center gap-4">
-                       <span className="text-sm text-gray-600 font-medium cursor-pointer">Abr 2026 ▼</span>
-                       <button onClick={toggleTheme} className="w-10 h-10 rounded-full bg-white/60 hover:bg-white shadow-sm flex items-center justify-center text-gray-600 transition-all">🌙</button>
-                    </div>
-                 </div>
-              </div>
-
-              {/* INNER CANVAS */}
-              <div className="mt-8 bg-[var(--folder-bg)] rounded-[32px] p-8 shadow-inner min-h-[700px] border border-white/40 dark:border-white/5">
-                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
-                    {children}
-                 </div>
-              </div>
-
-          </div>
-       </div>
-
-       <Copilot />
+        <Copilot />
+        <MobileBottomNav className="md:hidden fixed bottom-1 left-4 right-4 z-50 rounded-3xl" />
+      </div>
     </div>
   );
 }

@@ -226,28 +226,7 @@ export default function DashboardPage() {
   ];
 
    return (
-    <div className="max-w-7xl mx-auto space-y-20 pb-32 px-6 pt-12">
-      
-      {/* HEADER: BIENVENIDA */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-2">
-        <div className="space-y-1">
-          <p className="text-[13px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.4em]">Panel de Control GMM</p>
-          <h1 className="text-5xl font-black text-slate-900 dark:text-white tracking-tight">
-            Hola, <span className="text-blue-600">Claudia</span>
-          </h1>
-                    <div className="hidden sm:block">
-             <p className="text-[12px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-[0.2em] mb-1">Status Global</p>
-             <p className="text-sm font-black text-emerald-500 flex items-center gap-2 justify-end">
-               <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-               PÓLIZA ACTIVA
-             </p>
-           </div>
-           <div className="h-10 w-[1px] bg-slate-200 dark:bg-white/10 hidden sm:block mx-2"></div>
-           <button className="bg-white dark:bg-zinc-900 p-3 rounded-2xl shadow-sm border border-slate-100 dark:border-white/5 hover:scale-105 transition-transform">
-             <Plus size={20} className="text-slate-900 dark:text-white" />
-           </button>
-        </div>
-      </div>
+    <div className="space-y-16 pb-32">
 
       {/* SECCIÓN 1: PANORAMA GLOBAL */}
       <Section 
