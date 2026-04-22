@@ -122,7 +122,9 @@ export default function DashboardPage() {
 
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
-    setIsMounted(true);
+    // Pequeño retraso para asegurar que el grid de Tailwind haya calculado dimensiones finales
+    const timer = setTimeout(() => setIsMounted(true), 150);
+    return () => clearTimeout(timer);
   }, []);
 
   if (isLoading || !isMounted) {
@@ -242,7 +244,7 @@ export default function DashboardPage() {
                  <div className="px-4 py-1.5 bg-blue-600/10 rounded-full text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.1em]">Tiempo Real</div>
               </div>
               <div className="h-[320px] w-full">
-                 <ResponsiveContainer width="100%" height="100%">
+                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <BarChart data={categoryData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
                        <XAxis dataKey="name" fontSize={12} fontWeight="black" axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />

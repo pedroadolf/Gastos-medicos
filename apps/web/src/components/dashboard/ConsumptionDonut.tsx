@@ -43,7 +43,8 @@ export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
   const total = data.reduce((acc, curr) => acc + curr.value, 0);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => setMounted(true), 150);
+    return () => clearTimeout(timer);
   }, []);
 
   if (!mounted) {
@@ -68,7 +69,7 @@ export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
       </div>
 
       <div className="h-[300px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <PieChart>
             <Pie
               data={data}

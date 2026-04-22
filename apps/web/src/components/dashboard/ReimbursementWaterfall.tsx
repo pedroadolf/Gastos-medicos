@@ -24,6 +24,13 @@ const rawData = [
 ];
 
 export function ReimbursementWaterfall() {
+  const [mounted, setMounted] = React.useState(false);
+  
+  React.useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 150);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Transform data for Waterfall effect in Recharts
   let cumulative = 0;
   const data: WaterfallData[] = rawData.map((item, index) => {
@@ -60,6 +67,14 @@ export function ReimbursementWaterfall() {
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(val);
 
+  if (!mounted) {
+    return (
+      <div className="gmm-pill-card bg-white dark:bg-[#1A1A1A] border-none shadow-2xl p-8 h-full flex items-center justify-center">
+        <div className="h-[300px] w-full" />
+      </div>
+    );
+  }
+
   return (
     <div className="gmm-pill-card bg-white dark:bg-[#1A1A1A] border-none shadow-2xl p-8 h-full">
       <div className="flex justify-between items-start mb-8">
@@ -74,7 +89,7 @@ export function ReimbursementWaterfall() {
       </div>
 
       <div className="h-[300px] w-full mt-4">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <BarChart
             data={data}
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
