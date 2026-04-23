@@ -12,9 +12,9 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
   return (
     <div className="gmm-box relative overflow-hidden group border-none">
       {/* Contenido Principal */}
-      <div className="flex flex-col lg:flex-row border-b border-slate-100 dark:border-white/5">
+      <div className="flex flex-col lg:flex-row border-b border-slate-200 dark:border-white/5">
         {/* Panel Izquierdo: Póliza Primaria */}
-        <div className="flex-1 p-12 lg:border-r border-slate-100 dark:border-white/5">
+        <div className="flex-1 p-12 lg:border-r border-slate-200 dark:border-white/5">
           <div className="flex items-center gap-4 mb-10">
             <div className="h-10 w-2 bg-blue-600 dark:bg-blue-500 rounded-full" />
             <h2 className="text-2xl font-black uppercase tracking-[0.25em] text-slate-900 dark:text-white leading-none">
@@ -62,7 +62,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
         </div>
 
         {/* Panel Derecho: Excesos con fondo distinguido */}
-        <div className="lg:w-[480px] bg-[#DAE0E8]/40 dark:bg-black/40 p-12 relative overflow-hidden">
+        <div className="lg:w-[480px] bg-gmm-bg-panel dark:bg-black/40 p-12 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-8 opacity-5">
             <Shield size={120} className="text-slate-900 dark:text-white" />
           </div>
@@ -91,7 +91,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
               </div>
             </div>
 
-            <div className="bg-[#DAE0E8]/50 dark:bg-zinc-900/80 p-8 rounded-[30px] border border-slate-200/50 dark:border-white/5 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900/80 p-8 rounded-[30px] border border-slate-300/50 dark:border-white/5 shadow-sm">
               <p className="text-[15px] leading-relaxed font-bold text-slate-700 dark:text-slate-300">
                 La cobertura de excesos activa automáticamente al superar <strong className="text-slate-900 dark:text-white font-black">$2.0M</strong> en un solo evento, eliminando el riesgo de ruina financiera.
               </p>
@@ -101,7 +101,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
       </div>
 
       {/* Footer KPI Cards: Más grandes y claros */}
-    <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-slate-100 dark:divide-white/5 bg-[#DAE0E8]/30 dark:bg-zinc-900/50">
+    <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-slate-200 dark:divide-white/5 bg-gmm-bg-panel/50 dark:bg-zinc-900/50">
         {[
           { icon: <Users size={24} />, label: 'Integrantes', value: '4', sub: 'Claudia + Familia', color: 'text-blue-600' },
           { icon: <FolderOpen size={24} />, label: 'Siniestros', value: '3', sub: 'Trámites en curso', color: 'text-orange-500' },

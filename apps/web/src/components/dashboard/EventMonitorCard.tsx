@@ -51,7 +51,7 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       className="gmm-box p-0 overflow-hidden group hover:shadow-2xl transition-all duration-500"
     >
       {/* Header Informativo con Gradiente Sutil */}
-      <div className="bg-slate-50/80 dark:bg-zinc-800/50 px-8 py-8 border-b border-slate-100 dark:border-white/5 flex flex-wrap items-center gap-x-12 gap-y-6">
+      <div className="bg-gmm-bg-panel dark:bg-zinc-800/50 px-8 py-8 border-b border-slate-200 dark:border-white/5 flex flex-wrap items-center gap-x-12 gap-y-6">
         <div className="flex items-center gap-6">
           <div className="relative group/photo shrink-0">
              <div className="h-16 w-16 rounded-[22px] overflow-hidden ring-4 ring-white dark:ring-white/10 shadow-2xl bg-white dark:bg-zinc-800 flex items-center justify-center transition-all duration-500 group-hover/photo:scale-110 group-hover/photo:rotate-3">
@@ -98,7 +98,7 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       <div className="p-12 flex flex-col xl:flex-row gap-16">
         {/* Lado Izquierdo: Saldo Disponible */}
         <div className="flex-1 space-y-10">
-          <div className="bg-slate-50/50 dark:bg-white/[0.03] p-10 rounded-[40px] border border-slate-100 dark:border-white/5 shadow-inner">
+          <div className="bg-gmm-bg-panel/40 dark:bg-white/[0.03] p-10 rounded-[40px] border border-slate-200 dark:border-white/5 shadow-inner">
             <div className="flex justify-between items-end mb-8">
               <div>
                 <p className="text-[15px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.25em] mb-2">Saldo Disponible del Seguro</p>
@@ -113,7 +113,7 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
             </div>
             
             {/* Barra de Progreso Mejorada */}
-            <div className="h-7 w-full bg-slate-200/50 dark:bg-white/10 rounded-full overflow-hidden flex shadow-inner border-4 border-white dark:border-zinc-800">
+            <div className="h-7 w-full bg-slate-300/30 dark:bg-white/10 rounded-full overflow-hidden flex shadow-inner border-4 border-white dark:border-zinc-800">
               <motion.div 
                 initial={{ width: 0 }}
                 whileInView={{ width: `${consumedPct}%` }}
@@ -152,7 +152,7 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
             { label: 'Coaseguro Pagado', value: event.coaseguroPagado, color: 'text-blue-600 dark:text-blue-400', sub: `${event.coaseguroPercentage || 10}% contratado` },
             { label: 'Deducible Total', value: event.deductibleAmount, color: 'text-slate-900 dark:text-white', sub: 'Cuota fija' },
           ].map((stat, i) => (
-            <div key={i} className="bg-white dark:bg-white/[0.03] p-10 rounded-[35px] border border-slate-100 dark:border-white/10 shadow-sm hover:shadow-md hover:border-blue-500/30 transition-all duration-300 group/metric">
+            <div key={i} className="bg-white dark:bg-white/[0.03] p-10 rounded-[35px] border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-md hover:border-blue-500/30 transition-all duration-300 group/metric">
               <p className="text-[13px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-5 group-hover/metric:text-blue-500 transition-colors">{stat.label}</p>
               <p className={`text-4xl font-black ${stat.color} tracking-tight mb-2`}>
                 ${(stat.value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

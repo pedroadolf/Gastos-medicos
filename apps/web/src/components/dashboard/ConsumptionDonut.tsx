@@ -55,17 +55,19 @@ export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
   }
 
   return (
-    <div className="gmm-box p-8 h-full">
-      <div className="flex justify-between items-center mb-8">
+    <div className="gmm-box p-0 h-full overflow-hidden flex flex-col">
+      <div className="flex justify-between items-center p-10 bg-gmm-bg-panel/30 dark:bg-white/[0.02] border-b border-slate-200 dark:border-white/5">
          <div>
             <h3 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">Distribución del Consumo</h3>
-            <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-widest">Participación por Asegurado</p>
+            <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-widest mt-1">Participación por Asegurado</p>
          </div>
          <div className="text-right">
             <p className="text-[8px] font-black text-slate-400 dark:text-zinc-500 uppercase mb-1">Total Consolidado</p>
             <p className="text-xl font-black text-slate-900 dark:text-white italic tracking-tighter">${(total / 1_000).toLocaleString()}k</p>
          </div>
       </div>
+
+      <div className="p-10 flex-1 flex flex-col justify-center">
 
       <div className="h-[300px] w-full">
         <ResponsiveContainer id="consumption-donut-chart" width="99%" height="99%" debounce={100} minHeight={300}>
@@ -107,5 +109,6 @@ export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
         </ResponsiveContainer>
       </div>
     </div>
+  </div>
   );
 }

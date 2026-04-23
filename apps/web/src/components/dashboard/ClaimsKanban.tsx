@@ -94,7 +94,7 @@ export function ClaimsKanban() {
                   <motion.div
                     key={claim.id}
                     layoutId={claim.id}
-                    className={`p-4 gmm-box hover:border-gmm-text transition-colors ${index % 2 === 0 ? 'bg-[#FFFFFF]' : 'bg-[#FAFAFA]'}`}
+                    className={`p-4 gmm-box hover:border-blue-500/50 transition-colors ${index % 2 === 0 ? 'bg-slate-50/50 dark:bg-white/5' : 'bg-white dark:bg-white/[0.02]'}`}
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div>
