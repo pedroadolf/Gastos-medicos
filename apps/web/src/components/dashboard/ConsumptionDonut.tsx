@@ -56,14 +56,15 @@ export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
 
   return (
     <div className="gmm-box p-0 h-full overflow-hidden flex flex-col">
-      <div className="flex justify-between items-center p-10 bg-gmm-bg-panel dark:bg-white/[0.02] border-b border-slate-300 dark:border-white/5">
+      <div className="flex justify-between items-center p-10 border-b"
+           style={{ background: 'var(--gmm-bg-panel)', borderColor: 'var(--gmm-border)' }}>
          <div>
-            <h3 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">Distribución del Consumo</h3>
-            <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-widest mt-1">Participación por Asegurado</p>
+            <h3 className="text-[12px] font-black uppercase tracking-[0.3em]" style={{ color: 'var(--gmm-text)' }}>Distribución del Consumo</h3>
+            <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--gmm-text-muted)' }}>Participación por Asegurado</p>
          </div>
          <div className="text-right">
-            <p className="text-[8px] font-black text-slate-400 dark:text-zinc-500 uppercase mb-1">Total Consolidado</p>
-            <p className="text-xl font-black text-slate-900 dark:text-white italic tracking-tighter">${(total / 1_000).toLocaleString()}k</p>
+            <p className="text-[8px] font-black uppercase mb-1" style={{ color: 'var(--gmm-text-muted)' }}>Total Consolidado</p>
+            <p className="text-xl font-black italic tracking-tighter" style={{ color: 'var(--gmm-text)' }}>${(total / 1_000).toLocaleString()}k</p>
          </div>
       </div>
 

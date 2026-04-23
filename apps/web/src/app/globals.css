@@ -2,126 +2,282 @@
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
+/* ─── Google Fonts ─────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* ─── Tailwind Theme Extension ─────────────────────────────────────── */
 @theme {
-  /* ── GMM Medical Folder Palette (Light/Dark ready) ── */
-  --color-gmm-bg: var(--gmm-bg);
-  --color-gmm-bg-panel: var(--gmm-bg-panel);
-  --color-gmm-card: var(--gmm-card);
-  --color-gmm-accent: #FFAA00;
-  --color-gmm-text: var(--gmm-text);
+  /* GMM Official Palette */
+  --color-gmm-accent:     #FFAA00;   /* Amber / Dorado — botones, iconos, acentos */
+  --color-gmm-dark:       #343434;   /* Gris Oscuro — texto principal, sidebar */
+  --color-gmm-border-col: #D8D9D7;   /* Gris Claro — bordes, fondos secundarios */
+  --color-gmm-danger:     #B22B21;   /* Rojo — alertas críticas ÚNICAMENTE */
+  --color-gmm-success:    #22c55e;   /* Verde — estados positivos */
+  --color-gmm-white:      #FFFFFF;
+
+  /* Semantic aliases (resolved at runtime via CSS vars) */
+  --color-gmm-bg:         var(--gmm-bg);
+  --color-gmm-bg-panel:   var(--gmm-bg-panel);
+  --color-gmm-card:       var(--gmm-card);
+  --color-gmm-text:       var(--gmm-text);
   --color-gmm-text-muted: var(--gmm-text-muted);
-  --color-gmm-border: var(--gmm-border);
-  --color-gmm-danger: #B22B21;
-  --color-gmm-success: #22c55e;
+  --color-gmm-border:     var(--gmm-border);
+  --color-gmm-shadow:     var(--gmm-shadow);
 
-  /* ── Fonts ── */
+  /* Fonts */
   --font-plus-jakarta: var(--font-plus-jakarta-sans);
-  --font-inter: var(--font-inter);
+  --font-inter:        var(--font-inter);
 }
 
+/* ─── Light Theme (Medical Folder) ────────────────────────────────── */
 :root {
-  /* GMM Mandatory Palette - Serenidad Digital 2026 */
-  --gmm-white: #FFFFFF;
-  --gmm-accent: #2563EB; 
-  --gmm-accent-tidal: #3B82F6; 
-  --gmm-text: #0F172A;         
-  --gmm-border: rgba(0, 0, 0, 0.05); 
-  --gmm-danger: #EF4444; 
+  /* GMM Official Palette (fixed) */
+  --gmm-white:   #FFFFFF;
+  --gmm-accent:  #FFAA00;
+  --gmm-dark:    #343434;
+  --gmm-danger:  #B22B21;
   --gmm-success: #22C55E;
-  --gmm-warning: #F59E0B;
+  --gmm-yellow:  #FFAA00;
 
-  /* Light Theme - Gallery Neutral */
-  --gmm-bg: #DAE0E8; /* Gris Azulado Principal */
-  --gmm-bg-panel: #CED4DA; /* Gris más obscuro para paneles internos */
-  --gmm-card: #FFFFFF;
-  --gmm-text-muted: #71717A;
-  --gmm-border: rgba(0, 0, 0, 0.08); 
-  --gmm-shadow: 0 25px 60px -15px rgba(0,0,0,0.1);
-  --gmm-shadow-premium: none;
-  --gmm-texture: none;
-  --gmm-texture-size: none;
-  --folder-bg: #DAE0E8; 
+  /* Light semantic tokens */
+  --gmm-bg:          #E8E2D9;   /* Folder / expediente — fondo principal cálido */
+  --gmm-bg-panel:    #DDD8CE;   /* Panel secundario */
+  --gmm-card:        #FFFFFF;   /* Tarjetas */
+  --gmm-text:        #343434;   /* Texto principal */
+  --gmm-text-muted:  #7A7875;   /* Texto secundario */
+  --gmm-border:      rgba(52, 52, 52, 0.10);
+  --gmm-shadow:      0 4px 24px rgba(52, 52, 52, 0.08);
+  --gmm-shadow-lg:   0 20px 60px rgba(52, 52, 52, 0.12);
+
+  /* Topbar */
+  --gmm-topbar-bg:   #343434;
+  --gmm-topbar-text: #D8D9D7;
+  --gmm-topbar-active: #FFAA00;
 }
 
+/* ─── Dark Theme ───────────────────────────────────────────────────── */
 [data-theme='dark'] {
-  --gmm-bg: #000000; /* Negro Total */
-  --gmm-card: #53535C; /* Gris Claro Dark */
-  --gmm-text: #F8FAFC;
-  --gmm-text-muted: #CBD5E1; /* Brighter for dark mode visibility */
-  --gmm-border: rgba(255, 255, 255, 0.05);
-  --gmm-shadow: 0 40px 80px rgba(0,0,0,0.6);
-  --gmm-texture: none;
-  --gmm-texture-size: none;
-  --folder-bg: #000000; 
+  /* Dark semantic tokens */
+  --gmm-bg:          #121212;   /* Casi negro — fondo principal */
+  --gmm-bg-panel:    #1E1E1E;   /* Paneles internos */
+  --gmm-card:        #2A2A2A;   /* Tarjetas */
+  --gmm-text:        #D8D9D7;   /* Texto principal suave (no quema los ojos) */
+  --gmm-text-muted:  #8A8A88;
+  --gmm-border:      rgba(216, 217, 215, 0.08);
+  --gmm-shadow:      0 4px 24px rgba(0, 0, 0, 0.40);
+  --gmm-shadow-lg:   0 20px 60px rgba(0, 0, 0, 0.60);
+
+  /* Topbar — más oscuro en dark */
+  --gmm-topbar-bg:   #1A1A1A;
+  --gmm-topbar-text: #D8D9D7;
+  --gmm-topbar-active: #FFAA00;
 }
 
-.gmm-card-premium {
-  background-color: var(--gmm-card);
-  color: var(--gmm-text);
-  border: 1px solid var(--gmm-border);
-  box-shadow: var(--gmm-shadow);
-  border-radius: 16px;
-  backdrop-filter: none;
-}
-
-
-/* ── Custom Layers ── */
+/* ─── Base Styles ──────────────────────────────────────────────────── */
 @layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
   body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-color: var(--gmm-bg);
     color: var(--gmm-text);
-    background-image: var(--gmm-texture);
-    background-size: var(--gmm-texture-size);
+    /* Fondo tipo folder con textura sutil */
+    background-image:
+      radial-gradient(circle at 15% 15%, rgba(52,52,52,0.025) 1.5px, transparent 1.5px),
+      radial-gradient(circle at 85% 85%, rgba(52,52,52,0.015) 1px, transparent 1px);
+    background-size: 28px 28px, 14px 14px;
     background-attachment: fixed;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  [data-theme='dark'] body {
+    background-image:
+      radial-gradient(circle at 15% 15%, rgba(255,170,0,0.03) 1.5px, transparent 1.5px),
+      radial-gradient(circle at 85% 85%, rgba(255,170,0,0.015) 1px, transparent 1px);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   }
 }
 
+/* ─── Component Utilities ──────────────────────────────────────────── */
 @layer utilities {
+
+  /* ── Core Card ── */
   .gmm-box {
-    @apply bg-white dark:bg-[#53535C] 
-           rounded-[50px] 
-           border border-slate-300 dark:border-white/10 
-           shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] 
-           dark:shadow-[0_40px_80px_rgba(0,0,0,0.6)]
-           hover:-translate-y-1
-           transition-all duration-300
-           p-10;
+    background-color: var(--gmm-card);
+    color: var(--gmm-text);
+    border: 1px solid var(--gmm-border);
+    border-radius: 20px;
+    box-shadow: var(--gmm-shadow);
+    padding: 2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  .gmm-box:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--gmm-shadow-lg);
+  }
+
+  /* Premium card variant */
+  .gmm-card-premium {
+    background-color: var(--gmm-card);
+    color: var(--gmm-text);
+    border: 1px solid var(--gmm-border);
+    box-shadow: var(--gmm-shadow);
+    border-radius: 20px;
+  }
+
+  /* ── Section Headers ── */
   .gmm-section-header {
-    @apply flex items-center gap-4 mb-6;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .gmm-section-title {
-    @apply text-lg font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap;
+    font-size: 0.875rem;
+    font-weight: 800;
+    color: var(--gmm-text);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    white-space: nowrap;
   }
 
   .gmm-section-divider {
-    @apply h-px flex-1 bg-gray-200 dark:bg-neutral-800;
+    height: 1px;
+    flex: 1;
+    background-color: var(--gmm-border);
   }
 
-  /* GMM Pill Card — Ultra-rounded "Sticker" style */
-  .gmm-pill-card {
-    @apply bg-gmm-card border border-gmm-border rounded-[16px] p-8 transition-all duration-300;
-    box-shadow: none;
-  }
-
-  /* The Central Timeline Line backbone */
-  .timeline-line {
-    @apply absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2.5px] bg-gmm-border -z-10;
-  }
-
-  /* GMM Header Nav — Pill style with separation */
+  /* ── Header Nav Pill ── */
   .gmm-header-nav {
-    @apply bg-gmm-card border border-gmm-border rounded-[16px] px-8 py-4;
-    box-shadow: none;
+    background-color: var(--gmm-topbar-bg);
+    border: 1px solid rgba(216, 217, 215, 0.12);
+    border-radius: 20px;
+    padding: 0.75rem 1.5rem;
   }
 
-  /* Custom scrollbar */
+  /* ── Accent Badge ── */
+  .gmm-badge-accent {
+    background-color: rgba(255, 170, 0, 0.15);
+    color: #FFAA00;
+    border: 1px solid rgba(255, 170, 0, 0.25);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  /* ── Danger Badge ── */
+  .gmm-badge-danger {
+    background-color: rgba(178, 43, 33, 0.12);
+    color: #B22B21;
+    border: 1px solid rgba(178, 43, 33, 0.20);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  /* ── Pill Card ── */
+  .gmm-pill-card {
+    background-color: var(--gmm-card);
+    border: 1px solid var(--gmm-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+  }
+
+  /* ── Timeline ── */
+  .timeline-line {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    bottom: 0;
+    width: 2.5px;
+    background-color: var(--gmm-border);
+    z-index: -10;
+  }
+
+  /* ── Progress Bar GMM ── */
+  .gmm-progress {
+    height: 8px;
+    background-color: var(--gmm-border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .gmm-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background-color: #FFAA00;
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .gmm-progress-fill.danger {
+    background-color: #B22B21;
+  }
+
+  .gmm-progress-fill.safe {
+    background-color: #22C55E;
+  }
+
+  /* ── Button Primary (Amber) ── */
+  .gmm-btn-primary {
+    background-color: #FFAA00;
+    color: #343434;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 0.625rem 1.25rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .gmm-btn-primary:hover {
+    background-color: #E69900;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(255, 170, 0, 0.35);
+  }
+
+  /* ── Button Ghost (Amber border) ── */
+  .gmm-btn-ghost {
+    background: transparent;
+    color: #FFAA00;
+    font-weight: 700;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    border: 1.5px solid rgba(255, 170, 0, 0.4);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.8125rem;
+  }
+
+  .gmm-btn-ghost:hover {
+    background-color: rgba(255, 170, 0, 0.10);
+    border-color: #FFAA00;
+  }
+
+  /* ── Custom Scrollbar ── */
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -129,11 +285,70 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-gmm-text/10 rounded-full hover:bg-gmm-accent/20 transition-all;
+    background-color: rgba(255, 170, 0, 0.25);
+    border-radius: 999px;
+    transition: background-color 0.2s;
   }
 
-  /* Typography shortcuts */
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 170, 0, 0.50);
+  }
+
+  /* ── Typography shortcuts ── */
   .text-clinical-mono {
     font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── KPI Value ── */
+  .gmm-kpi-value {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--gmm-text);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .gmm-kpi-label {
+    font-size: 0.6875rem;
+    font-weight: 800;
+    color: var(--gmm-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+  }
+
+  /* ── Trend indicators ── */
+  .gmm-trend-up {
+    color: #22C55E;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .gmm-trend-down {
+    color: #B22B21;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  /* ── Alert styles ── */
+  .gmm-alert-critical {
+    background-color: rgba(178, 43, 33, 0.08);
+    border-left: 4px solid #B22B21;
+    border-radius: 0 12px 12px 0;
+    padding: 0.75rem 1rem;
+  }
+
+  .gmm-alert-warning {
+    background-color: rgba(255, 170, 0, 0.08);
+    border-left: 4px solid #FFAA00;
+    border-radius: 0 12px 12px 0;
+    padding: 0.75rem 1rem;
+  }
+
+  .gmm-alert-success {
+    background-color: rgba(34, 197, 94, 0.08);
+    border-left: 4px solid #22C55E;
+    border-radius: 0 12px 12px 0;
+    padding: 0.75rem 1rem;
   }
 }

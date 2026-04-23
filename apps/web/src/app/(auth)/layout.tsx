@@ -4,78 +4,148 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { 
-  Shield, Activity, Plus, Moon, Sun, User, FileText, Settings, BarChart3, Bell, Search 
+  Activity, Plus, Moon, Sun, User, FileText, Settings, 
+  BarChart3, Search, Bell
 } from 'lucide-react';
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Copilot } from "@/components/layout/Copilot";
 
-function GlobalTopNav({ theme, toggleTheme }: { theme: string, toggleTheme: () => void }) {
+const NAV_ITEMS = [
+  { name: 'Dashboard',           path: '/dashboard',           icon: <BarChart3 size={15} /> },
+  { name: 'Nuevo Trámite',       path: '/nuevo-tramite',       icon: <Plus size={15} /> },
+  { name: 'Mis Trámites',        path: '/tramites',            icon: <Activity size={15} /> },
+  { name: 'Reg. Documento',      path: '/registro-respuesta',  icon: <FileText size={15} /> },
+  { name: 'Configuración',       path: '/configuracion',       icon: <Settings size={15} /> },
+];
+
+function GlobalTopNav({ theme, toggleTheme }: { theme: string; toggleTheme: () => void }) {
   const pathname = usePathname();
-  
+
   return (
-    <header className="fixed top-4 left-6 right-6 z-50">
-      <nav className="flex justify-between items-center max-w-[1500px] mx-auto p-4 bg-white/90 dark:bg-black/80 backdrop-blur-md rounded-2xl border border-white/20 dark:border-white/5 shadow-xl">
-        {/* Left: Branding */}
-        <div className="flex items-center gap-6">
-           <Link href="/dashboard" className="flex items-center gap-6 group">
-             <div className="w-10 h-10 bg-slate-900 dark:bg-white rounded-2xl flex items-center justify-center text-white dark:text-black shadow-xl group-hover:scale-110 transition-transform">
-               <Activity size={20} />
-             </div>
-             <div>
-               <h1 className="text-xl font-black tracking-tighter text-slate-900 dark:text-white leading-none">Diagnostic</h1>
-               <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] mt-1">GMM PLATFORM V12</p>
-             </div>
-           </Link>
+    <header
+      style={{ background: 'var(--gmm-topbar-bg)' }}
+      className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center px-6 gap-6 shadow-lg"
+    >
+      {/* ── Branding ── */}
+      <Link href="/dashboard" className="flex items-center gap-3 shrink-0 group">
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md
+                     transition-transform duration-200 group-hover:scale-110"
+          style={{ background: '#FFAA00' }}
+        >
+          <Activity size={18} style={{ color: '#343434' }} />
         </div>
-
-        {/* Center: Search / Ops Monitor */}
-        <div className="hidden xl:flex items-center bg-slate-100 dark:bg-white/5 rounded-2xl px-6 py-2 border border-slate-200 dark:border-white/10 w-[400px] group transition-all focus-within:w-[500px] focus-within:border-blue-500">
-           <Search size={16} className="text-slate-400 group-focus-within:text-blue-500" />
-           <input 
-             type="text" 
-             placeholder="Buscar Siniestros, Asegurados o Facturas..." 
-             className="bg-transparent border-none outline-none px-4 text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white w-full placeholder:text-slate-400"
-           />
+        <div className="hidden sm:block leading-none">
+          <p className="text-white font-black text-base tracking-tight leading-none">GMM</p>
+          <p className="text-[9px] font-bold uppercase tracking-[0.25em] mt-0.5" style={{ color: '#D8D9D7', opacity: 0.6 }}>
+            Platform v2
+          </p>
         </div>
+      </Link>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-4">
-          <div className="hidden lg:flex gap-4">
-            {[
-              { name: 'Dashboard', path: '/dashboard', icon: <BarChart3 size={16} /> },
-              { name: 'Nuevo Trámite', path: '/nuevo-tramite', icon: <Plus size={16} /> },
-              { name: 'Registrar Documento', path: '/registro-respuesta', icon: <FileText size={16} /> },
-              { name: 'Mis Trámites', path: '/tramites', icon: <Activity size={16} /> },
-              { name: 'Configuración', path: '/configuracion', icon: <Settings size={16} /> },
-            ].map(item => (
-              <Link
-                key={item.name} 
-                href={item.path}
-                className={`px-5 py-2.5 rounded-xl flex items-center gap-2.5 text-xs font-bold uppercase tracking-widest transition-all border border-transparent
-                  ${pathname === item.path 
-                    ? 'bg-slate-900 dark:bg-white text-white dark:text-black shadow-lg shadow-black/10' 
-                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white'}`}
-              >
-                {item.icon}
-                {item.name}
-              </Link>
-            ))}
-          </div>
-          
-          <div className="w-px h-8 bg-slate-200 dark:bg-white/10 mx-2" />
+      {/* ── Divider ── */}
+      <div className="w-px h-8 shrink-0" style={{ background: 'rgba(216,217,215,0.15)' }} />
 
-          <button 
-            onClick={toggleTheme}
-            className="p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-white/10 transition-all shadow-sm"
-          >
-            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
-          </button>
-          
-          <div className="w-10 h-10 rounded-full border-2 border-white dark:border-white/10 shadow-md overflow-hidden bg-slate-200 dark:bg-white/10 flex items-center justify-center text-slate-900 dark:text-white">
-            <User size={20} />
-          </div>
-        </div>
+      {/* ── Nav Items ── */}
+      <nav className="hidden lg:flex items-center gap-1 flex-1">
+        {NAV_ITEMS.map((item) => {
+          const isActive = pathname === item.path;
+          return (
+            <Link
+              key={item.path}
+              href={item.path}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold uppercase
+                         tracking-widest transition-all duration-200 relative"
+              style={{
+                color:      isActive ? '#343434'    : 'rgba(216,217,215,0.7)',
+                background: isActive ? '#FFAA00'    : 'transparent',
+                boxShadow:  isActive ? '0 2px 8px rgba(255,170,0,0.30)' : 'none',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  (e.currentTarget as HTMLElement).style.color = '#FFAA00';
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(255,170,0,0.08)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  (e.currentTarget as HTMLElement).style.color = 'rgba(216,217,215,0.7)';
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }
+              }}
+            >
+              {item.icon}
+              {item.name}
+            </Link>
+          );
+        })}
       </nav>
+
+      {/* ── Search ── */}
+      <div
+        className="hidden xl:flex items-center gap-3 rounded-xl px-4 py-2 transition-all duration-200
+                   focus-within:ring-2 min-w-[240px]"
+        style={{
+          background: 'rgba(216,217,215,0.07)',
+          border:     '1px solid rgba(216,217,215,0.10)',
+          '--tw-ring-color': '#FFAA00',
+        } as React.CSSProperties}
+      >
+        <Search size={14} style={{ color: '#D8D9D7', opacity: 0.4 }} className="shrink-0" />
+        <input
+          type="text"
+          placeholder="Buscar siniestros, asegurados..."
+          className="bg-transparent border-none outline-none text-[11px] font-semibold w-full
+                     placeholder:opacity-40"
+          style={{ color: '#D8D9D7' }}
+        />
+      </div>
+
+      {/* ── Right Actions ── */}
+      <div className="flex items-center gap-3 ml-auto">
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200
+                     hover:scale-110 active:scale-95"
+          style={{
+            background: 'rgba(216,217,215,0.08)',
+            border:     '1px solid rgba(216,217,215,0.12)',
+            color:      '#D8D9D7',
+          }}
+          aria-label="Cambiar tema"
+        >
+          {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
+        </button>
+
+        {/* Notifications */}
+        <button
+          className="relative w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200
+                     hover:scale-110 active:scale-95"
+          style={{
+            background: 'rgba(216,217,215,0.08)',
+            border:     '1px solid rgba(216,217,215,0.12)',
+            color:      '#D8D9D7',
+          }}
+          aria-label="Notificaciones"
+        >
+          <Bell size={15} />
+          {/* Punto rojo solo si hay alertas */}
+          <span
+            className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
+            style={{ background: '#B22B21', boxShadow: '0 0 6px rgba(178,43,33,0.7)' }}
+          />
+        </button>
+
+        {/* User avatar */}
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all
+                     duration-200 hover:scale-110 cursor-pointer"
+          style={{ background: 'rgba(216,217,215,0.15)', border: '1px solid rgba(216,217,215,0.20)' }}
+        >
+          <User size={16} style={{ color: '#D8D9D7' }} />
+        </div>
+      </div>
     </header>
   );
 }
@@ -97,13 +167,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className={`min-h-screen bg-gmm-bg flex flex-col font-plus-jakarta transition-all duration-500`}>
+    <div className="min-h-screen flex flex-col font-plus-jakarta transition-all duration-500"
+         style={{ background: 'var(--gmm-bg)', color: 'var(--gmm-text)' }}>
       
       <GlobalTopNav theme={theme} toggleTheme={toggleTheme} />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 relative h-screen overflow-hidden pt-28">
-        <main className="flex-1 overflow-y-auto relative z-10 p-8">
+      {/* Main Content — offset for fixed topbar (h-16 = 64px) */}
+      <div className="flex-1 flex flex-col min-w-0 relative overflow-hidden pt-16">
+        <main className="flex-1 overflow-y-auto relative z-10 p-6 md:p-8 custom-scrollbar">
           <div className="max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-2 duration-700">
             {children}
           </div>
