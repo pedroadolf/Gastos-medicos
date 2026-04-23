@@ -72,10 +72,10 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
           </div>
 
           <div>
-            <p className="text-[13px] font-black uppercase tracking-[0.2em] mb-1" style={{ color: 'var(--gmm-text-muted)' }}>
+            <p className="gmm-text-small font-black uppercase tracking-[0.2em] mb-1" style={{ color: 'var(--gmm-text-muted)' }}>
               Asegurado / Afectado
             </p>
-            <h3 className="text-3xl font-black uppercase tracking-tight leading-none" style={{ color: 'var(--gmm-text)' }}>
+            <h3 className="text-2xl font-black uppercase tracking-tight leading-none" style={{ color: 'var(--gmm-text)' }}>
               {event.patientName}{' '}
               <span style={{ fontWeight: 300, margin: '0 8px', color: 'var(--gmm-text-muted)' }}>|</span>{' '}
               <span style={{ color: '#FFAA00' }}>{event.affectedName || event.patientName}</span>
@@ -131,23 +131,24 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       </div>
 
       {/* ── BODY ── */}
-      <div className="p-12 flex flex-col xl:flex-row gap-16">
+      <div className="p-8 flex flex-col xl:flex-row gap-12">
 
         {/* LEFT: Saldo disponible + barra de progreso */}
         <div className="flex-1 space-y-10">
           <div className="p-10 rounded-[32px]" style={{ background: 'var(--gmm-bg-panel)', border: '1px solid var(--gmm-border)' }}>
             <div className="flex justify-between items-end mb-8">
               <div>
-                <p className="text-[15px] font-black uppercase tracking-[0.25em] mb-2" style={{ color: 'var(--gmm-text-muted)' }}>
+              <div>
+                <p className="gmm-text-small font-black uppercase tracking-[0.25em] mb-1" style={{ color: 'var(--gmm-text-muted)' }}>
                   Saldo Disponible del Seguro
                 </p>
-                <h4 className="text-6xl font-black tracking-tighter" style={{ color: 'var(--gmm-text)' }}>
+                <h4 className="text-5xl font-black tracking-tighter" style={{ color: 'var(--gmm-text)' }}>
                   ${available.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </h4>
               </div>
               <div className="text-right">
-                <span className="text-4xl font-black" style={{ color: '#FFAA00' }}>{consumedPct.toFixed(1)}%</span>
-                <p className="text-[13px] font-black uppercase tracking-widest" style={{ color: 'var(--gmm-text-muted)' }}>Consumido</p>
+                <span className="text-3xl font-black" style={{ color: '#FFAA00' }}>{consumedPct.toFixed(1)}%</span>
+                <p className="gmm-text-small font-black uppercase tracking-widest" style={{ color: 'var(--gmm-text-muted)' }}>Consumido</p>
               </div>
             </div>
 
@@ -205,7 +206,7 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
           ].map((stat, i) => (
             <div
               key={i}
-              className="p-10 rounded-[28px] transition-all duration-300"
+              className="p-8 rounded-[24px] transition-all duration-300"
               style={{ background: 'var(--gmm-card)', border: '1px solid var(--gmm-border)' }}
               onMouseEnter={e => {
                 const el = e.currentTarget as HTMLElement;
@@ -218,13 +219,13 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
                 el.style.transform = 'none';
               }}
             >
-              <p className="text-[13px] font-black uppercase tracking-[0.2em] mb-5" style={{ color: 'var(--gmm-text-muted)' }}>
+              <p className="gmm-text-small font-black uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--gmm-text-muted)' }}>
                 {stat.label}
               </p>
-              <p className="text-4xl font-black tracking-tight mb-2" style={{ color: stat.color }}>
+              <p className="text-3xl font-black tracking-tight mb-1" style={{ color: stat.color }}>
                 ${(stat.value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
-              <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: 'var(--gmm-text-muted)' }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--gmm-text-muted)' }}>
                 {stat.sub}
               </p>
             </div>

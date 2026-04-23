@@ -45,9 +45,14 @@
   --gmm-card:        #FFFFFF;   /* Tarjetas */
   --gmm-text:        #343434;   /* Texto principal */
   --gmm-text-muted:  #7A7875;   /* Texto secundario */
-  --gmm-border:      rgba(52, 52, 52, 0.10);
-  --gmm-shadow:      0 4px 24px rgba(52, 52, 52, 0.08);
-  --gmm-shadow-lg:   0 20px 60px rgba(52, 52, 52, 0.12);
+  --gmm-border:      rgba(52, 52, 52, 0.08);
+  --gmm-shadow:      0 4px 20px rgba(52, 52, 52, 0.06);
+  --gmm-shadow-lg:   0 16px 48px rgba(52, 52, 52, 0.10);
+
+  /* Spacing Tokens (8-rule) */
+  --gmm-gap:         16px;
+  --gmm-padding:     24px;
+  --gmm-radius:      24px;
 
   /* Topbar */
   --gmm-topbar-bg:   #343434;
@@ -111,13 +116,49 @@
 
   /* ── Core Card ── */
   .gmm-box {
-    background-color: var(--gmm-card);
-    color: var(--gmm-text);
-    border: 1px solid var(--gmm-border);
-    border-radius: 20px;
+    @apply bg-gmm-card border border-gmm-border;
+    border-radius: var(--gmm-radius);
+    padding: var(--gmm-padding);
     box-shadow: var(--gmm-shadow);
-    padding: 2rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: auto; /* Evitar globos */
+  }
+
+  .gmm-box-kpi {
+    @apply gmm-box;
+    padding: 20px 24px;
+  }
+
+  /* Typography Utilities */
+  .gmm-title-h1 {
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .gmm-title-h2 {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .gmm-kpi-value {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .gmm-text-body {
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .gmm-text-small {
+    font-size: 12px;
+    font-weight: 400;
   }
 
   .gmm-box:hover {

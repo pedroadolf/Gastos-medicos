@@ -219,7 +219,7 @@ export default function DashboardPage() {
   ];
 
    return (
-    <div className="space-y-16 pb-32">
+    <div className="space-y-12 pb-32">
 
       {/* SECCIÓN 1: PANORAMA GLOBAL */}
       <Section 
@@ -238,14 +238,14 @@ export default function DashboardPage() {
         title="2. Análisis Financiero" 
         subtitle="Distribución inteligente del gasto y consumo acumulado"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
            <ConsumptionDonut data={distributionData} />
 
-           <div className="gmm-box h-full flex flex-col p-10">
-              <div className="flex justify-between items-center mb-10">
+           <div className="gmm-box h-full flex flex-col p-8">
+              <div className="flex justify-between items-center mb-8">
                  <div>
-                    <h3 className="text-[14px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">Consumo por Familiar</h3>
-                    <p className="text-[12px] text-slate-400 dark:text-slate-300 font-bold uppercase tracking-widest mt-1">Impacto presupuestal por integrante</p>
+                    <h3 className="gmm-title-h2 text-slate-900 dark:text-white">Consumo por Familiar</h3>
+                    <p className="gmm-text-small text-slate-400 dark:text-slate-300 font-bold uppercase tracking-widest mt-1">Impacto presupuestal por integrante</p>
                  </div>
                  <div className="px-4 py-1.5 bg-blue-600/10 rounded-full text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.1em]">Tiempo Real</div>
               </div>
@@ -300,7 +300,7 @@ export default function DashboardPage() {
               </span>
             </div>
             
-            <div className="flex flex-col gap-12">
+            <div className="flex flex-col gap-4">
               {clinicalEvents.map((event, i) => (
                 <EventMonitorCard key={i} event={event} index={i} onPhotoUpload={handlePhotoUpload} />
               ))}

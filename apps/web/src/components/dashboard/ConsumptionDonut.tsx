@@ -56,11 +56,11 @@ export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
 
   return (
     <div className="gmm-box p-0 h-full overflow-hidden flex flex-col">
-      <div className="flex justify-between items-center p-10 border-b"
+      <div className="flex justify-between items-center p-6 border-b"
            style={{ background: 'var(--gmm-bg-panel)', borderColor: 'var(--gmm-border)' }}>
          <div>
-            <h3 className="text-[12px] font-black uppercase tracking-[0.3em]" style={{ color: 'var(--gmm-text)' }}>Distribución del Consumo</h3>
-            <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--gmm-text-muted)' }}>Participación por Asegurado</p>
+            <h3 className="gmm-title-h2" style={{ color: 'var(--gmm-text)' }}>Distribución del Consumo</h3>
+            <p className="gmm-text-small font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--gmm-text-muted)' }}>Participación por Asegurado</p>
          </div>
          <div className="text-right">
             <p className="text-[8px] font-black uppercase mb-1" style={{ color: 'var(--gmm-text-muted)' }}>Total Consolidado</p>
@@ -68,7 +68,7 @@ export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
          </div>
       </div>
 
-      <div className="p-10 flex-1 flex flex-col justify-center">
+      <div className="p-8 flex-1 flex flex-col justify-center">
 
       <div className="h-[300px] w-full">
         <ResponsiveContainer id="consumption-donut-chart" width="99%" height="99%" debounce={100} minHeight={300}>

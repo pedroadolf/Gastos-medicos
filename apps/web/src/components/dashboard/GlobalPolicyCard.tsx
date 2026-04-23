@@ -14,10 +14,10 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
       {/* Contenido Principal */}
       <div className="flex flex-col lg:flex-row border-b border-slate-200 dark:border-white/5">
         {/* Panel Izquierdo: Póliza Primaria */}
-        <div className="flex-1 p-12 lg:border-r border-slate-200 dark:border-white/5">
-          <div className="flex items-center gap-4 mb-10">
-            <div className="h-10 w-2 rounded-full" style={{ background: '#FFAA00' }} />
-            <h2 className="text-2xl font-black uppercase tracking-[0.25em] leading-none" style={{ color: 'var(--gmm-text)' }}>
+        <div className="flex-1 p-8 lg:border-r border-slate-200 dark:border-white/5">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="h-8 w-2 rounded-full" style={{ background: '#FFAA00' }} />
+            <h2 className="gmm-title-h1" style={{ color: 'var(--gmm-text)' }}>
               Póliza Colectiva <span style={{ color: '#FFAA00' }}>— MetLife 2026</span>
             </h2>
           </div>
@@ -43,19 +43,19 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
               <p className="text-[14px] font-black uppercase tracking-[0.2em] mb-3" style={{ color: 'var(--gmm-text-muted)' }}>Asegurado Titular</p>
               <p className="text-2xl font-black" style={{ color: 'var(--gmm-text)' }}>Fonseca Aguilar, Claudia</p>
             </div>
-            <div className="md:col-span-2 pt-8 border-t border-slate-50 dark:border-white/5">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="md:col-span-2 pt-6 border-t border-slate-50 dark:border-white/5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <p className="text-[14px] font-black uppercase tracking-[0.2em] mb-3" style={{ color: 'var(--gmm-text-muted)' }}>Suma Asegurada</p>
-                  <p className="text-3xl font-black" style={{ color: 'var(--gmm-text)' }}>${(totalSum).toLocaleString()} <span className="text-sm font-bold uppercase" style={{ color: 'var(--gmm-text-muted)' }}>MXN</span></p>
+                  <p className="gmm-text-small font-black uppercase tracking-[0.2em] mb-2" style={{ color: 'var(--gmm-text-muted)' }}>Suma Asegurada</p>
+                  <p className="text-2xl font-black" style={{ color: 'var(--gmm-text)' }}>${(totalSum).toLocaleString()} <span className="text-xs font-bold uppercase" style={{ color: 'var(--gmm-text-muted)' }}>MXN</span></p>
                 </div>
                 <div>
-                  <p className="text-[14px] font-black uppercase tracking-[0.2em] mb-3" style={{ color: 'var(--gmm-text-muted)' }}>Deducible Base</p>
-                  <p className="text-2xl font-black" style={{ color: 'var(--gmm-text)' }}>$6,602.88 <span className="text-sm font-bold uppercase" style={{ color: 'var(--gmm-text-muted)' }}>/ Año</span></p>
+                  <p className="gmm-text-small font-black uppercase tracking-[0.2em] mb-2" style={{ color: 'var(--gmm-text-muted)' }}>Deducible Base</p>
+                  <p className="text-xl font-black" style={{ color: 'var(--gmm-text)' }}>$6,602.88 <span className="text-xs font-bold uppercase" style={{ color: 'var(--gmm-text-muted)' }}>/ Año</span></p>
                 </div>
                 <div>
-                  <p className="text-[14px] font-black uppercase tracking-[0.2em] mb-3" style={{ color: 'var(--gmm-text-muted)' }}>Coaseguro</p>
-                  <p className="text-2xl font-black" style={{ color: 'var(--gmm-text)' }}>10% <span className="text-[11px] font-bold uppercase" style={{ color: 'var(--gmm-text-muted)' }}>(Tope $17,500)</span></p>
+                  <p className="gmm-text-small font-black uppercase tracking-[0.2em] mb-2" style={{ color: 'var(--gmm-text-muted)' }}>Coaseguro</p>
+                  <p className="text-xl font-black" style={{ color: 'var(--gmm-text)' }}>10% <span className="text-[10px] font-bold uppercase" style={{ color: 'var(--gmm-text-muted)' }}>(Tope $17,500)</span></p>
                 </div>
               </div>
             </div>
@@ -63,22 +63,22 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
         </div>
 
         {/* Panel Derecho: Excesos con fondo distinguido */}
-        <div className="lg:w-[480px] p-12 relative overflow-hidden" style={{ background: 'var(--gmm-bg-panel)' }}>
-          <div className="absolute top-0 right-0 p-8" style={{ opacity: 0.04 }}>
-            <Shield size={120} style={{ color: 'var(--gmm-text)' }} />
+        <div className="lg:w-[420px] p-8 relative overflow-hidden" style={{ background: 'var(--gmm-bg-panel)' }}>
+          <div className="absolute top-0 right-0 p-6" style={{ opacity: 0.04 }}>
+            <Shield size={100} style={{ color: 'var(--gmm-text)' }} />
           </div>
           
-          <div className="flex items-center gap-4 mb-10 relative z-10">
-            <div className="h-10 w-2 rounded-full" style={{ background: '#22C55E' }} />
-            <h2 className="text-2xl font-black uppercase tracking-[0.25em] leading-none" style={{ color: 'var(--gmm-text)' }}>
+          <div className="flex items-center gap-4 mb-8 relative z-10">
+            <div className="h-8 w-2 rounded-full" style={{ background: '#22C55E' }} />
+            <h2 className="gmm-title-h1" style={{ color: 'var(--gmm-text)' }}>
               Capa de Excesos <span style={{ color: '#22C55E' }}>— M172</span>
             </h2>
           </div>
 
-          <div className="space-y-10 relative z-10">
+          <div className="space-y-8 relative z-10">
             <div>
-              <p className="text-[14px] font-black uppercase tracking-[0.2em] mb-3" style={{ color: 'var(--gmm-text-muted)' }}>Póliza Individual de Respaldo</p>
-              <p className="text-3xl font-black" style={{ color: 'var(--gmm-text)' }}>M172 1011</p>
+              <p className="gmm-text-small font-black uppercase tracking-[0.2em] mb-2" style={{ color: 'var(--gmm-text-muted)' }}>Póliza Individual de Respaldo</p>
+              <p className="text-2xl font-black" style={{ color: 'var(--gmm-text)' }}>M172 1011</p>
             </div>
             
             <div className="grid grid-cols-2 gap-8">
@@ -109,19 +109,19 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
           { icon: <DollarSign size={22} />, label: 'Coaseguro', value: '$42k', sub: 'Pagado este año', accent: '#22C55E' },
           { icon: <Activity size={22} />, label: 'Alertas', value: '0', sub: 'Eventos críticos', accent: 'var(--gmm-text-muted)' },
         ].map((kpi, idx) => (
-          <div key={idx} className="p-10 flex items-center gap-6 transition-colors cursor-default"
+          <div key={idx} className="p-6 flex items-center gap-4 transition-colors cursor-default"
                style={{ borderRight: idx < 3 ? '1px solid var(--gmm-border)' : 'none' }}
                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,170,0,0.04)'}
                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
           >
-            <div className="w-14 h-14 rounded-[18px] flex items-center justify-center shrink-0"
+            <div className="w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0"
                  style={{ background: `${kpi.accent}18`, color: kpi.accent, border: `1px solid ${kpi.accent}28` }}>
               {kpi.icon}
             </div>
             <div>
-              <p className="text-[12px] font-black uppercase tracking-[0.2em] mb-1" style={{ color: 'var(--gmm-text-muted)' }}>{kpi.label}</p>
-              <p className="text-4xl font-black tracking-tight leading-none" style={{ color: 'var(--gmm-text)' }}>{kpi.value}</p>
-              <p className="text-[10px] font-bold uppercase tracking-widest mt-1.5" style={{ color: 'var(--gmm-text-muted)' }}>{kpi.sub}</p>
+              <p className="gmm-text-small font-black uppercase tracking-[0.2em] mb-1" style={{ color: 'var(--gmm-text-muted)' }}>{kpi.label}</p>
+              <p className="gmm-kpi-value" style={{ color: 'var(--gmm-text)' }}>{kpi.value}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--gmm-text-muted)' }}>{kpi.sub}</p>
             </div>
           </div>
         ))}
