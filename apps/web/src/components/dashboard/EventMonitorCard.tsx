@@ -98,7 +98,7 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       <div className="p-12 flex flex-col xl:flex-row gap-16">
         {/* Lado Izquierdo: Saldo Disponible */}
         <div className="flex-1 space-y-10">
-          <div className="bg-gmm-bg-panel/40 dark:bg-white/[0.03] p-10 rounded-[40px] border border-slate-200 dark:border-white/5 shadow-inner">
+          <div className="bg-gmm-bg-panel dark:bg-white/[0.03] p-10 rounded-[40px] border border-slate-300 dark:border-white/5 shadow-inner">
             <div className="flex justify-between items-end mb-8">
               <div>
                 <p className="text-[15px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.25em] mb-2">Saldo Disponible del Seguro</p>

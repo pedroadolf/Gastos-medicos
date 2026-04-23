@@ -56,7 +56,7 @@ export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
 
   return (
     <div className="gmm-box p-0 h-full overflow-hidden flex flex-col">
-      <div className="flex justify-between items-center p-10 bg-gmm-bg-panel/30 dark:bg-white/[0.02] border-b border-slate-200 dark:border-white/5">
+      <div className="flex justify-between items-center p-10 bg-gmm-bg-panel dark:bg-white/[0.02] border-b border-slate-300 dark:border-white/5">
          <div>
             <h3 className="text-[12px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">Distribución del Consumo</h3>
             <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-widest mt-1">Participación por Asegurado</p>

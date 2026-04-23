@@ -101,7 +101,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
       </div>
 
       {/* Footer KPI Cards: Más grandes y claros */}
-    <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-slate-200 dark:divide-white/5 bg-gmm-bg-panel/50 dark:bg-zinc-900/50">
+    <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x divide-slate-300 dark:divide-white/5 bg-gmm-bg-panel dark:bg-zinc-900/50">
         {[
           { icon: <Users size={24} />, label: 'Integrantes', value: '4', sub: 'Claudia + Familia', color: 'text-blue-600' },
           { icon: <FolderOpen size={24} />, label: 'Siniestros', value: '3', sub: 'Trámites en curso', color: 'text-orange-500' },

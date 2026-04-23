@@ -32,7 +32,7 @@
 
   /* Light Theme - Gallery Neutral */
   --gmm-bg: #DAE0E8; /* Gris Azulado Principal */
-  --gmm-bg-panel: #E5EBEF; /* Un tono ligeramente más claro que el bg para capas internas */
+  --gmm-bg-panel: #CED4DA; /* Gris más obscuro para paneles internos */
   --gmm-card: #FFFFFF;
   --gmm-text-muted: #71717A;
   --gmm-border: rgba(0, 0, 0, 0.08); 
@@ -81,8 +81,8 @@
   .gmm-box {
     @apply bg-white dark:bg-[#53535C] 
            rounded-[50px] 
-           border border-slate-200/50 dark:border-white/10 
-           shadow-[0_25px_60px_-15px_rgba(0,0,0,0.1)] 
+           border border-slate-300 dark:border-white/10 
+           shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] 
            dark:shadow-[0_40px_80px_rgba(0,0,0,0.6)]
            hover:-translate-y-1
            transition-all duration-300
