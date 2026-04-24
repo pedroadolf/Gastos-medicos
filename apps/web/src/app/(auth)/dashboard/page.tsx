@@ -21,10 +21,10 @@ import { getInsuredProfiles, upsertInsuredProfile } from '@/app/actions/dashboar
 // ─── Data Helpers ──────────────
 
 const categoryData = [
-  { name: 'Claudia', Hospital: 2000, Farmacia: 5000, Honorarios: 2300, Estudios: 0 },
-  { name: 'Pedro', Hospital: 1100000, Farmacia: 400000, Honorarios: 200000, Estudios: 0 },
-  { name: 'Sebastian', Hospital: 45000, Farmacia: 20000, Honorarios: 20000, Estudios: 0 },
-  { name: 'Emilio', Hospital: 5000, Farmacia: 5000, Honorarios: 5000, Estudios: 0 },
+  { name: 'Claudia', Hospital: 1000, Farmacia: 5000, Honorarios: 3300, Estudios: 0 },
+  { name: 'Pedro', Hospital: 400000, Farmacia: 100000, Honorarios: 66195, Estudios: 4113 },
+  { name: 'Sebastian', Hospital: 15000, Farmacia: 5000, Honorarios: 4300, Estudios: 0 },
+  { name: 'Emilio', Hospital: 0, Farmacia: 0, Honorarios: 0, Estudios: 0 },
 ];
 
 // ─── Internal Components ────────
@@ -144,55 +144,55 @@ export default function DashboardPage() {
   const clinicalEvents = [
     {
       patientName: "CLAUDIA FONSECA AGUILAR",
-      policyNumber: "02001-2012432",
-      claimId: "01210200485-018",
-      consumed: 566195.27,
+      policyNumber: "02001-2212432",
+      claimId: "02250211464-000",
+      consumed: 9300.00,
       sublimit: 3961725.00,
       deductibleAmount: 6602.88,
       coaseguroPercentage: 10,
-      pendingAmount: 45000.00,
+      pendingAmount: 0,
       status: "Revision",
-      diagnosis: "Post-Operatorio / Control",
+      diagnosis: "Reembolso Gastos Médicos",
       role: "Titular",
-      age: "45",
-      lastUpdate: "Hace 2 días",
+      age: "57",
+      lastUpdate: "14 Marzo 2025",
       patientPhoto: patientPhotos["CLAUDIA FONSECA AGUILAR"]
     },
     {
       patientName: "PEDRO ADOLFO SOTO HERNANDEZ",
       policyNumber: "02001-2012432",
-      claimId: "01210200486-019",
-      consumed: 85000.00,
+      claimId: "01210200485-018",
+      consumed: 570308.29,
       sublimit: 3961725.00,
       deductibleAmount: 6602.88,
       coaseguroPercentage: 10,
-      pendingAmount: 12000.00,
+      pendingAmount: 7772.00,
       status: "Revision",
-      diagnosis: "Cirugía General",
+      diagnosis: "COVID-19 / Enfermedad Respiratoria",
       role: "Dependiente",
-      age: "46",
-      lastUpdate: "Hace 5 días",
+      age: "61",
+      lastUpdate: "3 Junio 2025",
       patientPhoto: patientPhotos["PEDRO ADOLFO SOTO HERNANDEZ"]
     },
     {
       patientName: "SEBASTIAN SOTO FONSECA",
-      policyNumber: "02001-2012432",
+      policyNumber: "02001-2212432",
       claimId: "01210200487-020",
-      consumed: 24300.00,
+      consumed: 0,
       sublimit: 3961725.00,
       deductibleAmount: 6602.88,
       coaseguroPercentage: 10,
       pendingAmount: 0,
       status: "Cerrado",
-      diagnosis: "Consulta Pediátrica",
+      diagnosis: "Control / Preventivo",
       role: "Dependiente",
-      age: "12",
-      lastUpdate: "Marzo 2024",
+      age: "18",
+      lastUpdate: "Enero 2026",
       patientPhoto: patientPhotos["SEBASTIAN SOTO FONSECA"]
     },
     {
-      patientName: "ISABELLA SOTO FONSECA",
-      policyNumber: "02001-2012432",
+      patientName: "EMILIO SOTO FONSECA",
+      policyNumber: "02001-2212432",
       claimId: "---",
       consumed: 0,
       sublimit: 3961725.00,
@@ -202,9 +202,9 @@ export default function DashboardPage() {
       status: "Preventivo",
       diagnosis: "Revision Anual",
       role: "Dependiente",
-      age: "8",
+      age: "17",
       lastUpdate: "Pendiente",
-      patientPhoto: patientPhotos["ISABELLA SOTO FONSECA"]
+      patientPhoto: patientPhotos["EMILIO SOTO FONSECA"]
     }
   ];
 
@@ -212,10 +212,10 @@ export default function DashboardPage() {
   const consumedSum = clinicalEvents.reduce((acc, curr) => acc + curr.consumed, 0);
 
   const distributionData = [
-    { name: 'Claudia', value: 566195.27, color: '#2563EB' },
-    { name: 'Pedro', value: 85000, color: '#F59E0B' },
-    { name: 'Sebastian', value: 24300, color: '#64748B' },
-    { name: 'Isabella', value: 0, color: '#E2E8F0' },
+    { name: 'Claudia', value: 9300.00, color: '#2563EB' },
+    { name: 'Pedro', value: 570308.29, color: '#F59E0B' },
+    { name: 'Sebastian', value: 0, color: '#64748B' },
+    { name: 'Emilio', value: 0, color: '#E2E8F0' },
   ];
 
    return (
