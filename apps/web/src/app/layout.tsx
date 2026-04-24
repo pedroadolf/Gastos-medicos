@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import "../styles/design-system.css";
 import AuthProvider from "@/components/AuthProvider";
 
 const inter = Inter({ 
@@ -25,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${inter.variable} ${plusJakartaSans.variable} dark`} suppressHydrationWarning>
-      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased font-body" suppressHydrationWarning>
+    <html lang="es" className={`${inter.variable} ${plusJakartaSans.variable} light`} suppressHydrationWarning>
+      <body className="min-h-screen antialiased" suppressHydrationWarning>
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

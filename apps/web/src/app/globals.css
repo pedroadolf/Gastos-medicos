@@ -1,9 +1,7 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
-
-/* ─── Google Fonts ─────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 /* ─── Tailwind Theme Extension ─────────────────────────────────────── */
 @theme {
@@ -45,14 +43,14 @@
   --gmm-card:        #FFFFFF;   /* Tarjetas */
   --gmm-text:        #343434;   /* Texto principal */
   --gmm-text-muted:  #7A7875;   /* Texto secundario */
-  --gmm-border:      rgba(52, 52, 52, 0.08);
-  --gmm-shadow:      0 4px 20px rgba(52, 52, 52, 0.06);
-  --gmm-shadow-lg:   0 16px 48px rgba(52, 52, 52, 0.10);
+  --gmm-border:      rgba(52, 52, 52, 0.10);
+  --gmm-shadow:      0 2px 12px rgba(52, 52, 52, 0.04);
+  --gmm-shadow-lg:   0 12px 32px rgba(52, 52, 52, 0.08);
 
   /* Spacing Tokens (8-rule) */
   --gmm-gap:         16px;
-  --gmm-padding:     24px;
-  --gmm-radius:      24px;
+  --gmm-padding:     20px;
+  --gmm-radius:      20px;
 
   /* Topbar */
   --gmm-topbar-bg:   #343434;
@@ -65,12 +63,12 @@
   /* Dark semantic tokens */
   --gmm-bg:          #121212;   /* Casi negro — fondo principal */
   --gmm-bg-panel:    #1E1E1E;   /* Paneles internos */
-  --gmm-card:        #2A2A2A;   /* Tarjetas */
-  --gmm-text:        #D8D9D7;   /* Texto principal suave (no quema los ojos) */
+  --gmm-card:        #242424;   /* Tarjetas un poco más claras */
+  --gmm-text:        #D8D9D7;   /* Texto principal suave */
   --gmm-text-muted:  #8A8A88;
-  --gmm-border:      rgba(216, 217, 215, 0.08);
-  --gmm-shadow:      0 4px 24px rgba(0, 0, 0, 0.40);
-  --gmm-shadow-lg:   0 20px 60px rgba(0, 0, 0, 0.60);
+  --gmm-border:      rgba(216, 217, 215, 0.06);
+  --gmm-shadow:      0 4px 20px rgba(0, 0, 0, 0.30);
+  --gmm-shadow-lg:   0 16px 48px rgba(0, 0, 0, 0.50);
 
   /* Topbar — más oscuro en dark */
   --gmm-topbar-bg:   #1A1A1A;
@@ -85,29 +83,29 @@
   }
 
   body {
+    @apply transition-colors duration-300;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-color: var(--gmm-bg);
     color: var(--gmm-text);
     /* Fondo tipo folder con textura sutil */
     background-image:
-      radial-gradient(circle at 15% 15%, rgba(52,52,52,0.025) 1.5px, transparent 1.5px),
-      radial-gradient(circle at 85% 85%, rgba(52,52,52,0.015) 1px, transparent 1px);
-    background-size: 28px 28px, 14px 14px;
+      radial-gradient(circle at 15% 15%, rgba(52,52,52,0.02) 1px, transparent 1px),
+      radial-gradient(circle at 85% 85%, rgba(52,52,52,0.01) 0.5px, transparent 0.5px);
+    background-size: 24px 24px, 12px 12px;
     background-attachment: fixed;
-    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   [data-theme='dark'] body {
     background-image:
-      radial-gradient(circle at 15% 15%, rgba(255,170,0,0.03) 1.5px, transparent 1.5px),
-      radial-gradient(circle at 85% 85%, rgba(255,170,0,0.015) 1px, transparent 1px);
+      radial-gradient(circle at 15% 15%, rgba(255,170,0,0.02) 1px, transparent 1px),
+      radial-gradient(circle at 85% 85%, rgba(255,170,0,0.01) 0.5px, transparent 0.5px);
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    @apply tracking-tight;
   }
 }
 
@@ -116,17 +114,21 @@
 
   /* ── Core Card ── */
   .gmm-box {
-    @apply bg-gmm-card border border-gmm-border;
+    @apply bg-gmm-card border border-gmm-border overflow-hidden;
     border-radius: var(--gmm-radius);
     padding: var(--gmm-padding);
     box-shadow: var(--gmm-shadow);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    height: auto; /* Evitar globos */
+    height: auto;
   }
 
   .gmm-box-kpi {
-    @apply gmm-box;
-    padding: 20px 24px;
+    @apply bg-gmm-card border border-gmm-border overflow-hidden;
+    border-radius: var(--gmm-radius);
+    padding: 16px 20px;
+    box-shadow: var(--gmm-shadow);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: auto;
   }
 
   /* Typography Utilities */
@@ -162,7 +164,6 @@
   }
 
   .gmm-box:hover {
-    transform: translateY(-2px);
     box-shadow: var(--gmm-shadow-lg);
   }
 

@@ -219,7 +219,7 @@ export default function DashboardPage() {
   ];
 
    return (
-    <div className="space-y-12 pb-32">
+    <div className="space-y-10 pb-24">
 
       {/* SECCIÓN 1: PANORAMA GLOBAL */}
       <Section 
@@ -238,10 +238,10 @@ export default function DashboardPage() {
         title="2. Análisis Financiero" 
         subtitle="Distribución inteligente del gasto y consumo acumulado"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
            <ConsumptionDonut data={distributionData} />
 
-           <div className="gmm-box h-full flex flex-col p-8">
+           <div className="gmm-box h-full flex flex-col p-6">
               <div className="flex justify-between items-center mb-8">
                  <div>
                     <h3 className="gmm-title-h2 text-slate-900 dark:text-white">Consumo por Familiar</h3>
@@ -285,12 +285,12 @@ export default function DashboardPage() {
         title="3. Gestión Operativa" 
         subtitle="Control de siniestros activos y grupo asegurado"
       >
-        <div className="space-y-16">
+        <div className="space-y-10">
           <div className="w-full">
              <ClaimsKanban />
           </div>
 
-          <div className="space-y-10">
+          <div className="space-y-8">
             <div className="flex items-center gap-4 ml-4">
               <h3 className="text-sm font-black tracking-[0.2em] text-slate-900 dark:text-white uppercase">
                 Perfiles del Grupo

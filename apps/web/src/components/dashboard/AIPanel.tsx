@@ -24,7 +24,7 @@ export function AIPanel({ ai }: AIPanelProps) {
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`p-6 rounded-[32px] border ${getSeverityStyles(ai.severity)} relative overflow-hidden`}
+      className={`p-5 rounded-[20px] border ${getSeverityStyles(ai.severity)} relative overflow-hidden shadow-sm`}
     >
       <div className="flex items-center gap-3 mb-6">
         <div className="p-2 bg-black/20 rounded-xl">

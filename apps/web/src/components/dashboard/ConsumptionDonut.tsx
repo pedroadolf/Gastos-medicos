@@ -68,7 +68,7 @@ export function ConsumptionDonut({ data }: ConsumptionDonutProps) {
          </div>
       </div>
 
-      <div className="p-8 flex-1 flex flex-col justify-center">
+      <div className="p-6 flex-1 flex flex-col justify-center">
 
       <div className="h-[300px] w-full">
         <ResponsiveContainer id="consumption-donut-chart" width="99%" height="99%" debounce={100} minHeight={300}>

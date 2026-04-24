@@ -14,7 +14,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
       {/* Contenido Principal */}
       <div className="flex flex-col lg:flex-row border-b border-slate-200 dark:border-white/5">
         {/* Panel Izquierdo: Póliza Primaria */}
-        <div className="flex-1 p-8 lg:border-r border-slate-200 dark:border-white/5">
+        <div className="flex-1 p-6 lg:border-r border-slate-200 dark:border-white/5">
           <div className="flex items-center gap-4 mb-8">
             <div className="h-8 w-2 rounded-full" style={{ background: '#FFAA00' }} />
             <h2 className="gmm-title-h1" style={{ color: 'var(--gmm-text)' }}>
@@ -22,7 +22,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             <div>
               <p className="text-[14px] font-black uppercase tracking-[0.2em] mb-3" style={{ color: 'var(--gmm-text-muted)' }}>No. de Póliza</p>
               <p className="text-3xl font-black uppercase tracking-tight" style={{ color: 'var(--gmm-text)' }}>{policyNumber}</p>
@@ -63,7 +63,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
         </div>
 
         {/* Panel Derecho: Excesos con fondo distinguido */}
-        <div className="lg:w-[420px] p-8 relative overflow-hidden" style={{ background: 'var(--gmm-bg-panel)' }}>
+        <div className="lg:w-[420px] p-6 relative overflow-hidden" style={{ background: 'var(--gmm-bg-panel)' }}>
           <div className="absolute top-0 right-0 p-6" style={{ opacity: 0.04 }}>
             <Shield size={100} style={{ color: 'var(--gmm-text)' }} />
           </div>
@@ -92,7 +92,7 @@ export function GlobalPolicyCard({ totalSum, consumedSum, policyNumber }: Global
               </div>
             </div>
 
-            <div className="p-8 rounded-[20px]" style={{ background: 'var(--gmm-card)', border: '1px solid var(--gmm-border)' }}>
+            <div className="p-6 rounded-[20px]" style={{ background: 'var(--gmm-card)', border: '1px solid var(--gmm-border)' }}>
               <p className="text-[15px] leading-relaxed font-bold" style={{ color: 'var(--gmm-text-muted)' }}>
                 La cobertura de excesos activa automáticamente al superar <strong style={{ color: 'var(--gmm-text)', fontWeight: 900 }}>$2.0M</strong> en un solo evento, eliminando el riesgo de ruina financiera.
               </p>

@@ -131,13 +131,12 @@ export function EventMonitorCard({ event, index, onPhotoUpload }: EventMonitorCa
       </div>
 
       {/* ── BODY ── */}
-      <div className="p-8 flex flex-col xl:flex-row gap-12">
+      <div className="p-6 flex flex-col xl:flex-row gap-10">
 
         {/* LEFT: Saldo disponible + barra de progreso */}
-        <div className="flex-1 space-y-10">
-          <div className="p-10 rounded-[32px]" style={{ background: 'var(--gmm-bg-panel)', border: '1px solid var(--gmm-border)' }}>
+        <div className="flex-1 space-y-8">
+          <div className="p-8 rounded-[32px]" style={{ background: 'var(--gmm-bg-panel)', border: '1px solid var(--gmm-border)' }}>
             <div className="flex justify-between items-end mb-8">
-              <div>
               <div>
                 <p className="gmm-text-small font-black uppercase tracking-[0.25em] mb-1" style={{ color: 'var(--gmm-text-muted)' }}>
                   Saldo Disponible del Seguro
