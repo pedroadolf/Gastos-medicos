@@ -1,0 +1,877 @@
+{
+  "communities": {
+    "0": [
+      "actions_dashboard_getcriticalalerts",
+      "actions_dashboard_getinsuredprofiles",
+      "actions_dashboard_upsertinsuredprofile",
+      "apps_web_src_app_actions_dashboard_ts",
+      "apps_web_src_app_api_audit_autofix_route_ts",
+      "apps_web_src_app_api_dashboard_estado_cuenta_route_ts",
+      "apps_web_src_app_api_gmm_callback_route_ts",
+      "apps_web_src_app_api_notifications_route_ts",
+      "apps_web_src_app_api_pdf_generate_route_ts",
+      "apps_web_src_app_api_slo_route_ts",
+      "apps_web_src_app_api_tramite_create_route_ts",
+      "apps_web_src_app_api_tramites_id_autofix_route_ts",
+      "apps_web_src_app_api_tramites_id_zip_route_ts",
+      "apps_web_src_app_api_upload_storage_route_ts",
+      "apps_web_src_app_auth_dashboard_page_tsx",
+      "apps_web_src_lib_workflow_engine_ts",
+      "apps_web_src_scripts_setup_healing_ts",
+      "apps_web_src_services_auditorservice_ts",
+      "apps_web_src_services_supabase_ts",
+      "apps_web_src_services_zipengine_ts",
+      "autofix_route_post",
+      "create_route_post",
+      "dashboard_page_handlephotoupload",
+      "dashboard_page_loaddata",
+      "estado_cuenta_route_get",
+      "generate_route_post",
+      "gmm_callback_route_get",
+      "gmm_callback_route_post",
+      "lib_workflow_engine_assertstate",
+      "lib_workflow_engine_checkidempotency",
+      "lib_workflow_engine_saveidempotency",
+      "lib_workflow_engine_withlock",
+      "notifications_route_get",
+      "notifications_route_post",
+      "scripts_setup_healing_runmigration",
+      "services_auditorservice_auditorservice",
+      "services_auditorservice_auditorservice_audittramite",
+      "services_auditorservice_auditorservice_calculatescore",
+      "services_supabase_getenvconfig",
+      "services_supabase_getsupabaseservice",
+      "services_zipengine_generatezip",
+      "slo_route_get",
+      "upload_storage_route_post",
+      "zip_route_post"
+    ],
+    "1": [
+      "agentes_route_post",
+      "apps_web_src_app_api_agentes_route_ts",
+      "apps_web_src_app_api_documentos_route_ts",
+      "apps_web_src_app_auth_auditoria_page_tsx",
+      "apps_web_src_app_auth_siniestros_nuevo_page_tsx",
+      "apps_web_src_components_layout_copilot_tsx",
+      "apps_web_src_components_notifications_notificationcenter_tsx",
+      "apps_web_src_components_tramite_auditorpanel_tsx",
+      "apps_web_src_components_tramite_powerdashboard_tsx",
+      "apps_web_src_components_tramite_tramiteslist_tsx",
+      "auditoria_page_async",
+      "documentos_route_post",
+      "grafana_deploy_resilience_dashboard_deployalertrules",
+      "grafana_deploy_resilience_dashboard_deploydashboard",
+      "grafana_deploy_resilience_dashboard_main",
+      "layout_copilot_handlesend",
+      "notifications_notificationcenter_fetchdata",
+      "notifications_notificationcenter_getslocolor",
+      "notifications_notificationcenter_getslolabel",
+      "notifications_notificationcenter_markasread",
+      "notifications_notificationcenter_toggleopen",
+      "nuevo_page_formattime",
+      "nuevo_page_handleprocessbtn",
+      "nuevo_page_triggerfinalgeneration",
+      "nuevo_page_uploadfilesviaserver",
+      "orchestrator_master_orchestrator_fetch",
+      "scripts_deploy_dashboard_deploy",
+      "scripts_deploy_dashboard_js",
+      "scripts_grafana_deploy_resilience_dashboard_js",
+      "scripts_list_models_js",
+      "scripts_list_models_run",
+      "scripts_utils_simulate_gmm_js",
+      "tramite_auditorpanel_fetchaudit",
+      "tramite_auditorpanel_handleautofix",
+      "tramite_powerdashboard_fetchtramites",
+      "tramite_tramiteslist_fetchtramites",
+      "tramite_tramiteslist_handleautofix",
+      "utils_simulate_gmm_main",
+      "utils_simulate_gmm_runscenario"
+    ],
+    "2": [
+      "apps_web_src_app_api_audit_id_route_ts",
+      "apps_web_src_app_api_dashboard_metrics_route_ts",
+      "apps_web_src_app_api_metrics_route_ts",
+      "apps_web_src_app_api_workflow_execution_id_route_ts",
+      "apps_web_src_services_ai_engine_ts",
+      "apps_web_src_services_anomaly_detector_ts",
+      "apps_web_src_services_governance_engine_ts",
+      "apps_web_src_services_preventive_engine_ts",
+      "id_route_get",
+      "metrics_route_get",
+      "metrics_route_recordmetrics",
+      "services_ai_engine_analyzeincident",
+      "services_anomaly_detector_clusteranomalies",
+      "services_anomaly_detector_detectanomalies",
+      "services_anomaly_detector_generatecavemaninsight",
+      "services_anomaly_detector_recordanomalies",
+      "services_governance_engine_checkgovernance",
+      "services_governance_engine_getgovernancemode",
+      "services_governance_engine_queueforapproval",
+      "services_preventive_engine_decidepreventiveaction",
+      "services_preventive_engine_detecttrends",
+      "services_preventive_engine_gettrendstrength",
+      "services_preventive_engine_recordpreventiveaction"
+    ],
+    "3": [
+      "agent_main_artifacts_node",
+      "agent_main_build_orchestrator",
+      "agent_main_execution_node",
+      "agent_main_load_knowledge",
+      "agent_main_load_rules",
+      "agent_main_main",
+      "agent_main_planning_node",
+      "agent_main_rationale_104",
+      "agent_main_rationale_119",
+      "agent_main_rationale_154",
+      "agent_main_rationale_32",
+      "agent_main_rationale_44",
+      "agent_main_rationale_71",
+      "agent_main_rationale_92",
+      "agent_main_skills_node",
+      "apps_agent_main_py"
+    ],
+    "4": [
+      "orchestrator_master_orchestrator_masterorchestrator",
+      "orchestrator_master_orchestrator_masterorchestrator_constructor",
+      "orchestrator_master_orchestrator_masterorchestrator_decideplan",
+      "orchestrator_master_orchestrator_masterorchestrator_executestep",
+      "orchestrator_master_orchestrator_masterorchestrator_handlefailure",
+      "orchestrator_master_orchestrator_masterorchestrator_process",
+      "orchestrator_master_orchestrator_masterorchestrator_updatestate",
+      "scripts_orchestrator_master_orchestrator_js",
+      "scripts_seed_observability_js",
+      "scripts_seed_observability_seed",
+      "scripts_seed_observability_uuidv4",
+      "scripts_utils_log_event_js",
+      "utils_log_event_logevent"
+    ],
+    "5": [
+      "agent_main_projectstate",
+      "agent_main_rationale_24",
+      "agents_migracion_analyst_analyst_node",
+      "agents_migracion_analyst_analyststate",
+      "agents_migracion_analyst_generate_blueprint",
+      "agents_migracion_analyst_rationale_1",
+      "agents_migracion_analyst_rationale_19",
+      "agents_migracion_analyst_rationale_35",
+      "agents_migracion_analyst_rationale_43",
+      "agents_migracion_analyst_scan_repo",
+      "apps_agent_agents_migracion_analyst_py",
+      "typeddict"
+    ],
+    "6": [
+      "n8n_patch_resilience_logging_api_get",
+      "n8n_patch_resilience_logging_api_post",
+      "n8n_patch_resilience_logging_api_put",
+      "n8n_patch_resilience_logging_build_error_catcher_workflow",
+      "n8n_patch_resilience_logging_create_error_catcher",
+      "n8n_patch_resilience_logging_make_log_node",
+      "n8n_patch_resilience_logging_patch_resilience_workflow",
+      "n8n_patch_resilience_logging_rationale_107",
+      "n8n_patch_resilience_logging_rationale_61",
+      "scripts_n8n_patch_resilience_logging_py"
+    ],
+    "7": [
+      "apps_web_src_services_pdfengine_ts",
+      "services_pdfengine_pdfengine",
+      "services_pdfengine_pdfengine_applytransform",
+      "services_pdfengine_pdfengine_filldynamictemplate",
+      "services_pdfengine_pdfengine_generateexpediente",
+      "services_pdfengine_pdfengine_resolvevalue",
+      "services_pdfengine_pdfengine_safecheck",
+      "services_pdfengine_pdfengine_safesettext"
+    ],
+    "8": [
+      "apps_web_src_app_auth_auditoria_id_page_tsx",
+      "apps_web_src_hooks_usetramites_ts",
+      "apps_web_src_hooks_useworkflowlogs_ts",
+      "hooks_usetramites_usetramite",
+      "hooks_usetramites_usetramites",
+      "hooks_useworkflowlogs_useworkflowlogs",
+      "id_page_auditdetailpage"
+    ],
+    "9": [
+      "docs_architecture",
+      "n8n_data_register",
+      "n8n_date_logic",
+      "supabase_asegurados_schema",
+      "web_ai_engine",
+      "web_supabase_service"
+    ],
+    "10": [
+      "apps_web_src_components_tramite_facturastable_tsx",
+      "tramite_facturastable_addrow",
+      "tramite_facturastable_cn",
+      "tramite_facturastable_removerow",
+      "tramite_facturastable_updaterow"
+    ],
+    "11": [
+      "middleware_audit_gate_auditgate",
+      "scripts_middleware_audit_gate_js",
+      "scripts_utils_n8n_auditor_js",
+      "utils_n8n_auditor_auditworkflow"
+    ],
+    "12": [
+      "apps_agent_app_api_generar_route_ts",
+      "apps_web_deprecated_pdfgenerator_ts",
+      "deprecated_pdfgenerator_llenarformatogmm",
+      "generar_route_post"
+    ],
+    "13": [
+      "apps_web_src_instrumentation_ts",
+      "apps_web_src_lib_tracing_ts",
+      "lib_tracing_inittracing",
+      "src_instrumentation_register"
+    ],
+    "14": [
+      "apps_web_src_components_sidebar_sidebar_tsx",
+      "apps_web_src_hooks_useuserrole_ts",
+      "hooks_useuserrole_useuserrole",
+      "sidebar_sidebar_sidebar"
+    ],
+    "15": [
+      "afectados_route_get",
+      "apps_web_src_app_api_afectados_route_ts",
+      "apps_web_src_services_googlesheets_ts",
+      "services_googlesheets_getgooglesheetsclient"
+    ],
+    "16": [
+      "apps_web_deprecated_scripts_ingest_kb_js",
+      "scripts_ingest_kb_ingestfile",
+      "scripts_ingest_kb_main"
+    ],
+    "17": [
+      "apps_web_src_app_auth_siniestros_page_tsx",
+      "siniestros_page_handlefilterchange",
+      "siniestros_page_handlesearch"
+    ],
+    "18": [
+      "apps_web_src_components_tramites_tramitefilters_tsx",
+      "tramites_tramitefilters_handlesearchchange",
+      "tramites_tramitefilters_togglefilter"
+    ],
+    "19": [
+      "apps_web_src_scratch_check_e2e_js",
+      "apps_web_src_scratch_check_e2e_ts",
+      "scratch_check_e2e_checkrecentactivity"
+    ],
+    "20": [
+      "apps_web_src_lib_env_validation_ts",
+      "lib_env_validation_ensurevalidenvironment",
+      "lib_env_validation_validateenvironment"
+    ],
+    "21": [
+      "apps_web_src_services_aifixservice_ts",
+      "services_aifixservice_aifixservice",
+      "services_aifixservice_aifixservice_analyzeandfix"
+    ],
+    "22": [
+      "scratch_find_siniestro_findsiniestro",
+      "scratch_find_siniestro_js"
+    ],
+    "23": [
+      "scratch_check_db_checksiniestros",
+      "scratch_check_db_js"
+    ],
+    "24": [
+      "scripts_test_circuit_breaker_js",
+      "scripts_test_circuit_breaker_test_resilience"
+    ],
+    "25": [
+      "scripts_verify_db_applymigration",
+      "scripts_verify_db_js"
+    ],
+    "26": [
+      "scripts_trigger_alert_js",
+      "scripts_trigger_alert_trigger"
+    ],
+    "27": [
+      "scripts_check_supabase_identity_check_identity",
+      "scripts_check_supabase_identity_py"
+    ],
+    "28": [
+      "scripts_test_gemini_js",
+      "scripts_test_gemini_run"
+    ],
+    "29": [
+      "scripts_test_backoff_jitter_js",
+      "scripts_test_backoff_jitter_test"
+    ],
+    "30": [
+      "scripts_utils_decision_engine_js",
+      "utils_decision_engine_getrecoveryaction"
+    ],
+    "31": [
+      "scripts_supabase_apply_migrations_js",
+      "supabase_apply_migrations_applymigration"
+    ],
+    "32": [
+      "n8n_recover_workflow_find_node",
+      "scripts_n8n_recover_workflow_py"
+    ],
+    "33": [
+      "n8n_update_n8n_rename_conn",
+      "scripts_n8n_update_n8n_py"
+    ],
+    "34": [
+      "apps_web_scratch_apply_migration_js",
+      "scratch_apply_migration_main"
+    ],
+    "35": [
+      "app_layout_rootlayout",
+      "apps_web_src_app_layout_tsx"
+    ],
+    "36": [
+      "app_page_home",
+      "apps_web_src_app_page_tsx"
+    ],
+    "37": [
+      "apps_web_src_app_api_gemini_route_ts",
+      "gemini_route_post"
+    ],
+    "38": [
+      "apps_web_src_app_api_health_route_ts",
+      "health_route_get"
+    ],
+    "39": [
+      "apps_web_src_app_api_tramites_route_ts",
+      "tramites_route_get"
+    ],
+    "40": [
+      "apps_web_src_app_api_tramites_id_download_route_ts",
+      "download_route_get"
+    ],
+    "41": [
+      "apps_web_src_app_api_notifications_callback_route_ts",
+      "callback_route_post"
+    ],
+    "42": [
+      "apps_web_src_app_auth_layout_tsx",
+      "auth_layout_toggletheme"
+    ],
+    "43": [
+      "apps_web_src_app_auth_configuracion_page_tsx",
+      "configuracion_page_handlesave"
+    ],
+    "44": [
+      "apps_web_src_app_auth_tramites_nuevo_page_tsx",
+      "nuevo_page_page"
+    ],
+    "45": [
+      "apps_web_src_app_auth_registro_respuesta_page_tsx",
+      "registro_respuesta_page_handlesimulateupload"
+    ],
+    "46": [
+      "apps_web_src_app_auth_nuevo_tramite_page_tsx",
+      "nuevo_tramite_page_nuevotramitepage"
+    ],
+    "47": [
+      "apps_web_src_components_animatedlogoloader_tsx",
+      "components_animatedlogoloader_animatedlogoloader"
+    ],
+    "48": [
+      "apps_web_src_components_authprovider_tsx",
+      "components_authprovider_authprovider"
+    ],
+    "49": [
+      "apps_web_src_components_tramite_uploaddocs_tsx",
+      "tramite_uploaddocs_handlefile"
+    ],
+    "50": [
+      "apps_web_src_components_tramite_nuevotramite_tsx",
+      "tramite_nuevotramite_handlefinalsubmit"
+    ],
+    "51": [
+      "apps_web_src_components_dashboard_trustbar_tsx",
+      "dashboard_trustbar_trustbar"
+    ],
+    "52": [
+      "apps_web_src_components_dashboard_intelligencehub_tsx",
+      "dashboard_intelligencehub_aicopilot"
+    ],
+    "53": [
+      "apps_web_src_components_dashboard_aipanel_tsx",
+      "dashboard_aipanel_aipanel"
+    ],
+    "54": [
+      "apps_web_src_components_dashboard_reimbursementwaterfall_tsx",
+      "dashboard_reimbursementwaterfall_formatcurrency"
+    ],
+    "55": [
+      "apps_web_src_components_dashboard_healingactionpanel_tsx",
+      "dashboard_healingactionpanel_healingactionpanel"
+    ],
+    "56": [
+      "apps_web_src_components_dashboard_consumptiondonut_tsx",
+      "dashboard_consumptiondonut_rendercustomizedlabel"
+    ],
+    "57": [
+      "apps_web_src_components_dashboard_eventmonitorcard_tsx",
+      "dashboard_eventmonitorcard_eventmonitorcard"
+    ],
+    "58": [
+      "apps_web_src_components_tramites_tramitestatusbadge_tsx",
+      "tramites_tramitestatusbadge_tramitestatusbadge"
+    ],
+    "59": [
+      "apps_web_src_components_tramites_mobiletramitelist_tsx",
+      "tramites_mobiletramitelist_switch"
+    ],
+    "60": [
+      "apps_web_src_components_tramites_tramiteactions_tsx",
+      "tramites_tramiteactions_tramiteactions"
+    ],
+    "61": [
+      "apps_web_src_components_tramites_desktoptable_tsx",
+      "tramites_desktoptable_desktoptable"
+    ],
+    "62": [
+      "apps_web_src_scratch_check_bucket_js",
+      "scratch_check_bucket_check"
+    ],
+    "63": [
+      "apps_web_src_scratch_check_permissions_js",
+      "scratch_check_permissions_diagnosepermissions"
+    ],
+    "64": [
+      "apps_web_src_scratch_check_policies_js",
+      "scratch_check_policies_listpolicies"
+    ],
+    "65": [
+      "apps_web_src_scratch_check_final_ownership_js",
+      "scratch_check_final_ownership_checkfinalstatus"
+    ],
+    "66": [
+      "apps_web_src_scratch_check_tramites_rls_js",
+      "scratch_check_tramites_rls_check"
+    ],
+    "67": [
+      "apps_web_src_scratch_check_schema_js",
+      "scratch_check_schema_checktableschema"
+    ],
+    "68": [
+      "apps_web_src_hooks_usesystemlogs_ts",
+      "hooks_usesystemlogs_usesystemlogs"
+    ],
+    "69": [
+      "apps_web_src_hooks_usealerts_ts",
+      "hooks_usealerts_usealerts"
+    ],
+    "70": [
+      "apps_web_src_hooks_usesafedata_ts",
+      "hooks_usesafedata_usesafedata"
+    ],
+    "71": [
+      "apps_web_src_hooks_userealtimenotifications_ts",
+      "hooks_userealtimenotifications_userealtimenotifications"
+    ],
+    "72": [
+      "apps_web_src_scripts_chaos_test_ts",
+      "scripts_chaos_test_triggerchaos"
+    ],
+    "73": [
+      "apps_web_src_lib_utils_ts",
+      "lib_utils_cn"
+    ],
+    "74": [
+      "apps_web_src_lib_logger_ts",
+      "lib_logger_log"
+    ],
+    "75": [
+      "apps_web_src_remotion_root_tsx",
+      "remotion_root_remotionroot"
+    ],
+    "76": [
+      "docs_knowledge_rules_05_logica_seguridad_config_ts"
+    ],
+    "77": [
+      "supabase_functions_notify_index_ts"
+    ],
+    "78": [
+      "scripts_test_gemini_simple_js"
+    ],
+    "79": [
+      "scripts_n8n_extract_nodes_py"
+    ],
+    "80": [
+      "scripts_n8n_push_workflow_py"
+    ],
+    "81": [
+      "scripts_metlife_prepare_metlife_email_js"
+    ],
+    "82": [
+      "apps_web_postcss_config_mjs"
+    ],
+    "83": [
+      "apps_web_next_env_d_ts"
+    ],
+    "84": [
+      "apps_web_eslint_config_mjs"
+    ],
+    "85": [
+      "apps_web_next_config_ts"
+    ],
+    "86": [
+      "apps_web_scripts_prebuild_check_js"
+    ],
+    "87": [
+      "apps_web_src_middleware_ts"
+    ],
+    "88": [
+      "apps_web_src_types_next_auth_d_ts"
+    ],
+    "89": [
+      "apps_web_src_types_claims_ts"
+    ],
+    "90": [
+      "apps_web_src_types_notification_ts"
+    ],
+    "91": [
+      "apps_web_src_app_api_auth_nextauth_route_ts"
+    ],
+    "92": [
+      "apps_web_src_app_auth_documentos_page_tsx"
+    ],
+    "93": [
+      "apps_web_src_app_auth_workflows_page_tsx"
+    ],
+    "94": [
+      "apps_web_src_app_auth_agentes_page_tsx"
+    ],
+    "95": [
+      "apps_web_src_app_auth_tramites_page_tsx"
+    ],
+    "96": [
+      "apps_web_src_app_auth_asegurados_page_tsx"
+    ],
+    "97": [
+      "apps_web_src_app_auth_observabilidad_page_tsx"
+    ],
+    "98": [
+      "apps_web_src_components_sidebar_sidebaritem_tsx"
+    ],
+    "99": [
+      "apps_web_src_components_sidebar_sidebar_config_ts"
+    ],
+    "100": [
+      "apps_web_src_components_tramite_steptipo_tsx"
+    ],
+    "101": [
+      "apps_web_src_components_tramite_stepper_tsx"
+    ],
+    "102": [
+      "apps_web_src_components_layout_topbar_tsx"
+    ],
+    "103": [
+      "apps_web_src_components_layout_sidebarlink_tsx"
+    ],
+    "104": [
+      "apps_web_src_components_layout_mobilebottomnav_tsx"
+    ],
+    "105": [
+      "apps_web_src_components_dashboard_alertcenter_tsx"
+    ],
+    "106": [
+      "apps_web_src_components_dashboard_insuredcards_tsx"
+    ],
+    "107": [
+      "apps_web_src_components_dashboard_claimskanban_tsx"
+    ],
+    "108": [
+      "apps_web_src_components_dashboard_executiondrilldown_tsx"
+    ],
+    "109": [
+      "apps_web_src_components_dashboard_coveragekpis_tsx"
+    ],
+    "110": [
+      "apps_web_src_components_dashboard_globalpolicycard_tsx"
+    ],
+    "111": [
+      "apps_web_src_components_tramites_siniestrotimeline_tsx"
+    ],
+    "112": [
+      "apps_web_src_components_tramites_tramitestable_tsx"
+    ],
+    "113": [
+      "apps_web_src_components_tramites_workflowtimeline_tsx"
+    ],
+    "114": [
+      "apps_web_src_components_tramites_scorebadge_tsx"
+    ],
+    "115": [
+      "apps_web_src_lib_supabase_ts"
+    ],
+    "116": [
+      "apps_web_src_services_claimsservice_ts"
+    ],
+    "117": [
+      "apps_web_src_remotion_logoanimation_tsx"
+    ]
+  },
+  "cohesion": {
+    "0": 0.06,
+    "1": 0.07,
+    "2": 0.11,
+    "3": 0.16,
+    "4": 0.24,
+    "5": 0.2,
+    "6": 0.31,
+    "7": 0.43,
+    "8": 0.29,
+    "9": 0.33,
+    "10": 0.4,
+    "11": 0.5,
+    "12": 0.5,
+    "13": 0.5,
+    "14": 0.5,
+    "15": 0.5,
+    "16": 1.0,
+    "17": 0.67,
+    "18": 0.67,
+    "19": 0.67,
+    "20": 1.0,
+    "21": 0.67,
+    "22": 1.0,
+    "23": 1.0,
+    "24": 1.0,
+    "25": 1.0,
+    "26": 1.0,
+    "27": 1.0,
+    "28": 1.0,
+    "29": 1.0,
+    "30": 1.0,
+    "31": 1.0,
+    "32": 1.0,
+    "33": 1.0,
+    "34": 1.0,
+    "35": 1.0,
+    "36": 1.0,
+    "37": 1.0,
+    "38": 1.0,
+    "39": 1.0,
+    "40": 1.0,
+    "41": 1.0,
+    "42": 1.0,
+    "43": 1.0,
+    "44": 1.0,
+    "45": 1.0,
+    "46": 1.0,
+    "47": 1.0,
+    "48": 1.0,
+    "49": 1.0,
+    "50": 1.0,
+    "51": 1.0,
+    "52": 1.0,
+    "53": 1.0,
+    "54": 1.0,
+    "55": 1.0,
+    "56": 1.0,
+    "57": 1.0,
+    "58": 1.0,
+    "59": 1.0,
+    "60": 1.0,
+    "61": 1.0,
+    "62": 1.0,
+    "63": 1.0,
+    "64": 1.0,
+    "65": 1.0,
+    "66": 1.0,
+    "67": 1.0,
+    "68": 1.0,
+    "69": 1.0,
+    "70": 1.0,
+    "71": 1.0,
+    "72": 1.0,
+    "73": 1.0,
+    "74": 1.0,
+    "75": 1.0,
+    "76": 1.0,
+    "77": 1.0,
+    "78": 1.0,
+    "79": 1.0,
+    "80": 1.0,
+    "81": 1.0,
+    "82": 1.0,
+    "83": 1.0,
+    "84": 1.0,
+    "85": 1.0,
+    "86": 1.0,
+    "87": 1.0,
+    "88": 1.0,
+    "89": 1.0,
+    "90": 1.0,
+    "91": 1.0,
+    "92": 1.0,
+    "93": 1.0,
+    "94": 1.0,
+    "95": 1.0,
+    "96": 1.0,
+    "97": 1.0,
+    "98": 1.0,
+    "99": 1.0,
+    "100": 1.0,
+    "101": 1.0,
+    "102": 1.0,
+    "103": 1.0,
+    "104": 1.0,
+    "105": 1.0,
+    "106": 1.0,
+    "107": 1.0,
+    "108": 1.0,
+    "109": 1.0,
+    "110": 1.0,
+    "111": 1.0,
+    "112": 1.0,
+    "113": 1.0,
+    "114": 1.0,
+    "115": 1.0,
+    "116": 1.0,
+    "117": 1.0
+  },
+  "gods": [
+    {
+      "id": "services_supabase_getsupabaseservice",
+      "label": "getSupabaseService()",
+      "degree": 33
+    },
+    {
+      "id": "orchestrator_master_orchestrator_fetch",
+      "label": "fetch()",
+      "degree": 21
+    },
+    {
+      "id": "id_route_get",
+      "label": "GET()",
+      "degree": 11
+    },
+    {
+      "id": "orchestrator_master_orchestrator_masterorchestrator",
+      "label": "MasterOrchestrator",
+      "degree": 7
+    },
+    {
+      "id": "services_pdfengine_pdfengine",
+      "label": "PdfEngine",
+      "degree": 7
+    },
+    {
+      "id": "metrics_route_get",
+      "label": "GET()",
+      "degree": 6
+    },
+    {
+      "id": "utils_log_event_logevent",
+      "label": "logEvent()",
+      "degree": 5
+    },
+    {
+      "id": "autofix_route_post",
+      "label": "POST()",
+      "degree": 5
+    },
+    {
+      "id": "lib_workflow_engine_withlock",
+      "label": "withLock()",
+      "degree": 5
+    },
+    {
+      "id": "n8n_patch_resilience_logging_patch_resilience_workflow",
+      "label": "patch_resilience_workflow()",
+      "degree": 4
+    }
+  ],
+  "surprises": [
+    {
+      "source": "POST()",
+      "target": "fetch()",
+      "source_files": [
+        "apps/web/src/app/api/agentes/route.ts",
+        "scripts/orchestrator/master-orchestrator.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `POST()` unexpectedly reaches hub `fetch()`"
+    },
+    {
+      "source": "triggerFinalGeneration()",
+      "target": "fetch()",
+      "source_files": [
+        "apps/web/src/app/(auth)/siniestros/nuevo/page.tsx",
+        "scripts/orchestrator/master-orchestrator.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `triggerFinalGeneration()` unexpectedly reaches hub `fetch()`"
+    },
+    {
+      "source": "async()",
+      "target": "fetch()",
+      "source_files": [
+        "apps/web/src/app/(auth)/auditoria/page.tsx",
+        "scripts/orchestrator/master-orchestrator.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `async()` unexpectedly reaches hub `fetch()`"
+    },
+    {
+      "source": "fetchTramites()",
+      "target": "fetch()",
+      "source_files": [
+        "apps/web/src/components/tramite/PowerDashboard.tsx",
+        "scripts/orchestrator/master-orchestrator.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `fetchTramites()` unexpectedly reaches hub `fetch()`"
+    },
+    {
+      "source": "handleSend()",
+      "target": "fetch()",
+      "source_files": [
+        "apps/web/src/components/layout/Copilot.tsx",
+        "scripts/orchestrator/master-orchestrator.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "calls",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `handleSend()` unexpectedly reaches hub `fetch()`"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `getSupabaseService()` connect `Community 0` to `Community 1`, `Community 2`, `Community 7`, `Community 15`?",
+      "why": "High betweenness centrality (0.099) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `fetch()` connect `Community 1` to `Community 4`?",
+      "why": "High betweenness centrality (0.074) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `POST()` connect `Community 1` to `Community 0`?",
+      "why": "High betweenness centrality (0.060) - this node is a cross-community bridge."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 31 inferred relationships involving `getSupabaseService()` (e.g. with `getInsuredProfiles()` and `upsertInsuredProfile()`) actually correct?",
+      "why": "`getSupabaseService()` has 31 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 19 inferred relationships involving `fetch()` (e.g. with `deploy()` and `run()`) actually correct?",
+      "why": "`fetch()` has 19 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 9 inferred relationships involving `GET()` (e.g. with `getSupabaseService()` and `analyzeIncident()`) actually correct?",
+      "why": "`GET()` has 9 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `Creates a Supabase HTTP node that calls safe_log_alert RPC.     Uses jsonBody (n`, `Standalone workflow: Error Trigger \u2192 safe_log_alert RPC     Catches ALL unhandle`, `Estado compartido entre nodos` to the rest of the system?",
+      "why": "17 weakly-connected nodes found - possible documentation gaps or missing edges."
+    }
+  ]
+}

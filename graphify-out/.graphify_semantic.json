@@ -1,0 +1,80 @@
+{
+  "nodes": [
+    {
+      "id": "supabase_asegurados_schema",
+      "label": "Asegurados Schema (PostgreSQL)",
+      "file_type": "code",
+      "source_file": "supabase/migrations/20260501_gmm_asegurados_schema.sql"
+    },
+    {
+      "id": "n8n_data_register",
+      "label": "GMM Data Register Workflow",
+      "file_type": "code",
+      "source_file": "workflows/registro-datos/GMM-Data-Register-Auditado.json"
+    },
+    {
+      "id": "n8n_date_logic",
+      "label": "PDF Date Logic Workflow",
+      "file_type": "code",
+      "source_file": "workflows/registro-datos/GMM-Fill-PDF-Date-Logic.json"
+    },
+    {
+      "id": "web_supabase_service",
+      "label": "Supabase Client Service",
+      "file_type": "code",
+      "source_file": "apps/web/src/services/supabase.ts"
+    },
+    {
+      "id": "web_ai_engine",
+      "label": "GMM AI Engine",
+      "file_type": "code",
+      "source_file": "apps/web/src/services/ai-engine.ts"
+    },
+    {
+      "id": "docs_architecture",
+      "label": "GMM Architecture Docs",
+      "file_type": "document",
+      "source_file": "docs/arquitectura.md"
+    }
+  ],
+  "edges": [
+    {
+      "source": "n8n_data_register",
+      "target": "supabase_asegurados_schema",
+      "relation": "writes_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "n8n_date_logic",
+      "target": "n8n_data_register",
+      "relation": "prepares_data_for",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9
+    },
+    {
+      "source": "web_supabase_service",
+      "target": "supabase_asegurados_schema",
+      "relation": "queries",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "web_ai_engine",
+      "target": "web_supabase_service",
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "docs_architecture",
+      "target": "supabase_asegurados_schema",
+      "relation": "defines",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0
+}
