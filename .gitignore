@@ -1,4 +1,9 @@
-# macOS
+# =============================================
+# .gitignore — Gastos-Medicos Monorepo
+# Actualizado: 2026-04-27
+# =============================================
+
+# === macOS ===
 .DS_Store
 .AppleDouble
 .LSOverride
@@ -6,51 +11,101 @@
 .Spotlight-V100
 .Trashes
 
-# IDE / Editors
+# === IDE / Editors ===
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+*.sublime-workspace
 
-# Node (por si se agrega en el futuro)
+# === Node.js / Next.js ===
 node_modules/
+**/node_modules/
 npm-debug.log*
 yarn-error.log*
+yarn-debug.log*
+pnpm-debug.log*
+.pnpm-store/
+.npm/
 
-# Environment variables
+# Next.js build
+.next/
+**/.next/
+out/
+build/
+dist/
+
+# Turbo / Vercel
+.turbo/
+.vercel/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# === Python / Agent ===
+venv/
+.venv/
+env/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+htmlcov/
+.coverage
+apps/agent/venv/
+
+# === Environment Variables ===
 .env
 .env.local
 .env.*.local
+.env.production
 
-# Copias / temporales
+# === Logs ===
+*.log
+logs/
+*.log.*
+
+# === Databases locales ===
+*.sqlite
+*.sqlite3
+*.db
+
+# === Temporales / Backup ===
 *.bak
 *.tmp
-*.log
-
-# Agent copy (legacy/backup)
-.agent copy/
-venv/
-data/
-
-# Antigravity artifacts and state
-.antigravity/
-artifacts/
-
-# Temporary and test scripts
-test_*.js
-supabase_diagnostic.js
+*.temp
+*.orig
+temp.json
 *test_payload*
 *updated_workflow*
-temp.json
+test_*.js
+supabase_diagnostic.js
 
-# Monorepo
-.turbo/
-node_modules/
+# === Docker (archivos generados) ===
+docker-compose.override.yml
 
-# Apps
+# === Antigravity / Agent artifacts ===
+.antigravity/
+artifacts/
+scratch/
+.agent copy/
+
+# === Coverage / Testing ===
+coverage/
+.nyc_output/
+
+# === Data (solo local) ===
+data/
+
+# === Apps específicas ===
 apps/*/node_modules/
 apps/*/.next/
-apps/agent/venv/
+apps/*/out/
+apps/*/dist/
+apps/*/build/
 apps/agent/__pycache__/
-*.pyc

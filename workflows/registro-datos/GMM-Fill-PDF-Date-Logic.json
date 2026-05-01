@@ -1,0 +1,117 @@
+{
+  "name": "GMM-Generacion-PDF-Fechas",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger-1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "asegurados_gmm",
+        "matchType": "anyColumn",
+        "matchColumns": "id",
+        "matchValue": "={{ $json.id_asegurado }}"
+      },
+      "id": "supabase-1",
+      "name": "Supabase - Get Asegurado",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        460,
+        300
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "njJBaAWhnJXRK8EY",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "31ed238e-04d3-48b4-8e10-912f2ea2d6f7",
+              "name": "Fecha_Dia",
+              "value": "={{ $json.fecha_nacimiento ? $json.fecha_nacimiento.split('-')[2] : '' }}",
+              "type": "string"
+            },
+            {
+              "id": "d0401b33-e18e-4aab-a5a4-5cc8976bcfd3",
+              "name": "Fecha_Mes",
+              "value": "={{ $json.fecha_nacimiento ? $json.fecha_nacimiento.split('-')[1] : '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a5763073-19eb-4a1d-a3d8-111c16827c1f",
+              "name": "Fecha_Ano",
+              "value": "={{ $json.fecha_nacimiento ? $json.fecha_nacimiento.split('-')[0] : '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-1",
+      "name": "Separador de Fechas PDF",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        680,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Lógica de Separación de Fechas\nEste nodo toma la variable `$json.fecha_nacimiento` que viene de Supabase (ej: `2026-03-21`) y usa la función `.split('-')` de JavaScript para separar el texto en 3 partes, enviándolas a las variables `Fecha_Dia`, `Fecha_Mes` y `Fecha_Ano`. Estas variables son las que debes mapear a los recuadros del PDF físico.",
+        "height": 260,
+        "width": 380,
+        "color": 6
+      },
+      "id": "sticky-1",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        20
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Get Asegurado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Get Asegurado": {
+      "main": [
+        [
+          {
+            "node": "Separador de Fechas PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
