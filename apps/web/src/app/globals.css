@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+/* Fonts loaded via next/font/google in layout.tsx — @import url() removed to avoid Tailwind v4 CSS order errors */
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 

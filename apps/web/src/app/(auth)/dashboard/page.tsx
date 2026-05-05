@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/services/supabase';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend, LabelList
 } from 'recharts';
-import { 
+import {
   Plus, Upload
 } from 'lucide-react';
 
@@ -17,6 +17,8 @@ import { ConsumptionDonut } from '@/components/dashboard/ConsumptionDonut';
 import { ClaimsKanban } from '@/components/dashboard/ClaimsKanban';
 import { GlobalPolicyCard } from '@/components/dashboard/GlobalPolicyCard';
 import { getInsuredProfiles, upsertInsuredProfile } from '@/app/actions/dashboard';
+import { getPoliciesCalculadas } from '@/app/actions/uma';
+import { POLIZA_FALLBACK, type PolicyCalculada } from '@/lib/uma';
 
 // ─── Data Helpers ──────────────
 
@@ -55,6 +57,7 @@ function Section({ title, subtitle, children }: { title: string; subtitle?: stri
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
+  const [policy, setPolicy] = useState<PolicyCalculada>(POLIZA_FALLBACK);
   const [patientPhotos, setPatientPhotos] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('gmm-patient-photos');
@@ -66,23 +69,28 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function loadData() {
-       const savedPhotos = localStorage.getItem('gmm-patient-photos');
-       if (savedPhotos) setPatientPhotos(JSON.parse(savedPhotos));
-       
-       try {
-         const profiles = await getInsuredProfiles();
-         
-         if (profiles && profiles.length > 0) {
-           const profileMap = profiles.reduce((acc: any, p: any) => ({
-             ...acc, [p.patient_name]: p.photo_url
-           }), {});
-           setPatientPhotos((prev) => ({ ...prev, ...profileMap }));
-         }
-       } catch (err) {
-         console.error('Error loading profiles:', err);
-       }
-       
-       setIsLoading(false);
+      const savedPhotos = localStorage.getItem('gmm-patient-photos');
+      if (savedPhotos) setPatientPhotos(JSON.parse(savedPhotos));
+
+      try {
+        const [profiles, policies] = await Promise.all([
+          getInsuredProfiles(),
+          getPoliciesCalculadas(),
+        ]);
+
+        if (profiles && profiles.length > 0) {
+          const profileMap = profiles.reduce((acc: any, p: any) => ({
+            ...acc, [p.patient_name]: p.photo_url
+          }), {});
+          setPatientPhotos((prev) => ({ ...prev, ...profileMap }));
+        }
+
+        if (policies && policies.length > 0) setPolicy(policies[0]);
+      } catch (err) {
+        console.error('Error loading data:', err);
+      }
+
+      setIsLoading(false);
     }
     loadData();
   }, [session]);
@@ -113,7 +121,7 @@ export default function DashboardPage() {
       const newPhotos = { ...patientPhotos, [patientName]: publicUrl };
       setPatientPhotos(newPhotos);
       localStorage.setItem('gmm-patient-photos', JSON.stringify(newPhotos));
-      
+
     } catch (err: any) {
       console.error('Upload failed:', err);
       alert("Error al subir foto: " + (err.message || "Tus permisos pueden estar limitados (RLS)."));
@@ -128,7 +136,7 @@ export default function DashboardPage() {
   if (!isMounted) {
     return (
       <div className="min-h-screen bg-gmm-bg flex items-center justify-center">
-         <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-10 h-10 border-t-2 border-gmm-accent rounded-full" />
+        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-10 h-10 border-t-2 border-gmm-accent rounded-full" />
       </div>
     );
   }
@@ -136,7 +144,7 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gmm-bg flex items-center justify-center">
-         <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-10 h-10 border-t-2 border-gmm-accent rounded-full" />
+        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-10 h-10 border-t-2 border-gmm-accent rounded-full" />
       </div>
     );
   }
@@ -208,7 +216,7 @@ export default function DashboardPage() {
     }
   ];
 
-  const totalSum = 3961725.00;
+  // totalSum proviene de policy.suma_asegurada_mxn (calculado desde UMA en Supabase)
   const consumedSum = clinicalEvents.reduce((acc, curr) => acc + curr.consumed, 0);
 
   const distributionData = [
@@ -218,76 +226,76 @@ export default function DashboardPage() {
     { name: 'Emilio', value: 0, color: '#E2E8F0' },
   ];
 
-   return (
+  return (
     <div className="space-y-10 pb-24">
 
       {/* SECCIÓN 1: PANORAMA GLOBAL */}
-      <Section 
-        title="1. Panorama de Póliza" 
+      <Section
+        title="1. Panorama de Póliza"
         subtitle="Estructura de suma asegurada y deducibles vigentes"
       >
-        <GlobalPolicyCard 
-          totalSum={totalSum}
+        <GlobalPolicyCard
+          policy={policy}
           consumedSum={consumedSum}
-          policyNumber="M172 1011"
+          claimsCount={clinicalEvents.filter(e => e.status !== 'Cerrado').length}
         />
       </Section>
 
       {/* SECCIÓN 2: ESTADO FINANCIERO */}
-      <Section 
-        title="2. Análisis Financiero" 
+      <Section
+        title="2. Análisis Financiero"
         subtitle="Distribución inteligente del gasto y consumo acumulado"
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-           <ConsumptionDonut data={distributionData} />
+          <ConsumptionDonut data={distributionData} />
 
-           <div className="gmm-box h-full flex flex-col p-6">
-              <div className="flex justify-between items-center mb-8">
-                 <div>
-                    <h3 className="gmm-title-h2 text-slate-900 dark:text-white">Consumo por Familiar</h3>
-                    <p className="gmm-text-small text-slate-400 dark:text-slate-300 font-bold uppercase tracking-widest mt-1">Impacto presupuestal por integrante</p>
-                 </div>
-                 <div className="px-4 py-1.5 bg-blue-600/10 rounded-full text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.1em]">Tiempo Real</div>
+          <div className="gmm-box h-full flex flex-col p-6">
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h3 className="gmm-title-h2 text-slate-900 dark:text-white">Consumo por Familiar</h3>
+                <p className="gmm-text-small text-slate-400 dark:text-slate-300 font-bold uppercase tracking-widest mt-1">Impacto presupuestal por integrante</p>
               </div>
-              <div className="h-[320px] w-full">
-                 <ResponsiveContainer id="main-category-chart" width="99%" height="99%" minHeight={300}>
-                    <BarChart data={categoryData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                       <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
-                       <XAxis dataKey="name" fontSize={12} fontWeight="black" axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />
-                       <YAxis hide />
-                       <Tooltip 
-                          cursor={{fill: 'transparent'}}
-                          contentStyle={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.98)', 
-                            border: 'none', 
-                            borderRadius: '24px', 
-                            fontSize: '13px', 
-                            boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
-                            color: '#0f172a',
-                            padding: '16px'
-                          }} 
-                          itemStyle={{ fontWeight: '900', textTransform: 'uppercase', fontSize: '11px', padding: '2px 0' }}
-                       />
-                       <Legend iconType="circle" wrapperStyle={{ paddingTop: '30px', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
-                       <Bar dataKey="Hospital" fill="#2D6A4F" radius={[8, 8, 0, 0]} barSize={24} />
-                       <Bar dataKey="Farmacia" fill="#3B82F6" radius={[8, 8, 0, 0]} barSize={24} />
-                       <Bar dataKey="Honorarios" fill="#F59E0B" radius={[8, 8, 0, 0]} barSize={24} />
-                       <Bar dataKey="Estudios" fill="#8B5CF6" radius={[8, 8, 0, 0]} barSize={24} />
-                    </BarChart>
-                 </ResponsiveContainer>
-              </div>
-           </div>
+              <div className="px-4 py-1.5 bg-blue-600/10 rounded-full text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.1em]">Tiempo Real</div>
+            </div>
+            <div className="h-[320px] w-full">
+              <ResponsiveContainer id="main-category-chart" width="99%" height="99%" minHeight={300}>
+                <BarChart data={categoryData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
+                  <XAxis dataKey="name" fontSize={12} fontWeight="black" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8' }} />
+                  <YAxis hide />
+                  <Tooltip
+                    cursor={{ fill: 'transparent' }}
+                    contentStyle={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                      border: 'none',
+                      borderRadius: '24px',
+                      fontSize: '13px',
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
+                      color: '#0f172a',
+                      padding: '16px'
+                    }}
+                    itemStyle={{ fontWeight: '900', textTransform: 'uppercase', fontSize: '11px', padding: '2px 0' }}
+                  />
+                  <Legend iconType="circle" wrapperStyle={{ paddingTop: '30px', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+                  <Bar dataKey="Hospital" fill="#2D6A4F" radius={[8, 8, 0, 0]} barSize={24} />
+                  <Bar dataKey="Farmacia" fill="#3B82F6" radius={[8, 8, 0, 0]} barSize={24} />
+                  <Bar dataKey="Honorarios" fill="#F59E0B" radius={[8, 8, 0, 0]} barSize={24} />
+                  <Bar dataKey="Estudios" fill="#8B5CF6" radius={[8, 8, 0, 0]} barSize={24} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       </Section>
 
       {/* SECCIÓN 3: OPERACIONES Y ASEGURADOS */}
-      <Section 
-        title="3. Gestión Operativa" 
+      <Section
+        title="3. Gestión Operativa"
         subtitle="Control de siniestros activos y grupo asegurado"
       >
         <div className="space-y-10">
           <div className="w-full">
-             <ClaimsKanban />
+            <ClaimsKanban />
           </div>
 
           <div className="space-y-8">
@@ -299,7 +307,7 @@ export default function DashboardPage() {
                 {clinicalEvents.length} Integrantes
               </span>
             </div>
-            
+
             <div className="flex flex-col gap-4">
               {clinicalEvents.map((event, i) => (
                 <EventMonitorCard key={i} event={event} index={i} onPhotoUpload={handlePhotoUpload} />
