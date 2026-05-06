@@ -1,0 +1,9 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--cov=src --cov-report=html --strict-markers"
+markers = [
+    "unit: unit tests",
+    "integration: integration tests",
+    "critical: critical business logic"
+]
