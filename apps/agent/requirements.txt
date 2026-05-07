@@ -13,3 +13,8 @@ playwright>=1.41.2
 
 # MCP SDK
 mcp-agent>=0.1.0
+
+# API / Database (Fase 3)
+fastapi>=0.100.0
+uvicorn>=0.23.0
+supabase>=2.0.0

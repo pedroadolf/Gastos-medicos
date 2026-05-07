@@ -1,0 +1,54 @@
+name: GMM Agent CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      # Podríamos levantar un postgres local si no usamos el service_role de Supabase
+      # Pero para este pipeline usaremos mocks en unit tests y env vars para integration
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        cd apps/agent
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest-cov
+
+    - name: Run Unit Tests
+      run: |
+        cd apps/agent
+        pytest tests/unit -v --cov=src --cov-report=xml
+
+    - name: Run Integration Tests (with Mocks)
+      env:
+        SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      run: |
+        cd apps/agent
+        # Ejecutar solo si los secretos están disponibles
+        if [ "${{ secrets.SUPABASE_URL }}" != "" ]; then
+          pytest tests/integration -v
+        else
+          echo "Skipping integration tests (No secrets found)"
+        fi
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./apps/agent/coverage.xml
+        fail_ci_if_error: false
