@@ -8,7 +8,7 @@ endif
         migrate-pro patch-n8n-logs deploy-grafana-pro validate-observability
 
 init:
-	npm install && cd apps/agent && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
+	npm install && cd apps/backend && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
 
 dev:
 	npm run dev
@@ -24,7 +24,7 @@ status:
 
 clean:
 	npm run clean
-	rm -rf apps/agent/venv
+	rm -rf apps/backend/venv
 	rm -rf artifacts/
 
 # ── Observabilidad PRO (Phase 9) ──────────────────────────────────────────────

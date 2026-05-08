@@ -6,7 +6,7 @@
   "private": true,
   "workspaces": [
     "apps/web",
-    "apps/agent"
+    "apps/backend"
   ],
   "scripts": {
     "dev": "turbo run dev --filter=web",
