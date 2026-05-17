@@ -19,6 +19,7 @@ import { GlobalPolicyCard } from '@/components/dashboard/GlobalPolicyCard';
 import { getInsuredProfiles, upsertInsuredProfile } from '@/app/actions/dashboard';
 import { getPoliciesCalculadas } from '@/app/actions/uma';
 import { POLIZA_FALLBACK, type PolicyCalculada } from '@/lib/uma';
+import { GroupProfilesSection } from '@/components/dashboard/GroupProfilesSection';
 
 // ─── Data Helpers ──────────────
 
@@ -315,6 +316,14 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+      </Section>
+
+      {/* SECCIÓN 4: PERFILES DE GRUPO Y SINIESTROS */}
+      <Section
+        title="4. Perfiles de Grupo — Siniestros"
+        subtitle="Detalle por asegurado · Inciso 4 · Subtotales y total consolidado"
+      >
+        <GroupProfilesSection />
       </Section>
 
     </div>
