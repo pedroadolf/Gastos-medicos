@@ -18,7 +18,7 @@ export function MobileBottomNav({ className }: { className?: string }) {
   const NAV_ITEMS = [
     { label: 'Inicio', icon: Home, href: '/dashboard' },
     { label: 'Mis Trámites', icon: FileText, href: '/siniestros' },
-    { label: 'Nuevo', icon: PlusCircle, href: '/siniestros/nuevo', primary: true },
+    { label: 'Nuevo', icon: PlusCircle, href: '/nuevo-tramite', primary: true },
     { label: 'Agentes', icon: User, href: '/agentes' }, 
     { label: 'Ajustes', icon: Settings, href: '/configuracion' },
   ];

@@ -23,19 +23,39 @@ const STEPS = [
   { id: 4, label: 'Archivos', signal: 'DOCUMENTACIÓN' },
 ];
 
-export default function NuevoTramite() {
+export default function NuevoTramite({ initialTipo }: { initialTipo?: TramiteType }) {
   const router = useRouter();
   
   // -- State --
+  // If initialTipo is provided, we skip step 2 (Propósito)
   const [step, setStep] = useState(1);
   const [siniestros, setSiniestros] = useState<Siniestro[]>([]);
   const [selectedSiniestroId, setSelectedSiniestroId] = useState<string>('');
-  const [tipo, setTipo] = useState<TramiteType>('reembolso');
+  const [tipo, setTipo] = useState<TramiteType>(initialTipo || 'reembolso');
   const [invoices, setInvoices] = useState<FacturaRow[]>([]);
   const [files, setFiles] = useState<Record<string, File>>({});
   
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Dynamic steps based on flow
+  const isFinancial = tipo === 'reembolso' || tipo === 'cirugia_programada';
+  const STEPS = [
+    { id: 1, label: 'Asociar', signal: 'VINCULACIÓN' },
+    ...(!initialTipo ? [{ id: 2, label: 'Propósito', signal: 'CONFIGURACIÓN' }] : []),
+    ...(isFinancial ? [{ id: 3, label: 'Detalle', signal: 'FINANZAS' }] : []),
+    { id: 4, label: 'Archivos', signal: 'DOCUMENTACIÓN' },
+  ];
+
+  const getNextStep = (current: number) => {
+    const currentIndex = STEPS.findIndex(s => s.id === current);
+    return STEPS[currentIndex + 1]?.id || current;
+  };
+
+  const getPrevStep = (current: number) => {
+    const currentIndex = STEPS.findIndex(s => s.id === current);
+    return STEPS[currentIndex - 1]?.id || current;
+  };
 
   // -- Initial Load --
   useEffect(() => {
@@ -68,7 +88,7 @@ export default function NuevoTramite() {
         siniestro_id: selectedSiniestroId,
         nombre_siniestro: selectedSiniestro?.nombre_siniestro,
         tipo,
-        facturas: invoices,
+        facturas: isFinancial ? invoices : [],
         files: files
       });
 
@@ -103,11 +123,11 @@ export default function NuevoTramite() {
         
         <div className="flex flex-col space-y-4 relative z-10">
           <button 
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/nuevo-tramite')}
             className="flex items-center gap-2 text-slate-500 hover:text-medical-cyan text-[10px] font-black uppercase tracking-widest transition-colors w-fit group"
           >
             <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-            Regresar al Dashboard
+            Regresar al Menú
           </button>
           
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -241,7 +261,7 @@ export default function NuevoTramite() {
 
                   <div className="pt-6">
                     <button
-                      onClick={() => setStep(2)}
+                      onClick={() => setStep(getNextStep(1))}
                       disabled={!selectedSiniestroId}
                       className={cn(
                         "w-full py-6 rounded-3xl font-black text-xs transition-all flex items-center justify-center gap-4 shadow-2xl uppercase tracking-[0.1em]",
@@ -250,7 +270,7 @@ export default function NuevoTramite() {
                           : "bg-medical-cyan text-slate-950 hover:bg-white hover:scale-[1.03] active:scale-95 group shadow-medical-cyan/30"
                       )}
                     >
-                      CONTINUAR AL PROPÓSITO <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+                      CONTINUAR <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
                     </button>
                     {siniestros.length === 0 && !isLoading && (
                         <p className="text-[10px] text-amber-500 font-bold text-center mt-4 flex items-center justify-center gap-2">
@@ -292,7 +312,7 @@ export default function NuevoTramite() {
               </motion.div>
             )}
 
-            {step === 2 && (
+            {step === 2 && !initialTipo && (
               <motion.div
                 key="step2"
                 initial={{ opacity: 0, x: 20 }}
@@ -307,18 +327,18 @@ export default function NuevoTramite() {
                 <StepTipo 
                   value={tipo} 
                   onChange={setTipo} 
-                  onNext={() => setStep(3)} 
+                  onNext={() => setStep(getNextStep(2))} 
                 />
                 <button 
-                  onClick={() => setStep(1)}
+                  onClick={() => setStep(getPrevStep(2))}
                   className="px-6 py-2 text-slate-500 hover:text-white text-[10px] font-black uppercase tracking-widest flex items-center gap-2"
                 >
-                  <ArrowLeft size={14} /> Volver al paso 1
+                  <ArrowLeft size={14} /> Volver
                 </button>
               </motion.div>
             )}
 
-            {step === 3 && (
+            {step === 3 && isFinancial && (
               <motion.div
                 key="step3"
                 initial={{ opacity: 0, x: 20 }}
@@ -327,14 +347,16 @@ export default function NuevoTramite() {
                 className="space-y-8"
               >
                 <div className="flex items-center gap-4 mb-2">
-                   <div className="w-10 h-10 rounded-full bg-medical-cyan/10 text-medical-cyan border border-medical-cyan/20 flex items-center justify-center font-black">3</div>
+                   <div className="w-10 h-10 rounded-full bg-medical-cyan/10 text-medical-cyan border border-medical-cyan/20 flex items-center justify-center font-black">
+                     {STEPS.findIndex(s => s.id === 3) + 1}
+                   </div>
                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Detalle Económico</h2>
                 </div>
                 <FacturasTable 
                   invoices={invoices} 
                   onChange={setInvoices} 
-                  onBack={() => setStep(2)}
-                  onNext={() => setStep(4)}
+                  onBack={() => setStep(getPrevStep(3))}
+                  onNext={() => setStep(getNextStep(3))}
                 />
               </motion.div>
             )}
@@ -349,7 +371,9 @@ export default function NuevoTramite() {
               >
                 <div className="flex items-center justify-between mb-2">
                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-medical-cyan/10 text-medical-cyan border border-medical-cyan/20 flex items-center justify-center font-black">4</div>
+                      <div className="w-10 h-10 rounded-full bg-medical-cyan/10 text-medical-cyan border border-medical-cyan/20 flex items-center justify-center font-black">
+                        {STEPS.findIndex(s => s.id === 4) + 1}
+                      </div>
                       <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Cargar Documentos</h2>
                    </div>
                    {Object.keys(files).length > 0 && (
@@ -359,10 +383,29 @@ export default function NuevoTramite() {
                       </div>
                    )}
                 </div>
+                {tipo === 'carta_remanente' && (
+                  <div className="p-5 mb-4 rounded-[20px] bg-amber-500/10 border border-amber-500/20 text-amber-500">
+                    <p className="text-sm font-bold">Por favor, descarga el formato de Siniestralidad, llénalo, e ingresa el documento firmado aquí.</p>
+                    <a href="/plantillas/6_Carta-Siniestralidad-Mar26.pdf" download className="mt-2 inline-block px-4 py-2 bg-amber-500 text-slate-900 rounded-lg text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform">
+                      Descargar Formato
+                    </a>
+                  </div>
+                )}
+                {tipo === 'pago_directo' && (
+                  <div className="p-5 mb-4 rounded-[20px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-medium space-y-2">
+                    <p className="font-bold">Para pago directo requieres adjuntar:</p>
+                    <ul className="list-disc pl-5">
+                      <li>Identificación oficial</li>
+                      <li>Credencial de MetLife (física y/o digital)</li>
+                      <li>Consentimiento informado (si no hay carta pase)</li>
+                      <li>Presupuesto de honorarios y/u hospital</li>
+                    </ul>
+                  </div>
+                )}
                 <UploadDocs 
                   files={files} 
                   setFiles={setFiles} 
-                  onBack={() => setStep(3)}
+                  onBack={() => setStep(getPrevStep(4))}
                   onSubmit={handleFinalSubmit}
                   isSubmitting={isSubmitting}
                 />

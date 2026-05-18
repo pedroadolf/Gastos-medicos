@@ -1,7 +1,7 @@
 // 🚑 TypeScript Definitions for Core Claims (Siniestros)
 import { Receipt, Files, Stethoscope } from 'lucide-react';
 
-export type TramiteType = 'reembolso' | 'carta_pase';
+export type TramiteType = 'reembolso' | 'cirugia_programada' | 'carta_remanente' | 'pago_directo';
 export type TramiteStatus = 'borrador' | 'en_revision' | 'procesando' | 'completado' | 'rechazado';
 export type FacturaTipo = 'H' | 'M' | 'F' | 'O';
 
@@ -16,10 +16,28 @@ export const TYPES = [
     border: 'border-indigo-500/20'
   },
   {
-    id: 'carta_pase',
-    label: 'Carta Pase Especial',
-    description: 'Solicitud de autorización para terapias, estudios especiales o consultas.',
+    id: 'cirugia_programada',
+    label: 'Cirugía Programada',
+    description: 'Programación de cirugía en red de hospitales asociados.',
+    icon: Stethoscope,
+    color: 'text-sky-500',
+    bg: 'bg-sky-500/10',
+    border: 'border-sky-500/20'
+  },
+  {
+    id: 'carta_remanente',
+    label: 'Carta Siniestralidad (Remanente)',
+    description: 'Solicita el remanente de tu siniestro a la aseguradora.',
     icon: Files,
+    color: 'text-amber-500',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/20'
+  },
+  {
+    id: 'pago_directo',
+    label: 'Pago Directo / Ingreso Hosp.',
+    description: 'Autorización y liquidación directa al médico/hospital por MetLife.',
+    icon: Receipt,
     color: 'text-emerald-500',
     bg: 'bg-emerald-500/10',
     border: 'border-emerald-500/20'
