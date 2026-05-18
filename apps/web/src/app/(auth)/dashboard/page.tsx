@@ -3,32 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { supabase } from '@/services/supabase';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend, LabelList
-} from 'recharts';
-import {
-  Plus, Upload
-} from 'lucide-react';
 
-import { EventMonitorCard } from '@/components/dashboard/EventMonitorCard';
-import { ConsumptionDonut } from '@/components/dashboard/ConsumptionDonut';
-import { ClaimsKanban } from '@/components/dashboard/ClaimsKanban';
 import { GlobalPolicyCard } from '@/components/dashboard/GlobalPolicyCard';
-import { getInsuredProfiles, upsertInsuredProfile } from '@/app/actions/dashboard';
+import { ClaimsKanban } from '@/components/dashboard/ClaimsKanban';
+import { FinancialAnalysis } from '@/components/dashboard/FinancialAnalysis';
+import { InsuredSiniestrosSection } from '@/components/dashboard/InsuredSiniestrosSection';
 import { getPoliciesCalculadas } from '@/app/actions/uma';
 import { POLIZA_FALLBACK, type PolicyCalculada } from '@/lib/uma';
-import { GroupProfilesSection } from '@/components/dashboard/GroupProfilesSection';
-
-// ─── Data Helpers ──────────────
-
-const categoryData = [
-  { name: 'Claudia', Hospital: 1000, Farmacia: 5000, Honorarios: 3300, Estudios: 0 },
-  { name: 'Pedro', Hospital: 400000, Farmacia: 100000, Honorarios: 66195, Estudios: 4113 },
-  { name: 'Sebastian', Hospital: 15000, Farmacia: 5000, Honorarios: 4300, Estudios: 0 },
-  { name: 'Emilio', Hospital: 0, Farmacia: 0, Honorarios: 0, Estudios: 0 },
-];
+import { calcularTotalGrupo } from '@/lib/siniestros-data';
 
 // ─── Internal Components ────────
 
@@ -59,82 +41,26 @@ export default function DashboardPage() {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [policy, setPolicy] = useState<PolicyCalculada>(POLIZA_FALLBACK);
-  const [patientPhotos, setPatientPhotos] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('gmm-patient-photos');
-      return saved ? JSON.parse(saved) : {};
-    }
-    return {};
-  });
-
 
   useEffect(() => {
     async function loadData() {
-      const savedPhotos = localStorage.getItem('gmm-patient-photos');
-      if (savedPhotos) setPatientPhotos(JSON.parse(savedPhotos));
-
       try {
-        const [profiles, policies] = await Promise.all([
-          getInsuredProfiles(),
-          getPoliciesCalculadas(),
-        ]);
-
-        if (profiles && profiles.length > 0) {
-          const profileMap = profiles.reduce((acc: any, p: any) => ({
-            ...acc, [p.patient_name]: p.photo_url
-          }), {});
-          setPatientPhotos((prev) => ({ ...prev, ...profileMap }));
-        }
-
+        const policies = await getPoliciesCalculadas();
         if (policies && policies.length > 0) setPolicy(policies[0]);
       } catch (err) {
-        console.error('Error loading data:', err);
+        console.error('Error loading policy data:', err);
       }
-
       setIsLoading(false);
     }
     loadData();
   }, [session]);
-
-  const handlePhotoUpload = async (patientName: string, file: File) => {
-    try {
-      if (file.size > 2 * 1024 * 1024) {
-        alert("El archivo es muy pesado. Máximo 2MB permitido por políticas de seguridad.");
-        return;
-      }
-      if (!session?.user) throw new Error('No sesion activa');
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${patientName.toLowerCase()}-${Date.now()}.${fileExt}`;
-      const filePath = `insured-photos/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('gmm-uploads')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('gmm-uploads')
-        .getPublicUrl(filePath);
-
-      await upsertInsuredProfile(patientName, publicUrl);
-
-      const newPhotos = { ...patientPhotos, [patientName]: publicUrl };
-      setPatientPhotos(newPhotos);
-      localStorage.setItem('gmm-patient-photos', JSON.stringify(newPhotos));
-
-    } catch (err: any) {
-      console.error('Upload failed:', err);
-      alert("Error al subir foto: " + (err.message || "Tus permisos pueden estar limitados (RLS)."));
-    }
-  };
 
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  if (!isMounted) {
+  if (!isMounted || isLoading) {
     return (
       <div className="min-h-screen bg-gmm-bg flex items-center justify-center">
         <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-10 h-10 border-t-2 border-gmm-accent rounded-full" />
@@ -142,90 +68,9 @@ export default function DashboardPage() {
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gmm-bg flex items-center justify-center">
-        <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-10 h-10 border-t-2 border-gmm-accent rounded-full" />
-      </div>
-    );
-  }
-
-  const clinicalEvents = [
-    {
-      patientName: "CLAUDIA FONSECA AGUILAR",
-      policyNumber: "02001-2212432",
-      claimId: "02250211464-000",
-      consumed: 9300.00,
-      sublimit: 3961725.00,
-      deductibleAmount: 6602.88,
-      coaseguroPercentage: 10,
-      pendingAmount: 0,
-      status: "Revision",
-      diagnosis: "Reembolso Gastos Médicos",
-      role: "Titular",
-      age: "57",
-      lastUpdate: "14 Marzo 2025",
-      patientPhoto: patientPhotos["CLAUDIA FONSECA AGUILAR"]
-    },
-    {
-      patientName: "PEDRO ADOLFO SOTO HERNANDEZ",
-      policyNumber: "02001-2012432",
-      claimId: "01210200485-018",
-      consumed: 570308.29,
-      sublimit: 3961725.00,
-      deductibleAmount: 6602.88,
-      coaseguroPercentage: 10,
-      pendingAmount: 7772.00,
-      status: "Revision",
-      diagnosis: "COVID-19 / Enfermedad Respiratoria",
-      role: "Dependiente",
-      age: "61",
-      lastUpdate: "3 Junio 2025",
-      patientPhoto: patientPhotos["PEDRO ADOLFO SOTO HERNANDEZ"]
-    },
-    {
-      patientName: "SEBASTIAN SOTO FONSECA",
-      policyNumber: "02001-2212432",
-      claimId: "01210200487-020",
-      consumed: 0,
-      sublimit: 3961725.00,
-      deductibleAmount: 6602.88,
-      coaseguroPercentage: 10,
-      pendingAmount: 0,
-      status: "Cerrado",
-      diagnosis: "Control / Preventivo",
-      role: "Dependiente",
-      age: "18",
-      lastUpdate: "Enero 2026",
-      patientPhoto: patientPhotos["SEBASTIAN SOTO FONSECA"]
-    },
-    {
-      patientName: "EMILIO SOTO FONSECA",
-      policyNumber: "02001-2212432",
-      claimId: "---",
-      consumed: 0,
-      sublimit: 3961725.00,
-      deductibleAmount: 6602.88,
-      coaseguroPercentage: 10,
-      pendingAmount: 0,
-      status: "Preventivo",
-      diagnosis: "Revision Anual",
-      role: "Dependiente",
-      age: "17",
-      lastUpdate: "Pendiente",
-      patientPhoto: patientPhotos["EMILIO SOTO FONSECA"]
-    }
-  ];
-
-  // totalSum proviene de policy.suma_asegurada_mxn (calculado desde UMA en Supabase)
-  const consumedSum = clinicalEvents.reduce((acc, curr) => acc + curr.consumed, 0);
-
-  const distributionData = [
-    { name: 'Claudia', value: 9300.00, color: '#2563EB' },
-    { name: 'Pedro', value: 570308.29, color: '#F59E0B' },
-    { name: 'Sebastian', value: 0, color: '#64748B' },
-    { name: 'Emilio', value: 0, color: '#E2E8F0' },
-  ];
+  // Real totals from siniestros data
+  const totalGrupo = calcularTotalGrupo();
+  const consumedSum = totalGrupo.total_pagado;
 
   return (
     <div className="space-y-10 pb-24">
@@ -238,92 +83,32 @@ export default function DashboardPage() {
         <GlobalPolicyCard
           policy={policy}
           consumedSum={consumedSum}
-          claimsCount={clinicalEvents.filter(e => e.status !== 'Cerrado').length}
+          claimsCount={totalGrupo.count_siniestros}
         />
       </Section>
 
-      {/* SECCIÓN 2: ESTADO FINANCIERO */}
+      {/* SECCIÓN 2: ANÁLISIS FINANCIERO — datos reales */}
       <Section
         title="2. Análisis Financiero"
-        subtitle="Distribución inteligente del gasto y consumo acumulado"
+        subtitle="KPIs del grupo asegurado · datos reales de cartas de siniestralidad"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ConsumptionDonut data={distributionData} />
-
-          <div className="gmm-box h-full flex flex-col p-6">
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h3 className="gmm-title-h2 text-slate-900 dark:text-white">Consumo por Familiar</h3>
-                <p className="gmm-text-small text-slate-400 dark:text-slate-300 font-bold uppercase tracking-widest mt-1">Impacto presupuestal por integrante</p>
-              </div>
-              <div className="px-4 py-1.5 bg-blue-600/10 rounded-full text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.1em]">Tiempo Real</div>
-            </div>
-            <div className="h-[320px] w-full">
-              <ResponsiveContainer id="main-category-chart" width="99%" height="99%" minHeight={300}>
-                <BarChart data={categoryData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
-                  <XAxis dataKey="name" fontSize={12} fontWeight="black" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8' }} />
-                  <YAxis hide />
-                  <Tooltip
-                    cursor={{ fill: 'transparent' }}
-                    contentStyle={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                      border: 'none',
-                      borderRadius: '24px',
-                      fontSize: '13px',
-                      boxShadow: '0 20px 40px rgba(0,0,0,0.12)',
-                      color: '#0f172a',
-                      padding: '16px'
-                    }}
-                    itemStyle={{ fontWeight: '900', textTransform: 'uppercase', fontSize: '11px', padding: '2px 0' }}
-                  />
-                  <Legend iconType="circle" wrapperStyle={{ paddingTop: '30px', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }} />
-                  <Bar dataKey="Hospital" fill="#2D6A4F" radius={[8, 8, 0, 0]} barSize={24} />
-                  <Bar dataKey="Farmacia" fill="#3B82F6" radius={[8, 8, 0, 0]} barSize={24} />
-                  <Bar dataKey="Honorarios" fill="#F59E0B" radius={[8, 8, 0, 0]} barSize={24} />
-                  <Bar dataKey="Estudios" fill="#8B5CF6" radius={[8, 8, 0, 0]} barSize={24} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
+        <FinancialAnalysis />
       </Section>
 
-      {/* SECCIÓN 3: OPERACIONES Y ASEGURADOS */}
+      {/* SECCIÓN 3: GESTIÓN OPERATIVA */}
       <Section
         title="3. Gestión Operativa"
-        subtitle="Control de siniestros activos y grupo asegurado"
+        subtitle="Flujo de trámites y solicitudes activas"
       >
-        <div className="space-y-10">
-          <div className="w-full">
-            <ClaimsKanban />
-          </div>
-
-          <div className="space-y-8">
-            <div className="flex items-center gap-4 ml-4">
-              <h3 className="text-sm font-black tracking-[0.2em] text-slate-900 dark:text-white uppercase">
-                Perfiles del Grupo
-              </h3>
-              <span className="px-3 py-1 bg-slate-100 dark:bg-white/5 rounded-full text-[12px] font-black text-slate-400 uppercase tracking-widest">
-                {clinicalEvents.length} Integrantes
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              {clinicalEvents.map((event, i) => (
-                <EventMonitorCard key={i} event={event} index={i} onPhotoUpload={handlePhotoUpload} />
-              ))}
-            </div>
-          </div>
-        </div>
+        <ClaimsKanban />
       </Section>
 
-      {/* SECCIÓN 4: PERFILES DE GRUPO Y SINIESTROS */}
+      {/* SECCIÓN 4: ASEGURADOS Y SINIESTROS */}
       <Section
-        title="4. Perfiles de Grupo — Siniestros"
-        subtitle="Detalle por asegurado · Inciso 4 · Subtotales y total consolidado"
+        title="4. Asegurados y Siniestros"
+        subtitle="Detalle por integrante · Inciso 4 · Subtotales y total consolidado"
       >
-        <GroupProfilesSection />
+        <InsuredSiniestrosSection />
       </Section>
 
     </div>
