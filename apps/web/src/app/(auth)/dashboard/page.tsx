@@ -3,44 +3,20 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
-import { GlobalPolicyCard } from '@/components/dashboard/GlobalPolicyCard';
+import { CompactPolicyCard } from '@/components/dashboard/CompactPolicyCard';
 import { ClaimsKanban } from '@/components/dashboard/ClaimsKanban';
 import { FinancialAnalysis } from '@/components/dashboard/FinancialAnalysis';
 import { InsuredSiniestrosSection } from '@/components/dashboard/InsuredSiniestrosSection';
 import { getPoliciesCalculadas } from '@/app/actions/uma';
 import { POLIZA_FALLBACK, type PolicyCalculada } from '@/lib/uma';
-import { calcularTotalGrupo } from '@/lib/siniestros-data';
-
-// ─── Internal Components ────────
-
-function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
-  return (
-    <section className="space-y-8">
-      <div className="flex items-center justify-between gap-6 px-2">
-        <div className="flex flex-col">
-          <h2 className="text-[22px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em]">
-            {title}
-          </h2>
-          {subtitle && (
-            <p className="text-[14px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-2">
-              {subtitle}
-            </p>
-          )}
-        </div>
-        <div className="h-[2px] flex-1 bg-slate-300/30 dark:bg-white/5 rounded-full" />
-      </div>
-      <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
-        {children}
-      </div>
-    </section>
-  );
-}
 
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [policy, setPolicy] = useState<PolicyCalculada>(POLIZA_FALLBACK);
+  const [showKanban, setShowKanban] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -68,49 +44,60 @@ export default function DashboardPage() {
     );
   }
 
-  // Real totals from siniestros data
-  const totalGrupo = calcularTotalGrupo();
-  const consumedSum = totalGrupo.total_pagado;
-
   return (
-    <div className="space-y-10 pb-24">
+    <div className="pb-24 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* ── COLUMNA IZQUIERDA (65%) ── */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* Póliza Compacta */}
+          <CompactPolicyCard policy={policy} />
 
-      {/* SECCIÓN 1: PANORAMA GLOBAL */}
-      <Section
-        title="1. Panorama de Póliza"
-        subtitle="Estructura de suma asegurada y deducibles vigentes"
-      >
-        <GlobalPolicyCard
-          policy={policy}
-          consumedSum={consumedSum}
-          claimsCount={totalGrupo.count_siniestros}
-        />
-      </Section>
+          {/* Siniestros y Asegurados */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[16px] font-black uppercase tracking-widest text-slate-900 dark:text-white">
+                Gestión de Siniestros
+              </h2>
+            </div>
+            <InsuredSiniestrosSection />
+          </div>
 
-      {/* SECCIÓN 2: ANÁLISIS FINANCIERO — datos reales */}
-      <Section
-        title="2. Análisis Financiero"
-        subtitle="KPIs del grupo asegurado · datos reales de cartas de siniestralidad"
-      >
-        <FinancialAnalysis />
-      </Section>
+          {/* Kanban Colapsable */}
+          <div className="pt-6">
+            <button 
+              onClick={() => setShowKanban(!showKanban)}
+              className="w-full gmm-box p-4 flex items-center justify-between hover:border-emerald-500/50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[12px] font-black uppercase tracking-widest text-slate-900 dark:text-white">Trámites en Curso</span>
+              </div>
+              {showKanban ? <ChevronUp size={20} className="text-slate-500" /> : <ChevronDown size={20} className="text-slate-500" />}
+            </button>
+            {showKanban && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }} 
+                animate={{ opacity: 1, height: 'auto' }} 
+                className="mt-4"
+              >
+                <ClaimsKanban />
+              </motion.div>
+            )}
+          </div>
+        </div>
 
-      {/* SECCIÓN 3: GESTIÓN OPERATIVA */}
-      <Section
-        title="3. Gestión Operativa"
-        subtitle="Flujo de trámites y solicitudes activas"
-      >
-        <ClaimsKanban />
-      </Section>
+        {/* ── COLUMNA DERECHA (35%) ── */}
+        <div className="lg:col-span-4 relative">
+          <div className="sticky top-20">
+            <h2 className="text-[16px] font-black uppercase tracking-widest text-slate-900 dark:text-white mb-4">
+              Finanzas
+            </h2>
+            <FinancialAnalysis />
+          </div>
+        </div>
 
-      {/* SECCIÓN 4: ASEGURADOS Y SINIESTROS */}
-      <Section
-        title="4. Asegurados y Siniestros"
-        subtitle="Detalle por integrante · Inciso 4 · Subtotales y total consolidado"
-      >
-        <InsuredSiniestrosSection />
-      </Section>
-
+      </div>
     </div>
   );
 }

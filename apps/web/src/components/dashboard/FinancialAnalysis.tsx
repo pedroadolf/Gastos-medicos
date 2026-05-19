@@ -38,7 +38,6 @@ export function FinancialAnalysis() {
 
   const total = calcularTotalGrupo();
 
-  // Per-insured subtotals for charts
   const perInsured = ASEGURADOS_GRUPO.map((a) => {
     const sub = calcularSubtotalAsegurado(a);
     return {
@@ -55,174 +54,98 @@ export function FinancialAnalysis() {
   }).sort((a, b) => b.pagado - a.pagado);
 
   const maxPagado = Math.max(...perInsured.map((p) => p.pagado), 1);
+  const donutData = perInsured.filter((p) => p.pagado > 0).map((p) => ({ name: p.name, value: p.pagado, color: p.color }));
 
-  // Donut data — only insured with pagado > 0
-  const donutData = perInsured
-    .filter((p) => p.pagado > 0)
-    .map((p) => ({ name: p.name, value: p.pagado, color: p.color }));
-
-  // KPIs
   const kpis = [
-    { label: 'Total Pagado',       value: total.total_pagado,    icon: Wallet,       color: '#FFAA00', sub: `${total.count_siniestros} siniestros` },
-    { label: 'Pend. Carta Pase',   value: total.total_pendiente, icon: Clock,        color: total.total_pendiente > 0 ? '#EF4444' : '#94A3B8', sub: 'En trámite' },
-    { label: 'Deducibles',         value: total.total_deducible, icon: TrendingDown, color: '#38BDF8', sub: 'Pagado por asegurado' },
-    { label: 'Coaseguro 10%',      value: total.total_coaseguro, icon: Receipt,      color: '#A78BFA', sub: 'Acumulado' },
+    { label: 'Total Pagado',       value: total.total_pagado,    icon: Wallet,       color: '#FFAA00' },
+    { label: 'Pend. Carta Pase',   value: total.total_pendiente, icon: Clock,        color: total.total_pendiente > 0 ? '#EF4444' : '#94A3B8' },
+    { label: 'Deducibles',         value: total.total_deducible, icon: TrendingDown, color: '#38BDF8' },
+    { label: 'Coaseguro 10%',      value: total.total_coaseguro, icon: Receipt,      color: '#A78BFA' },
   ];
 
   return (
     <div className="space-y-6">
-
-      {/* ── KPI ROW ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpis.map(({ label, value, icon: Icon, color, sub }, i) => (
+      {/* ── Vertical KPIs ── */}
+      <div className="grid grid-cols-2 gap-4">
+        {kpis.map(({ label, value, icon: Icon, color }, i) => (
           <motion.div
             key={label}
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08 }}
-            className="gmm-box p-5 flex items-center gap-4 group hover:shadow-lg transition-all"
+            transition={{ delay: i * 0.05 }}
+            className="gmm-box p-4 flex flex-col items-start gap-3 hover:shadow-lg transition-all"
           >
-            <div
-              className="w-11 h-11 rounded-[14px] flex items-center justify-center shrink-0 transition-transform group-hover:scale-110"
-              style={{ background: `${color}15`, border: `1px solid ${color}30` }}
-            >
-              <Icon size={19} style={{ color }} />
+            <div className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0" style={{ background: `${color}15`, color }}>
+              <Icon size={16} />
             </div>
             <div>
               <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-0.5" style={{ color: 'var(--gmm-text-muted)' }}>{label}</p>
-              <p className="text-[22px] font-black tracking-tight" style={{ color }}>{fmtK(value)}</p>
-              <p className="text-[9px] font-bold uppercase tracking-widest mt-0.5" style={{ color: 'var(--gmm-text-muted)' }}>{sub}</p>
+              <p className="text-[18px] font-black tracking-tight" style={{ color }}>{fmtK(value)}</p>
             </div>
           </motion.div>
         ))}
       </div>
 
-      {/* ── CHARTS ROW ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-        {/* LEFT — Horizontal Bars (3 cols) */}
-        <div className="lg:col-span-3 gmm-box p-6 space-y-6">
-          <div>
-            <h3 className="text-[13px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--gmm-text)' }}>
-              Total Pagado por Asegurado
-            </h3>
-            <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--gmm-text-muted)' }}>
-              Distribución real del gasto acumulado
-            </p>
-          </div>
-
-          <div className="space-y-5">
-            {perInsured.map((p, i) => {
-              const pct = maxPagado > 0 ? (p.pagado / maxPagado) * 100 : 0;
-              return (
-                <motion.div
-                  key={p.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="space-y-2"
+      {/* ── Donut ── */}
+      <div className="gmm-box p-5 flex flex-col">
+        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--gmm-text)' }}>Distribución</h3>
+        <div className="flex-1 min-h-[180px] relative">
+          {mounted && (
+            <ResponsiveContainer width="100%" height="100%" minHeight={180}>
+              <PieChart>
+                <Pie
+                  data={donutData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={45}
+                  outerRadius={75}
+                  paddingAngle={4}
+                  dataKey="value"
+                  stroke="none"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-8 h-8 rounded-[10px] flex items-center justify-center text-[10px] font-black"
-                        style={{ background: `${p.color}18`, border: `1px solid ${p.color}30`, color: p.color }}
-                      >
-                        {p.name.substring(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="text-[12px] font-black" style={{ color: 'var(--gmm-text)' }}>{p.name}</p>
-                        <p className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--gmm-text-muted)' }}>
-                          {p.parentesco} · {p.siniestros} siniestro{p.siniestros !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[14px] font-black" style={{ color: p.color }}>{fmtK(p.pagado)}</p>
-                      {p.pendiente > 0 && (
-                        <p className="text-[9px] font-bold text-red-400">+{fmtK(p.pendiente)} pend.</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Bar */}
-                  <div className="h-3 w-full rounded-full overflow-hidden" style={{ background: 'var(--gmm-border)' }}>
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${pct}%` }}
-                      transition={{ duration: 1, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] }}
-                      className="h-full rounded-full"
-                      style={{ background: p.color, minWidth: p.pagado > 0 ? '4px' : 0 }}
-                    />
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+                  {donutData.map((entry, idx) => (
+                    <Cell key={idx} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'var(--gmm-card)', border: '1px solid var(--gmm-border)', borderRadius: '12px', fontSize: '10px'
+                  }}
+                  formatter={((value: number) => [`$${fmt(value)}`, '']) as any}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
         </div>
+      </div>
 
-        {/* RIGHT — Donut (2 cols) */}
-        <div className="lg:col-span-2 gmm-box p-6 flex flex-col">
-          <div className="mb-4">
-            <h3 className="text-[13px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--gmm-text)' }}>
-              Distribución del Gasto
-            </h3>
-            <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: 'var(--gmm-text-muted)' }}>
-              Participación por integrante
-            </p>
-          </div>
-
-          <div className="flex-1 min-h-[260px] relative">
-            {mounted && (
-              <ResponsiveContainer width="100%" height="100%" minHeight={260}>
-                <PieChart>
-                  <Pie
-                    data={donutData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={90}
-                    paddingAngle={4}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {donutData.map((entry, idx) => (
-                      <Cell key={idx} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'var(--gmm-card)',
-                      border: '1px solid var(--gmm-border)',
-                      borderRadius: '16px',
-                      fontSize: '11px',
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                      color: 'var(--gmm-text)',
-                      padding: '12px 16px',
-                    }}
-                    formatter={((value: number) => [`$${fmt(value)}`, '']) as any}
+      {/* ── Horizontal Bars ── */}
+      <div className="gmm-box p-5 space-y-5">
+        <h3 className="text-[11px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--gmm-text)' }}>Por Asegurado</h3>
+        <div className="space-y-4">
+          {perInsured.map((p, i) => {
+            const pct = maxPagado > 0 ? (p.pagado / maxPagado) * 100 : 0;
+            return (
+              <motion.div key={p.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
+                    <p className="text-[11px] font-bold" style={{ color: 'var(--gmm-text)' }}>{p.name}</p>
+                  </div>
+                  <p className="text-[11px] font-black" style={{ color: p.color }}>{fmtK(p.pagado)}</p>
+                </div>
+                <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: 'var(--gmm-border)' }}>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${pct}%` }}
+                    transition={{ duration: 1, delay: i * 0.12 }}
+                    className="h-full rounded-full"
+                    style={{ background: p.color, minWidth: p.pagado > 0 ? '4px' : 0 }}
                   />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-            {/* Center label */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <p className="text-[8px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--gmm-text-muted)' }}>Total</p>
-              <p className="text-[18px] font-black" style={{ color: 'var(--gmm-text)' }}>{fmtK(total.total_pagado)}</p>
-            </div>
-          </div>
-
-          {/* Legend */}
-          <div className="grid grid-cols-2 gap-3 mt-4 pt-4" style={{ borderTop: '1px solid var(--gmm-border)' }}>
-            {perInsured.map((p) => (
-              <div key={p.id} className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: p.color }} />
-                <span className="text-[10px] font-bold truncate" style={{ color: 'var(--gmm-text-muted)' }}>
-                  {p.name} — {fmtK(p.pagado)}
-                </span>
-              </div>
-            ))}
-          </div>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </div>
