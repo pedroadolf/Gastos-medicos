@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { 
-  Activity, Plus, Moon, Sun, User, FileText, Settings, 
+  Activity, Plus, Moon, Sun, User, FileText, Settings, LogOut,
   BarChart3, Search, Bell, ChevronDown
 } from 'lucide-react';
+import { signOut, useSession } from 'next-auth/react';
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Copilot } from "@/components/layout/Copilot";
 
@@ -27,6 +28,8 @@ const SUBMENU_ITEMS = [
 
 function GlobalTopNav({ theme, toggleTheme }: { theme: string; toggleTheme: () => void }) {
   const pathname = usePathname();
+  const session = useSession().data;
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
@@ -236,13 +239,66 @@ function GlobalTopNav({ theme, toggleTheme }: { theme: string; toggleTheme: () =
           />
         </button>
 
-        {/* User avatar */}
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all
-                     duration-200 hover:scale-110 cursor-pointer"
-          style={{ background: 'rgba(216,217,215,0.15)', border: '1px solid rgba(216,217,215,0.20)' }}
-        >
-          <User size={16} style={{ color: '#D8D9D7' }} />
+        {/* ── User Menu ── */}
+        <div className="relative">
+          <button
+            onClick={() => setUserMenuOpen(!userMenuOpen)}
+            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-all
+                       duration-200 hover:scale-110 active:scale-95 cursor-pointer"
+            style={{ background: 'rgba(216,217,215,0.15)', border: '1px solid rgba(216,217,215,0.20)' }}
+            aria-label="Menú de usuario"
+          >
+            {session?.user?.image ? (
+              <img src={session.user.image} alt="User" className="w-full h-full rounded-xl object-cover" />
+            ) : (
+              <User size={16} style={{ color: '#D8D9D7' }} />
+            )}
+          </button>
+
+          {userMenuOpen && (
+            <div
+              className="absolute right-0 top-full mt-2 w-64 rounded-2xl p-3 shadow-2xl border z-50 flex flex-col gap-1"
+              style={{ background: 'var(--gmm-topbar-bg)', backdropFilter: 'blur(16px)', borderColor: 'rgba(216,217,215,0.12)' }}
+            >
+              {/* User info */}
+              <div className="px-3 py-3 border-b mb-1" style={{ borderColor: 'rgba(216,217,215,0.10)' }}>
+                <p className="text-[12px] font-black text-white leading-tight">
+                  {session?.user?.name ?? 'Usuario'}
+                </p>
+                <p className="text-[9px] font-semibold mt-0.5" style={{ color: 'rgba(216,217,215,0.5)' }}>
+                  {session?.user?.email ?? '—'}
+                </p>
+                <span
+                  className="inline-block mt-2 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest"
+                  style={{ background: 'rgba(255,170,0,0.15)', color: '#FFAA00', border: '1px solid rgba(255,170,0,0.25)' }}
+                >
+                  {(session?.user as any)?.role === 'admin' ? 'Administrador' : 'Asegurado'}
+                </span>
+              </div>
+
+              {/* Menu items */}
+              <Link
+                href="/configuracion"
+                onClick={() => setUserMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                style={{ color: 'rgba(216,217,215,0.7)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,170,0,0.08)'; e.currentTarget.style.color = '#FFAA00'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(216,217,215,0.7)'; }}
+              >
+                <Settings size={13} /> Configuración
+              </Link>
+
+              <button
+                onClick={() => { setUserMenuOpen(false); signOut({ callbackUrl: '/' }); }}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all w-full text-left"
+                style={{ color: '#EF4444' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <LogOut size={13} /> Cerrar Sesión
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
