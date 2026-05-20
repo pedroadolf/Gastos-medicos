@@ -107,23 +107,10 @@ export default function NuevoTramite({ initialTipo }: { initialTipo?: TramiteTyp
     return STEPS[idx - 1]?.id || current;
   };
 
-  // Load siniestros — API first, fallback to static data
+  // Use static group data to perfectly match the dashboard UI
   useEffect(() => {
-    fetch('/api/afectados')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.siniestros?.length > 0) {
-          setSiniestros(data.siniestros);
-        } else {
-          // API returned empty — use static group data
-          setSiniestros(buildFallbackSiniestros());
-        }
-      })
-      .catch(() => {
-        // Network error — use static group data
-        setSiniestros(buildFallbackSiniestros());
-      })
-      .finally(() => setIsLoading(false));
+    setSiniestros(buildFallbackSiniestros());
+    setIsLoading(false);
   }, []);
 
   const handleFinalSubmit = async () => {
