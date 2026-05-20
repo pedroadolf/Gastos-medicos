@@ -29,23 +29,51 @@ const TRAMITE_META: Record<TramiteType, { label: string; desc: string; color: st
   carta_remanente:   { label: 'Carta de Siniestralidad',    desc: 'Solicita la carta de remanente de suma asegurada disponible.',  color: '#FFAA00', icon: ScrollText },
 };
 
+// ── Insured config (same colors as dashboard) ─────────────────────────────────
+const INSURED_CONFIG: Record<string, { label: string; fullName: string; color: string; initials: string }> = {
+  'pedro-soto':      { label: 'PASH',    fullName: 'Pedro Adolfo Soto Hernández',  color: '#38BDF8', initials: 'PA' },
+  'claudia-fonseca': { label: 'Claudia', fullName: 'Claudia Fonseca Aguilar',      color: '#FFAA00', initials: 'CF' },
+  'emilio-soto':     { label: 'Emilio',  fullName: 'Emilio Soto Fonseca',          color: '#10B981', initials: 'ES' },
+  'sebastian-soto':  { label: 'Chari',   fullName: 'Pedro Sebastián Soto Fonseca', color: '#A78BFA', initials: 'SS' },
+};
+
+// ── Status badge config ────────────────────────────────────────────────────────
+const ESTADO_CONFIG: Record<string, { label: string; color: string }> = {
+  carta_pase:       { label: 'Carta Pase',      color: '#F59E0B' },
+  liquidado:        { label: 'Liquidado',        color: '#10B981' },
+  sin_movimiento:   { label: 'Sin movimiento',  color: '#6B7280' },
+  revision:         { label: 'En Revisión',     color: '#A78BFA' },
+  pendiente_carta:  { label: 'Pendiente',       color: '#EF4444' },
+};
+
 // ── Fallback: build siniestros list from static data ─────────────────────────
 function buildFallbackSiniestros() {
-  const list: { id: string; user_id: string; nombre_siniestro: string; numero_siniestro: string; fecha_apertura: string; estado: string; asegurado: string }[] = [];
+  const list: any[] = [];
   ASEGURADOS_GRUPO.forEach(asegurado => {
-    asegurado.siniestros.forEach(s => {
+    asegurado.siniestros.forEach((s: any) => {
+      // Skip placeholder pendientes
+      if (s.numero?.startsWith('PENDIENTE')) return;
       list.push({
         id: `${asegurado.id}-${s.numero}`,
         user_id: asegurado.id,
         nombre_siniestro: s.padecimiento,
         numero_siniestro: s.numero,
-        fecha_apertura: s.primer_gasto || new Date().toISOString().split('T')[0],
+        fecha_apertura: s.primer_gasto || '',
         estado: s.estado,
+        total_pagado: s.total_pagado || 0,
+        pendiente: s.pendiente_carta_pase || 0,
         asegurado: asegurado.nombre,
       });
     });
   });
   return list;
+}
+
+function fmtK(n: number) {
+  if (!n) return '—';
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000)     return `$${(n / 1_000).toFixed(1)}K`;
+  return `$${n.toFixed(2)}`;
 }
 
 export default function NuevoTramite({ initialTipo }: { initialTipo?: TramiteType }) {
@@ -54,6 +82,7 @@ export default function NuevoTramite({ initialTipo }: { initialTipo?: TramiteTyp
   const [step, setStep] = useState(1);
   const [siniestros, setSiniestros] = useState<any[]>([]);
   const [selectedSiniestroId, setSelectedSiniestroId] = useState<string>('');
+  const [selectedAseguradoId, setSelectedAseguradoId] = useState<string>('pedro-soto'); // default: PASH
   const [tipo, setTipo] = useState<TramiteType>(initialTipo || 'reembolso');
   const [invoices, setInvoices] = useState<FacturaRow[]>([]);
   const [files, setFiles] = useState<Record<string, File>>({});
@@ -213,89 +242,161 @@ export default function NuevoTramite({ initialTipo }: { initialTipo?: TramiteTyp
         <div className="relative z-10">
           <AnimatePresence mode="wait">
 
-            {/* STEP 1 — Vincular siniestro */}
+            {/* STEP 1 — Vincular siniestro (insured tabs + siniestro cards) */}
             {step === 1 && (
               <motion.div
                 key="step1"
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                className="space-y-10"
+                className="space-y-6"
               >
-                <div className="text-center space-y-3">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto font-black text-xl"
-                       style={{ background: `${meta.color}15`, color: meta.color, border: `1px solid ${meta.color}30` }}>
-                    1
-                  </div>
-                  <h2 className="text-[22px] font-black tracking-tight" style={{ color: 'var(--gmm-text)' }}>
-                    Vincular Expediente
+                {/* Title */}
+                <div>
+                  <h2 className="text-[18px] font-black tracking-tight" style={{ color: 'var(--gmm-text)' }}>
+                    Seleccionar Expediente
                   </h2>
-                  <p className="text-[12px] font-semibold max-w-md mx-auto" style={{ color: 'var(--gmm-text-muted)' }}>
-                    Selecciona el siniestro del asegurado para vincular este trámite. Esto permite el rastreo automático.
+                  <p className="text-[11px] font-semibold mt-1" style={{ color: 'var(--gmm-text-muted)' }}>
+                    Elige el asegurado y el siniestro al que pertenece este trámite.
                   </p>
                 </div>
 
-                <div className="max-w-md mx-auto space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest flex items-center gap-2"
-                           style={{ color: selectedSiniestroId ? '#10B981' : 'var(--gmm-text-muted)' }}>
-                      {selectedSiniestroId ? <Check size={12} strokeWidth={3} /> : <Search size={12} />}
-                      Siniestro / Padecimiento del Asegurado
-                    </label>
-                    <div className="relative">
-                      <select
-                        disabled={isLoading}
-                        value={selectedSiniestroId}
-                        onChange={e => setSelectedSiniestroId(e.target.value)}
-                        className="w-full rounded-xl px-5 py-4 text-[12px] font-bold outline-none transition-all appearance-none cursor-pointer"
-                        style={{
-                          background: 'var(--gmm-bg)',
-                          border: `1px solid ${selectedSiniestroId ? '#10B98150' : 'var(--gmm-border)'}`,
-                          color: 'var(--gmm-text)',
-                          boxShadow: selectedSiniestroId ? '0 0 0 4px #10B98110' : 'none',
-                        }}
-                      >
-                        {isLoading ? (
-                          <option>Cargando expedientes...</option>
-                        ) : (
-                          <>
-                            <option value="">— Seleccionar Siniestro / Padecimiento —</option>
-                            {siniestros.length > 0 ? (
-                              siniestros.map(s => (
-                                <option key={s.id} value={s.id}>
-                                  {s.numero_siniestro} · {(s.nombre_siniestro || s.padecimiento || 'Trámite General').toUpperCase()}
-                                  {s.asegurado ? ` (${s.asegurado.split(' ')[0]})` : ''}
-                                </option>
-                              ))
-                            ) : (
-                              <option value="" disabled>No se encontraron siniestros activos</option>
-                            )}
-                          </>
-                        )}
-                      </select>
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
-                           style={{ color: selectedSiniestroId ? '#10B981' : 'var(--gmm-text-muted)' }}>
-                        {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
-                      </div>
-                    </div>
+                {/* ── Insured Tabs (same style as dashboard) */}
+                {isLoading ? (
+                  <div className="flex items-center gap-3" style={{ color: 'var(--gmm-text-muted)' }}>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span className="text-[11px] font-bold uppercase tracking-widest">Cargando expedientes...</span>
                   </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(INSURED_CONFIG).map(([id, cfg]) => {
+                      const isActive = selectedAseguradoId === id;
+                      const hasData = siniestros.some(s => (s.user_id === id));
+                      if (!hasData) return null;
+                      return (
+                        <button
+                          key={id}
+                          onClick={() => { setSelectedAseguradoId(id); setSelectedSiniestroId(''); }}
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-200 border"
+                          style={{
+                            background:  isActive ? cfg.color : 'var(--gmm-bg)',
+                            color:       isActive ? '#1a1a1a' : 'var(--gmm-text-muted)',
+                            borderColor: isActive ? cfg.color  : 'var(--gmm-border)',
+                            boxShadow:   isActive ? `0 4px 14px -4px ${cfg.color}60` : 'none',
+                          }}
+                        >
+                          <span
+                            className="w-5 h-5 rounded-md text-[9px] flex items-center justify-center font-black shrink-0"
+                            style={{ background: isActive ? 'rgba(0,0,0,0.15)' : `${cfg.color}25`, color: isActive ? '#1a1a1a' : cfg.color }}
+                          >
+                            {cfg.initials}
+                          </span>
+                          {cfg.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
 
+                {/* ── Siniestros of selected insured */}
+                {!isLoading && selectedAseguradoId && (() => {
+                  const insuredSiniestros = siniestros.filter(s => s.user_id === selectedAseguradoId);
+                  const cfg = INSURED_CONFIG[selectedAseguradoId];
+                  if (!insuredSiniestros.length) return (
+                    <p className="text-[11px] font-bold" style={{ color: 'var(--gmm-text-muted)' }}>
+                      Sin siniestros registrados para {cfg?.label}.
+                    </p>
+                  );
+                  return (
+                    <div className="space-y-2">
+                      <p className="text-[9px] font-black uppercase tracking-widest mb-3" style={{ color: cfg?.color }}>
+                        {cfg?.fullName} — {insuredSiniestros.length} expediente{insuredSiniestros.length !== 1 ? 's' : ''}
+                      </p>
+                      {insuredSiniestros.map(s => {
+                        const isSelected = selectedSiniestroId === s.id;
+                        const estadoCfg = ESTADO_CONFIG[s.estado] || { label: s.estado, color: '#6B7280' };
+                        return (
+                          <button
+                            key={s.id}
+                            onClick={() => setSelectedSiniestroId(isSelected ? '' : s.id)}
+                            className="w-full text-left rounded-2xl p-4 transition-all duration-200 border relative overflow-hidden"
+                            style={{
+                              background:   isSelected ? `${cfg?.color}10` : 'var(--gmm-bg)',
+                              borderColor:  isSelected ? `${cfg?.color}50` : 'var(--gmm-border)',
+                              boxShadow:    isSelected ? `0 4px 20px -8px ${cfg?.color}40` : 'none',
+                            }}
+                          >
+                            {/* Selected glow */}
+                            {isSelected && (
+                              <div className="absolute right-0 top-0 bottom-0 w-24 pointer-events-none"
+                                   style={{ background: cfg?.color, opacity: 0.06, filter: 'blur(20px)' }} />
+                            )}
+                            <div className="relative z-10 flex items-start justify-between gap-4">
+                              <div className="flex items-start gap-3 flex-1 min-w-0">
+                                {/* Radio circle */}
+                                <div
+                                  className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all"
+                                  style={{
+                                    borderColor: isSelected ? cfg?.color : 'var(--gmm-border)',
+                                    background:  isSelected ? cfg?.color : 'transparent',
+                                  }}
+                                >
+                                  {isSelected && <Check size={10} strokeWidth={4} style={{ color: '#1a1a1a' }} />}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[12px] font-black leading-tight" style={{ color: 'var(--gmm-text)' }}>
+                                    {s.nombre_siniestro || s.padecimiento || 'Trámite médico'}
+                                  </p>
+                                  <p className="text-[9px] font-black uppercase tracking-widest mt-1" style={{ color: 'var(--gmm-text-muted)' }}>
+                                    {s.numero_siniestro}
+                                  </p>
+                                  {s.fecha_apertura && (
+                                    <p className="text-[9px] font-semibold mt-0.5" style={{ color: 'var(--gmm-text-muted)', opacity: 0.7 }}>
+                                      Primer gasto: {s.fecha_apertura}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Right col: amounts + status */}
+                              <div className="text-right shrink-0">
+                                {s.total_pagado > 0 && (
+                                  <p className="text-[11px] font-black" style={{ color: cfg?.color }}>
+                                    Pagado: {fmtK(s.total_pagado)}
+                                  </p>
+                                )}
+                                {s.pendiente > 0 && (
+                                  <p className="text-[9px] font-bold" style={{ color: '#F59E0B' }}>
+                                    Pend: {fmtK(s.pendiente)}
+                                  </p>
+                                )}
+                                <span
+                                  className="inline-block mt-1 px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest"
+                                  style={{ background: `${estadoCfg.color}18`, color: estadoCfg.color, border: `1px solid ${estadoCfg.color}25` }}
+                                >
+                                  {estadoCfg.label}
+                                </span>
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+
+                {/* Continue button */}
+                <div className="pt-2">
                   <button
                     onClick={() => setStep(getNextStep(1))}
                     disabled={!selectedSiniestroId}
                     className="w-full py-4 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed"
                     style={{
                       background: selectedSiniestroId ? meta.color : 'var(--gmm-border)',
-                      color: selectedSiniestroId ? '#1a1a1a' : 'var(--gmm-text-muted)',
-                      boxShadow: selectedSiniestroId ? `0 8px 24px -8px ${meta.color}60` : 'none',
+                      color:      selectedSiniestroId ? '#1a1a1a' : 'var(--gmm-text-muted)',
+                      boxShadow:  selectedSiniestroId ? `0 8px 24px -8px ${meta.color}60` : 'none',
                     }}
                   >
-                    Continuar <ArrowRight size={18} />
+                    Continuar con este Siniestro <ArrowRight size={18} />
                   </button>
-
-                  {siniestros.length === 0 && !isLoading && (
-                    <p className="text-[10px] text-amber-500 font-bold text-center flex items-center justify-center gap-2">
-                      <AlertCircle size={12} /> No hay siniestros registrados. Contacta a soporte.
-                    </p>
-                  )}
                 </div>
               </motion.div>
             )}
