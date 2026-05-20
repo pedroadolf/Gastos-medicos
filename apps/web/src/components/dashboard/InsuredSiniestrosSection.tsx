@@ -22,10 +22,10 @@ const COLORS: Record<string, string> = {
 };
 
 const SHORT_NAMES: Record<string, string> = {
-  'pedro-soto': 'Pedro',
+  'pedro-soto': 'PASH',
   'claudia-fonseca': 'Claudia',
   'emilio-soto': 'Emilio',
-  'sebastian-soto': 'Sebas',
+  'sebastian-soto': 'Chari',
 };
 
 export function InsuredSiniestrosSection() {

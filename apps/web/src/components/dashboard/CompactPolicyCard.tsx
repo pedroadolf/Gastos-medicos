@@ -3,6 +3,13 @@
 import { Shield, ShieldAlert } from 'lucide-react';
 import { formatMXN, type PolicyCalculada } from '@/lib/uma';
 
+/** Formatea como $3.55M o $293K — para montos grandes en tarjetas compactas */
+function fmtCompact(n: number): string {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000)     return `$${(n / 1_000).toFixed(1)}K`;
+  return `$${formatMXN(n)}`;
+}
+
 interface CompactPolicyCardProps {
   policy: PolicyCalculada;
 }
@@ -47,11 +54,14 @@ export function CompactPolicyCard({ policy }: CompactPolicyCardProps) {
           <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
             <div>
               <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-0.5" style={{ color: 'var(--gmm-text-muted)' }}>Suma Asegurada</p>
-              <p className="text-[15px] font-black" style={{ color: 'var(--gmm-text)' }}>${formatMXN(policy.suma_asegurada_mxn)}</p>
+              <p className="text-[15px] font-black" style={{ color: 'var(--gmm-text)' }}>{fmtCompact(policy.suma_asegurada_mxn)}</p>
+              <p className="text-[8px] font-semibold mt-0.5" style={{ color: 'var(--gmm-text-muted)', opacity: 0.6 }}>
+                {policy.suma_asegurada_uma.toLocaleString('es-MX')} UMA × ${policy.uma_diaria} ({policy.uma_year})
+              </p>
             </div>
             <div>
               <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-0.5" style={{ color: 'var(--gmm-text-muted)' }}>Deducible</p>
-              <p className="text-[15px] font-black" style={{ color: 'var(--gmm-text)' }}>${formatMXN(policy.deducible_mxn)}</p>
+              <p className="text-[15px] font-black" style={{ color: 'var(--gmm-text)' }}>{fmtCompact(policy.deducible_mxn)}</p>
             </div>
             <div>
               <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-0.5" style={{ color: 'var(--gmm-text-muted)' }}>Coaseguro</p>
@@ -96,7 +106,7 @@ export function CompactPolicyCard({ policy }: CompactPolicyCardProps) {
             </div>
             <div>
               <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-0.5" style={{ color: 'var(--gmm-text-muted)' }}>Deducible</p>
-              <p className="text-[15px] font-black" style={{ color: 'var(--gmm-text)' }}>$2,000,000.00</p>
+              <p className="text-[15px] font-black" style={{ color: 'var(--gmm-text)' }}>$2M</p>
             </div>
             <div>
               <p className="text-[9px] font-black uppercase tracking-[0.2em] mb-0.5" style={{ color: 'var(--gmm-text-muted)' }}>Coaseguro</p>

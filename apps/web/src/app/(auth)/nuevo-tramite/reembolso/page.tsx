@@ -9,7 +9,7 @@ export default function ReembolsoPage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-slate-950 bg-grid-white pt-10"
+      className="min-h-screen bg-gmm-bg pt-10"
     >
       <NuevoTramite initialTipo="reembolso" />
     </motion.div>

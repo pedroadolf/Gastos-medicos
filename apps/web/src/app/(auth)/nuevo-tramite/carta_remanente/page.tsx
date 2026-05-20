@@ -9,7 +9,7 @@ export default function RemanentePage() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-slate-950 bg-grid-white pt-10"
+      className="min-h-screen bg-gmm-bg pt-10"
     >
       <NuevoTramite initialTipo="carta_remanente" />
     </motion.div>

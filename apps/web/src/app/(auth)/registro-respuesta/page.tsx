@@ -31,7 +31,7 @@ export default function RegistroRespuestaPage() {
   const [uploadSource, setUploadSource] = useState<'upload' | 'local' | null>(null);
 
   // Form states
-  const [insuredKey, setInsuredKey] = useState('sebastian-soto');
+  const [insuredKey, setInsuredKey] = useState('pedro-soto');
   const [claimNum, setClaimNum] = useState('');
   const [folioDcn, setFolioDcn] = useState('');
   const [amount, setAmount] = useState(0);
@@ -122,7 +122,7 @@ export default function RegistroRespuestaPage() {
 
   // Reset form
   const handleReset = () => {
-    setInsuredKey('sebastian-soto');
+    setInsuredKey('pedro-soto');
     setClaimNum('');
     setFolioDcn('');
     setAmount(0);
@@ -433,9 +433,9 @@ export default function RegistroRespuestaPage() {
                   className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/5 text-slate-900 dark:text-white text-[11px] font-black p-3 rounded-xl outline-none focus:border-amber-500"
                 >
                   <option value="claudia-fonseca">Claudia Fonseca Aguilar (Titular)</option>
-                  <option value="pedro-soto">Pedro Adolfo Soto Hernández (Cónyuge)</option>
+                  <option value="pedro-soto">PASH — Pedro Adolfo Soto Hernández (Cónyuge)</option>
                   <option value="emilio-soto">Emilio Soto Fonseca (Hijo)</option>
-                  <option value="sebastian-soto">Pedro Sebastián Soto Fonseca (Hijo)</option>
+                  <option value="sebastian-soto">Chari — Pedro Sebastián Soto Fonseca (Hijo)</option>
                 </select>
               </div>
 
