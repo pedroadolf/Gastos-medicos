@@ -32,6 +32,8 @@ export async function GET(req: Request) {
     .from('tramites')
     .select(`
       *,
+      siniestros(*),
+      facturas(importe),
       audit_results!left(score, findings, status)
     `)
     .order('created_at', { ascending: false })
