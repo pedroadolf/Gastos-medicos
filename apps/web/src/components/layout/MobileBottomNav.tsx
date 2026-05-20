@@ -5,21 +5,21 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   Home, 
-  FileText, 
+  Activity, 
   PlusCircle, 
-  User, 
+  FileCheck, 
   Settings 
 } from 'lucide-react';
-import { cn } from '@/lib/utils'; // Assuming this exists given package.json dependencies
+import { cn } from '@/lib/utils';
 
 export function MobileBottomNav({ className }: { className?: string }) {
   const pathname = usePathname();
 
   const NAV_ITEMS = [
     { label: 'Inicio', icon: Home, href: '/dashboard' },
-    { label: 'Mis Trámites', icon: FileText, href: '/siniestros' },
-    { label: 'Nuevo', icon: PlusCircle, href: '/nuevo-tramite', primary: true },
-    { label: 'Agentes', icon: User, href: '/agentes' }, 
+    { label: 'Trámites', icon: Activity, href: '/tramites' },
+    { label: 'Trámite', icon: PlusCircle, href: '/nuevo-tramite', primary: true },
+    { label: 'Conciliar', icon: FileCheck, href: '/registro-respuesta' }, 
     { label: 'Ajustes', icon: Settings, href: '/configuracion' },
   ];
 
@@ -29,7 +29,9 @@ export function MobileBottomNav({ className }: { className?: string }) {
       className
     )}>
       {NAV_ITEMS.map((item) => {
-        const isActive = pathname === item.href;
+        const isActive = item.primary 
+          ? pathname.startsWith(item.href) 
+          : pathname === item.href;
         const Icon = item.icon;
 
         if (item.primary) {
@@ -39,10 +41,10 @@ export function MobileBottomNav({ className }: { className?: string }) {
               href={item.href}
               className="flex flex-col items-center justify-center -mt-8"
             >
-              <div className="w-14 h-14 rounded-full bg-medical-cyan flex items-center justify-center shadow-lg shadow-medical-cyan/30 text-slate-950 scale-110 active:scale-95 transition-all">
+              <div className="w-14 h-14 rounded-full bg-[#FFAA00] flex items-center justify-center shadow-lg shadow-amber-500/30 text-slate-950 scale-110 active:scale-95 transition-all">
                 <Icon size={24} strokeWidth={3} />
               </div>
-              <span className="text-[10px] font-bold text-slate-500 mt-2 lowercase tracking-wide">
+              <span className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-wider">
                 {item.label}
               </span>
             </Link>
@@ -55,13 +57,13 @@ export function MobileBottomNav({ className }: { className?: string }) {
             href={item.href}
             className={cn(
               "flex flex-col items-center gap-1 p-2 rounded-xl transition-all",
-              isActive ? "text-medical-cyan" : "text-slate-500 hover:text-slate-300"
+              isActive ? "text-[#FFAA00]" : "text-slate-500 hover:text-slate-300"
             )}
           >
             <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
             <span className={cn(
-              "text-[10px] font-medium",
-              isActive ? "text-medical-cyan" : "text-slate-500"
+              "text-[9px] font-bold uppercase tracking-wider",
+              isActive ? "text-[#FFAA00]" : "text-slate-500"
             )}>
               {item.label}
             </span>

@@ -93,7 +93,7 @@ export default function DashboardPage() {
             <h2 className="text-[16px] font-black uppercase tracking-widest text-slate-900 dark:text-white mb-4">
               Finanzas
             </h2>
-            <FinancialAnalysis />
+            <FinancialAnalysis policy={policy} />
           </div>
         </div>
 

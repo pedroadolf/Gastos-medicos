@@ -3,6 +3,12 @@
  * Detiene el proceso si no detecta las variables de entorno necesarias.
  */
 
+const path = require("path");
+const dotenv = require("dotenv");
+
+// Cargar variables de entorno desde .env.local de la aplicación
+dotenv.config({ path: path.resolve(__dirname, "../.env.local") });
+
 const requiredEnvs = [
   "NEXT_PUBLIC_SUPABASE_URL",
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",

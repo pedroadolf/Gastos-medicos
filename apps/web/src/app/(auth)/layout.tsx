@@ -5,21 +5,48 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { 
   Activity, Plus, Moon, Sun, User, FileText, Settings, 
-  BarChart3, Search, Bell
+  BarChart3, Search, Bell, ChevronDown
 } from 'lucide-react';
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Copilot } from "@/components/layout/Copilot";
 
 const NAV_ITEMS = [
   { name: 'Dashboard',           path: '/dashboard',           icon: <BarChart3 size={15} /> },
-  { name: 'Nuevo Trámite',       path: '/nuevo-tramite',       icon: <Plus size={15} /> },
+  { name: 'Tipo de Trámite',     path: '/nuevo-tramite',       icon: <Plus size={15} /> },
   { name: 'Mis Trámites',        path: '/tramites',            icon: <Activity size={15} /> },
-  { name: 'Reg. Documento',      path: '/registro-respuesta',  icon: <FileText size={15} /> },
+  { name: 'Conciliar Finiquito', path: '/registro-respuesta',  icon: <FileText size={15} /> },
   { name: 'Configuración',       path: '/configuracion',       icon: <Settings size={15} /> },
+];
+
+const SUBMENU_ITEMS = [
+  { name: 'Reembolso de Gastos',        path: '/nuevo-tramite/reembolso' },
+  { name: 'Pago Directo / Hosp.',       path: '/nuevo-tramite/pago_directo' },
+  { name: 'Cirugía Programada',         path: '/nuevo-tramite/cirugia_programada' },
+  { name: 'Carta Siniestralidad',       path: '/nuevo-tramite/carta_remanente' },
 ];
 
 function GlobalTopNav({ theme, toggleTheme }: { theme: string; toggleTheme: () => void }) {
   const pathname = usePathname();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = () => {
+    if (timeoutId) clearTimeout(timeoutId);
+    setDropdownOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    const id = setTimeout(() => {
+      setDropdownOpen(false);
+    }, 150);
+    setTimeoutId(id);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [timeoutId]);
 
   return (
     <header
@@ -49,7 +76,78 @@ function GlobalTopNav({ theme, toggleTheme }: { theme: string; toggleTheme: () =
       {/* ── Nav Items ── */}
       <nav className="hidden lg:flex items-center gap-1 flex-1">
         {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.path;
+          const isTipo = item.name === 'Tipo de Trámite';
+          const isActive = isTipo 
+            ? pathname.startsWith('/nuevo-tramite') 
+            : pathname === item.path;
+
+          if (isTipo) {
+            return (
+              <div
+                key={item.path}
+                className="relative"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
+                <Link
+                  href={item.path}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold uppercase
+                             tracking-widest transition-all duration-200"
+                  style={{
+                    color:      isActive ? '#343434'    : 'rgba(216,217,215,0.7)',
+                    background: isActive ? '#FFAA00'    : 'transparent',
+                    boxShadow:  isActive ? '0 2px 8px rgba(255,170,0,0.30)' : 'none',
+                  }}
+                >
+                  {item.icon}
+                  {item.name}
+                  <ChevronDown 
+                    size={12} 
+                    className={`transition-transform duration-200 ml-0.5 ${dropdownOpen ? 'rotate-180' : ''}`} 
+                    style={{ color: isActive ? '#343434' : 'rgba(216,217,215,0.4)' }}
+                  />
+                </Link>
+
+                {/* Submenu Dropdown */}
+                {dropdownOpen && (
+                  <div
+                    className="absolute top-full left-0 mt-1 w-60 rounded-2xl p-2 shadow-2xl border border-white/10 z-50 flex flex-col gap-1 transition-all duration-200 animate-in fade-in slide-in-from-top-2"
+                    style={{ background: 'var(--gmm-topbar-bg)', backdropFilter: 'blur(16px)' }}
+                  >
+                    {SUBMENU_ITEMS.map((sub) => {
+                      const isSubActive = pathname === sub.path;
+                      return (
+                        <Link
+                          key={sub.path}
+                          href={sub.path}
+                          className="flex items-center w-full px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-150"
+                          style={{
+                            color: isSubActive ? '#FFAA00' : 'rgba(216,217,215,0.7)',
+                            background: isSubActive ? 'rgba(255,170,0,0.08)' : 'transparent',
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!isSubActive) {
+                              (e.currentTarget as HTMLElement).style.color = '#FFAA00';
+                              (e.currentTarget as HTMLElement).style.background = 'rgba(255,170,0,0.08)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!isSubActive) {
+                              (e.currentTarget as HTMLElement).style.color = 'rgba(216,217,215,0.7)';
+                              (e.currentTarget as HTMLElement).style.background = 'transparent';
+                            }
+                          }}
+                        >
+                          {sub.name}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
           return (
             <Link
               key={item.path}
@@ -80,6 +178,7 @@ function GlobalTopNav({ theme, toggleTheme }: { theme: string; toggleTheme: () =
           );
         })}
       </nav>
+
 
       {/* ── Search ── */}
       <div

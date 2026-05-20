@@ -15,10 +15,10 @@ const fmt = (n: number) => n.toLocaleString('es-MX', { minimumFractionDigits: 2,
 const fmtK = (n: number) => n >= 1000 ? `$${(n / 1000).toLocaleString('es-MX', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k` : `$${fmt(n)}`;
 
 const COLORS: Record<string, string> = {
-  'pedro-soto': '#38BDF8',
-  'claudia-fonseca': '#A78BFA',
-  'emilio-soto': '#34D399',
-  'sebastian-soto': '#FBBF24',
+  'pedro-soto': '#38BDF8',      // Sky Blue
+  'claudia-fonseca': '#FFAA00',  // Gold/Amber (unified!)
+  'emilio-soto': '#10B981',      // Emerald Green
+  'sebastian-soto': '#A78BFA',   // Purple
 };
 
 const SHORT_NAMES: Record<string, string> = {
@@ -30,20 +30,80 @@ const SHORT_NAMES: Record<string, string> = {
 
 export function InsuredSiniestrosSection() {
   const [mounted, setMounted] = useState(false);
+  const [asegurados, setAsegurados] = useState(ASEGURADOS_GRUPO);
   const [activeTab, setActiveTab] = useState<string>(ASEGURADOS_GRUPO[0].id);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    // Load local storage conciliaciones to calculate dynamic values
+    const saved = localStorage.getItem('gmm-conciliaciones');
+    if (saved) {
+      try {
+        const conciliaciones = JSON.parse(saved);
+        const updatedGrupo = JSON.parse(JSON.stringify(ASEGURADOS_GRUPO));
+        
+        conciliaciones.forEach((c: any) => {
+          const asegurado = updatedGrupo.find((a: any) => a.id === c.insuredKey);
+          if (asegurado) {
+            const normalize = (num: string) => num.replace(/\D/g, '');
+            const targetNorm = normalize(c.claimNum);
+            
+            // Check if claim exists
+            let siniestro = asegurado.siniestros.find((s: any) => 
+              normalize(s.numero).startsWith(targetNorm.substring(0, 11))
+            );
+            
+            if (siniestro) {
+              siniestro.total_pagado += c.amount;
+              siniestro.pendiente_carta_pase = Math.max(0, siniestro.pendiente_carta_pase - c.amount);
+              siniestro.estado = 'liquidado';
+            } else {
+              asegurado.siniestros.unshift({
+                numero: c.claimNum,
+                padecimiento: c.diagnosis,
+                poliza: '02012-0075008',
+                inciso: 4,
+                suma_asegurada: 108049334,
+                total_pagado: c.amount,
+                pendiente_carta_pase: 0,
+                sa_disponible: 108049334 - c.amount,
+                deducible_aplicado: c.deducible,
+                coaseguro_pct: 10,
+                coaseguro_aplicado: c.coaseguro,
+                estado: 'liquidado'
+              });
+            }
+          }
+        });
+        
+        setAsegurados(updatedGrupo);
+      } catch (e) {
+        console.error("Error applying saved conciliaciones:", e);
+      }
+    }
+  }, []);
 
   if (!mounted) return null;
 
-  // Transform all group data once
-  const groupData = ASEGURADOS_GRUPO.map((asegurado) => {
+  // Transform all group data once based on dynamic state
+  const groupData = asegurados.map((asegurado) => {
     const sub = calcularSubtotalAsegurado(asegurado);
     return { asegurado, sub };
   });
 
   const activeData = groupData.find(g => g.asegurado.id === activeTab);
-  const totalGrupo = calcularTotalGrupo();
+  
+  // Calculate total group dynamically from state
+  const totalGrupo = asegurados.reduce((acc, asegurado) => {
+    const sub = calcularSubtotalAsegurado(asegurado);
+    return {
+      total_pagado: acc.total_pagado + sub.total_pagado,
+      total_pendiente: acc.total_pendiente + sub.total_pendiente,
+      total_deducible: acc.total_deducible + sub.total_deducible,
+      total_coaseguro: acc.total_coaseguro + sub.total_coaseguro,
+      count_siniestros: acc.count_siniestros + sub.count_siniestros,
+    };
+  }, { total_pagado: 0, total_pendiente: 0, total_deducible: 0, total_coaseguro: 0, count_siniestros: 0 });
 
   if (!activeData) return null;
 
@@ -64,15 +124,21 @@ export function InsuredSiniestrosSection() {
                 "px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all whitespace-nowrap border outline-none",
                 isActive 
                   ? "shadow-lg scale-[1.02]" 
-                  : "bg-transparent hover:bg-slate-800/30 text-slate-500 border-transparent hover:border-slate-700"
+                  : "bg-transparent text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 border-transparent hover:border-slate-200 dark:hover:border-white/10 dark:text-slate-400"
               )}
-              style={isActive ? { background: `${color}15`, color, borderColor: `${color}30` } : {}}
+              style={isActive ? { 
+                background: `${color}15`, 
+                color, 
+                borderColor: `${color}40`,
+                boxShadow: `0 8px 20px -6px ${color}25`
+              } : {}}
             >
               {name}
             </button>
           );
         })}
       </div>
+
 
       {/* ── TAB CONTENT ── */}
       <AnimatePresence mode="wait">
