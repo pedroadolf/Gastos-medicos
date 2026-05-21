@@ -48,10 +48,10 @@ export default function UploadDocs({ files, setFiles, onBack, onSubmit, isSubmit
     <div className="space-y-12">
       {/* 📎 Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-          Cargar <span className="text-medical-cyan">Documentación</span>
+        <h2 className="text-3xl font-black tracking-tight" style={{ color: 'var(--gmm-text)' }}>
+          Cargar <span style={{ color: 'var(--gmm-accent)' }}>Documentación</span>
         </h2>
-        <p className="text-slate-500 text-sm max-w-md mx-auto">
+        <p className="text-sm max-w-md mx-auto" style={{ color: 'var(--gmm-text-muted)' }}>
           Sube los archivos necesarios para completar tu expediente. El motor de IA los clasificará automáticamente.
         </p>
       </div>
@@ -59,11 +59,12 @@ export default function UploadDocs({ files, setFiles, onBack, onSubmit, isSubmit
       <div className="max-w-4xl mx-auto space-y-10 relative z-10">
         {/* 🚀 Master Dropzone (The "Bulk" Option) */}
         <div 
-          onDragOver={(e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.currentTarget.classList.add('border-medical-cyan', 'bg-medical-cyan/5'); }}
-          onDragLeave={(e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.currentTarget.classList.remove('border-medical-cyan', 'bg-medical-cyan/5'); }}
+          onDragOver={(e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--gmm-accent)'; e.currentTarget.style.background = 'rgba(255, 170, 0, 0.05)'; }}
+          onDragLeave={(e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--gmm-border)'; e.currentTarget.style.background = 'var(--gmm-bg-panel)'; }}
           onDrop={(e: React.DragEvent<HTMLDivElement>) => {
             e.preventDefault();
-            e.currentTarget.classList.remove('border-medical-cyan', 'bg-medical-cyan/5');
+            e.currentTarget.style.borderColor = 'var(--gmm-border)';
+            e.currentTarget.style.background = 'var(--gmm-bg-panel)';
             const droppedFiles = Array.from(e.dataTransfer.files);
             
             const newFiles = { ...files };
@@ -85,38 +86,50 @@ export default function UploadDocs({ files, setFiles, onBack, onSubmit, isSubmit
           className="relative group cursor-pointer"
         >
           <div className="absolute -top-14 right-4 flex flex-col items-end gap-1">
-            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Documentos Detectados</span>
-            <div className={cn(
-               "px-4 py-1.5 rounded-full shadow-lg transition-all duration-500 border-2",
-               Object.keys(files).length > 0 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" : "bg-medical-cyan/10 border-medical-cyan/30 text-medical-cyan"
-            )}>
+            <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'var(--gmm-text-muted)' }}>Documentos Detectados</span>
+            <div 
+              className="px-4 py-1.5 rounded-full shadow-lg transition-all duration-500 border-2"
+              style={
+                Object.keys(files).length > 0
+                  ? { background: 'rgba(34, 197, 94, 0.1)', borderColor: 'rgba(34, 197, 94, 0.3)', color: '#22c55e' }
+                  : { background: 'rgba(255, 170, 0, 0.1)', borderColor: 'rgba(255, 170, 0, 0.3)', color: 'var(--gmm-accent)' }
+              }
+            >
               <span className="text-sm font-black tracking-tighter">
                 {Object.keys(files).length} <span className="text-[10px] opacity-40">de</span> {REQUIRED_DOCS.length}
               </span>
             </div>
           </div>
           
-          <div className="absolute -inset-2 bg-gradient-to-r from-medical-cyan/30 to-indigo-500/30 rounded-[3rem] blur-xl opacity-20 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-          <div className="relative p-12 border-4 border-dashed border-slate-200 dark:border-slate-800 rounded-[3rem] bg-white dark:bg-slate-950/80 flex flex-col items-center justify-center gap-6 transition-all hover:border-medical-cyan hover:shadow-2xl hover:shadow-medical-cyan/20 overflow-hidden min-h-[300px]">
+          <div className="absolute -inset-2 rounded-[3rem] blur-xl opacity-20 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"
+               style={{ background: 'linear-gradient(to right, rgba(255, 170, 0, 0.3), rgba(255, 170, 0, 0.15))' }}></div>
+          <div 
+            className="relative p-12 border-4 border-dashed rounded-[3rem] flex flex-col items-center justify-center gap-6 transition-all group-hover:shadow-2xl overflow-hidden min-h-[300px]"
+            style={{
+              background: 'var(--gmm-bg-panel)',
+              borderColor: 'var(--gmm-border)'
+            }}
+          >
              
              {/* Decorative Background Icon */}
-             <FileUp size={120} className="absolute -bottom-4 -right-4 text-medical-cyan/5 -rotate-12" />
+             <FileUp size={120} className="absolute -bottom-4 -right-4 -rotate-12 pointer-events-none" style={{ color: 'var(--gmm-accent)', opacity: 0.05 }} />
 
-             <div className="w-24 h-24 rounded-[2.5rem] bg-medical-cyan text-white flex items-center justify-center shadow-2xl shadow-medical-cyan/40 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+             <div className="w-24 h-24 rounded-[2.5rem] flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500"
+                  style={{ background: '#FFAA00', color: '#1a1a1a', boxShadow: '0 12px 32px rgba(255,170,0,0.3)' }}>
                 <FileUp size={42} strokeWidth={3} />
              </div>
              
              <div className="text-center space-y-3">
-                <h3 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tight italic">CARGA MASIVA</h3>
-                <p className="text-sm text-slate-500 font-bold uppercase tracking-[0.2em] max-w-sm mx-auto leading-relaxed">
-                   Arrastra <span className="text-medical-cyan underline decoration-2 underline-offset-4">todo el expediente</span> aquí. El sistema clasificará INE, Recetas y Estudios automáticamente.
+                <h3 className="text-3xl font-black uppercase tracking-tight italic" style={{ color: 'var(--gmm-text)' }}>CARGA MASIVA</h3>
+                <p className="text-sm font-bold uppercase tracking-[0.2em] max-w-sm mx-auto leading-relaxed" style={{ color: 'var(--gmm-text-muted)' }}>
+                   Arrastra <span style={{ color: 'var(--gmm-text)', fontWeight: 900, textDecoration: 'underline', textDecorationColor: '#FFAA00', textDecorationThickness: '2px', textUnderlineOffset: '4px' }}>todo el expediente</span> aquí. El sistema clasificará INE, Recetas y Estudios automáticamente.
                 </p>
              </div>
 
-             <div className="flex gap-4 p-2 bg-slate-100 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800">
-                <span className="px-3 py-1 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-200 dark:border-slate-800 last:border-0">PDF</span>
-                <span className="px-3 py-1 text-[10px] font-black text-slate-500 uppercase tracking-widest border-r border-slate-200 dark:border-slate-800 last:border-0">JPG/PNG</span>
-                <span className="px-3 py-1 text-[10px] font-black text-slate-500 uppercase tracking-widest">XML</span>
+             <div className="flex gap-4 p-2 rounded-2xl border" style={{ background: 'var(--gmm-bg)', borderColor: 'var(--gmm-border)' }}>
+                <span className="px-3 py-1 text-[10px] font-black uppercase tracking-widest border-r last:border-0" style={{ color: 'var(--gmm-text-muted)', borderColor: 'var(--gmm-border)' }}>PDF</span>
+                <span className="px-3 py-1 text-[10px] font-black uppercase tracking-widest border-r last:border-0" style={{ color: 'var(--gmm-text-muted)', borderColor: 'var(--gmm-border)' }}>JPG/PNG</span>
+                <span className="px-3 py-1 text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--gmm-text-muted)' }}>XML</span>
              </div>
 
              <input 
@@ -145,9 +158,9 @@ export default function UploadDocs({ files, setFiles, onBack, onSubmit, isSubmit
         </div>
 
         <div className="flex items-center gap-4 py-4">
-          <div className="h-[1px] flex-1 bg-slate-800" />
-          <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">o carga individual</span>
-          <div className="h-[1px] flex-1 bg-slate-800" />
+          <div className="h-[1px] flex-1" style={{ background: 'var(--gmm-border)' }} />
+          <span className="text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: 'var(--gmm-text-muted)' }}>o carga individual</span>
+          <div className="h-[1px] flex-1" style={{ background: 'var(--gmm-border)' }} />
         </div>
 
         {/* 🧩 Individual Document Cards */}
@@ -161,19 +174,22 @@ export default function UploadDocs({ files, setFiles, onBack, onSubmit, isSubmit
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: idx * 0.05 }}
-                onDragOver={(e: React.DragEvent<HTMLLabelElement>) => { e.preventDefault(); e.currentTarget.classList.add('border-medical-cyan'); }}
-                onDragLeave={(e: React.DragEvent<HTMLLabelElement>) => { e.preventDefault(); e.currentTarget.classList.remove('border-medical-cyan'); }}
+                onDragOver={(e: React.DragEvent<HTMLLabelElement>) => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--gmm-accent)'; }}
+                onDragLeave={(e: React.DragEvent<HTMLLabelElement>) => { e.preventDefault(); e.currentTarget.style.borderColor = file ? 'rgba(34, 197, 94, 0.3)' : 'var(--gmm-border)'; }}
                 onDrop={(e: React.DragEvent<HTMLLabelElement>) => {
                   e.preventDefault();
-                  e.currentTarget.classList.remove('border-medical-cyan');
+                  e.currentTarget.style.borderColor = file ? 'rgba(34, 197, 94, 0.3)' : 'var(--gmm-border)';
                   if (e.dataTransfer.files[0]) handleFile(doc.id, e.dataTransfer.files[0]);
                 }}
                 className={cn(
                   "p-6 rounded-3xl border-2 transition-all cursor-pointer group flex flex-col items-start gap-4 h-full min-h-[140px] relative overflow-hidden",
                   file 
-                    ? "bg-emerald-500/5 border-emerald-500/30 ring-1 ring-emerald-500/10" 
-                    : "bg-white dark:bg-slate-950/40 border-slate-100 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                    ? "bg-emerald-500/5 ring-1 ring-emerald-500/10" 
+                    : "bg-gmm-card hover:shadow-md"
                 )}
+                style={{
+                  borderColor: file ? 'rgba(34, 197, 94, 0.3)' : 'var(--gmm-border)'
+                }}
               >
                 <input 
                   type="file" 
@@ -182,25 +198,29 @@ export default function UploadDocs({ files, setFiles, onBack, onSubmit, isSubmit
                 />
 
                 <div className="flex justify-between w-full items-start">
-                  <div className={cn(
-                    "w-12 h-12 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110",
-                    file ? "bg-emerald-500 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500"
-                  )}>
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110"
+                       style={{
+                         background: file ? '#22c55e' : 'var(--gmm-bg)',
+                         color: file ? '#ffffff' : 'var(--gmm-text-muted)'
+                       }}>
                     {file ? <Check size={24} strokeWidth={3} /> : <FileUp size={24} />}
                   </div>
-                  <span className={cn(
-                    "text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md border",
-                    file ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" : "bg-slate-500/10 border-slate-500/20 text-slate-500"
-                  )}>
+                  <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-md border"
+                        style={
+                          file
+                            ? { background: 'rgba(34, 197, 94, 0.1)', borderColor: 'rgba(34, 197, 94, 0.3)', color: '#22c55e' }
+                            : { background: 'rgba(0,0,0,0.03)', borderColor: 'var(--gmm-border)', color: 'var(--gmm-text-muted)' }
+                        }>
                     {doc.category}
                   </span>
                 </div>
 
                 <div className="space-y-1">
-                  <h4 className={cn("text-sm font-black tracking-tight", file ? "text-emerald-700 dark:text-emerald-400" : "text-slate-900 dark:text-white")}>
+                  <h4 className="text-sm font-black tracking-tight"
+                      style={{ color: file ? '#2e7d32' : 'var(--gmm-text)' }}>
                     {doc.label}
                   </h4>
-                  <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+                  <p className="text-[10px] font-medium leading-relaxed" style={{ color: 'var(--gmm-text-muted)' }}>
                     {file ? `${file.name.substring(0, 30)}...` : doc.desc}
                   </p>
                 </div>
@@ -227,30 +247,43 @@ export default function UploadDocs({ files, setFiles, onBack, onSubmit, isSubmit
         </AnimatePresence>
 
         {/* 🚀 Navigation */}
-        <div className="flex justify-between items-center mt-12 bg-slate-950/20 p-6 rounded-3xl border border-slate-800/40 border-dashed">
+        <div className="flex justify-between items-center mt-12 p-6 rounded-3xl border border-dashed"
+             style={{ background: 'var(--gmm-bg-panel)', borderColor: 'var(--gmm-border)' }}>
           <button
             onClick={onBack}
-            className="px-8 py-4 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-2 group"
+            className="px-8 py-4 text-xs font-black uppercase tracking-widest transition-colors flex items-center gap-2 group"
+            style={{ color: 'var(--gmm-text-muted)', background: 'transparent' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--gmm-text)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--gmm-text-muted)'; }}
           >
             <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> ATRÁS
           </button>
           
           <div className="flex items-center gap-4">
              <div className="text-right hidden md:block">
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Estado</p>
-                <p className="text-xs font-bold text-emerald-500 flex items-center gap-1 justify-end">
+                <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--gmm-text-muted)' }}>Estado</p>
+                <p className="text-xs font-bold flex items-center gap-1 justify-end" style={{ color: '#22c55e' }}>
                    <ShieldCheck size={14} /> Listo para procesar
                 </p>
              </div>
              <button
               onClick={onSubmit}
               disabled={isSubmitting || !allUploaded}
-              className={cn(
-                "px-12 py-4 rounded-2xl font-black text-sm transition-all flex items-center gap-3 shadow-2xl relative overflow-hidden group",
-                isSubmitting || !allUploaded
-                  ? "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700" 
-                  : "bg-medical-cyan text-white shadow-medical-cyan/30 hover:scale-[1.03] active:scale-95"
-              )}
+              className="px-12 py-4 rounded-2xl font-black text-sm transition-all flex items-center gap-3 relative overflow-hidden group"
+              style={(isSubmitting || !allUploaded) ? {
+                background: 'transparent',
+                border: '2px solid var(--gmm-border)',
+                color: 'var(--gmm-text-muted)',
+                cursor: 'not-allowed',
+                opacity: 0.6,
+                boxShadow: 'none'
+              } : {
+                background: '#FFAA00',
+                border: '2px solid transparent',
+                color: '#1a1a1a',
+                cursor: 'pointer',
+                boxShadow: '0 8px 24px rgba(255,170,0,0.25)'
+              }}
             >
               {isSubmitting ? (
                 <>

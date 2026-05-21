@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FacturaRow, FacturaTipo } from '@/types/claims';
-import { cn } from '@/lib/utils';
 
 interface FacturasTableProps {
   invoices: FacturaRow[];
@@ -63,27 +62,27 @@ export default function FacturasTable({ invoices, onChange, onBack, onNext }: Fa
     <div className="space-y-12">
       {/* 🧾 Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-          Detalle de <span className="text-medical-cyan">Facturas</span>
+        <h2 className="text-3xl font-black tracking-tight" style={{ color: 'var(--gmm-text)' }}>
+          Detalle de <span style={{ color: 'var(--gmm-accent)' }}>Facturas</span>
         </h2>
-        <p className="text-slate-500 text-sm max-w-md mx-auto">
+        <p className="text-sm max-w-md mx-auto" style={{ color: 'var(--gmm-text-muted)' }}>
           Ingresa el desglose de los gastos. Esta información será procesada por el motor de auditoría automatizada.
         </p>
       </div>
 
       <div className="max-w-4xl mx-auto space-y-6">
         {/* 📋 Table Container */}
-        <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden scale-100 group">
+        <div className="bg-gmm-card border rounded-[var(--gmm-radius)] shadow-[var(--gmm-shadow)] overflow-hidden scale-100 group" style={{ borderColor: 'var(--gmm-border)' }}>
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/50 dark:bg-slate-800/10 border-b border-slate-100 dark:border-slate-800">
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Concepto</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Factura / UUID</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Importe</th>
+              <tr className="border-b" style={{ background: 'var(--gmm-bg-panel)', borderColor: 'var(--gmm-border)' }}>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--gmm-text-muted)' }}>Concepto</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest" style={{ color: 'var(--gmm-text-muted)' }}>Factura / UUID</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-right" style={{ color: 'var(--gmm-text-muted)' }}>Importe</th>
                 <th className="px-4 py-4 w-12"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+            <tbody className="divide-y" style={{ borderColor: 'var(--gmm-border)' }}>
               <AnimatePresence initial={false}>
                 {invoices.map((row, index) => (
                   <motion.tr 
@@ -91,14 +90,14 @@ export default function FacturasTable({ invoices, onChange, onBack, onNext }: Fa
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: 10 }}
-                    className="hover:bg-slate-50/30 dark:hover:bg-slate-800/10 transition-colors"
+                    className="hover:bg-slate-500/5 transition-colors"
                   >
                     <td className="px-4 py-4">
                       <select 
                         value={row.tipo_gasto}
                         onChange={(e) => updateRow(index, 'tipo_gasto', e.target.value as FacturaTipo)}
                         className={cn(
-                          "appearance-none text-xs font-black px-4 py-2 rounded-xl border focus:ring-4 focus:ring-medical-cyan/5 outline-none transition-all cursor-pointer",
+                          "appearance-none text-xs font-black px-4 py-2 rounded-xl border focus:ring-4 focus:ring-gmm-accent/10 outline-none transition-all cursor-pointer",
                           TIPO_COLORS[row.tipo_gasto]
                         )}
                       >
@@ -111,33 +110,50 @@ export default function FacturasTable({ invoices, onChange, onBack, onNext }: Fa
                     </td>
                     <td className="px-4 py-4">
                       <div className="relative">
-                        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                        <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--gmm-text-muted)' }} />
                         <input 
                           type="text"
                           value={row.numero_factura}
                           onChange={(e) => updateRow(index, 'numero_factura', e.target.value)}
                           placeholder="Ej: A-12345"
-                          className="w-full bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800/80 rounded-xl px-10 py-2.5 text-sm outline-none focus:border-medical-cyan transition-all font-bold placeholder:text-slate-300 placeholder:font-medium"
+                          className="w-full rounded-xl px-10 py-2.5 text-sm outline-none transition-all font-bold"
+                          style={{
+                            background: 'var(--gmm-bg-panel)',
+                            border: '1px solid var(--gmm-border)',
+                            color: 'var(--gmm-text)',
+                          }}
+                          onFocus={(e) => { e.target.style.borderColor = 'var(--gmm-accent)'; }}
+                          onBlur={(e) => { e.target.style.borderColor = 'var(--gmm-border)'; }}
                         />
                       </div>
                     </td>
                     <td className="px-4 py-4">
                       <div className="relative">
-                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-medical-cyan" />
+                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--gmm-accent)' }} />
                         <input 
                           type="number"
                           step="0.01"
                           value={row.importe || ''}
                           onChange={(e) => updateRow(index, 'importe', e.target.value)}
                           placeholder="0.00"
-                          className="w-full bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200 dark:border-slate-800/80 rounded-xl px-10 py-2.5 text-sm text-right outline-none focus:border-emerald-500 transition-all font-black text-slate-900 dark:text-white tabular-nums placeholder:text-slate-300"
+                          className="w-full rounded-xl px-10 py-2.5 text-sm text-right outline-none transition-all font-black tabular-nums"
+                          style={{
+                            background: 'var(--gmm-bg-panel)',
+                            border: '1px solid var(--gmm-border)',
+                            color: 'var(--gmm-text)',
+                          }}
+                          onFocus={(e) => { e.target.style.borderColor = 'var(--gmm-accent)'; }}
+                          onBlur={(e) => { e.target.style.borderColor = 'var(--gmm-border)'; }}
                         />
                       </div>
                     </td>
                     <td className="px-4 py-4">
                       <button 
                         onClick={() => removeRow(index)}
-                        className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all"
+                        className="p-2 rounded-xl transition-all hover:scale-105 active:scale-95"
+                        style={{ color: 'var(--gmm-text-muted)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--gmm-danger)'; e.currentTarget.style.background = 'rgba(178, 43, 33, 0.1)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--gmm-text-muted)'; e.currentTarget.style.background = 'transparent'; }}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -149,15 +165,18 @@ export default function FacturasTable({ invoices, onChange, onBack, onNext }: Fa
           </table>
 
           {/* ➕ Add Row Button */}
-          <div className="p-6 border-t border-slate-100 dark:border-slate-800/50 bg-slate-50/20 dark:bg-slate-900/40">
+          <div className="p-6 border-t" style={{ borderColor: 'var(--gmm-border)', background: 'var(--gmm-bg-panel)' }}>
             <button 
               onClick={addRow}
-              className="group flex items-center justify-center gap-3 w-full border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-medical-cyan/50 p-4 rounded-2xl transition-all"
+              className="group flex items-center justify-center gap-3 w-full border-2 border-dashed p-4 rounded-2xl transition-all"
+              style={{ borderColor: 'var(--gmm-border)', background: 'transparent' }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--gmm-accent)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--gmm-border)'; }}
             >
-              <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-500 group-hover:scale-110 group-hover:rotate-90 transition-transform">
+              <div className="p-2 rounded-lg transition-transform group-hover:scale-110 group-hover:rotate-90" style={{ background: 'rgba(255, 170, 0, 0.1)', color: 'var(--gmm-accent)' }}>
                 <Plus size={18} strokeWidth={3} />
               </div>
-              <span className="text-sm font-black text-slate-500 dark:text-slate-400 group-hover:text-medical-cyan uppercase tracking-widest">
+              <span className="text-sm font-black uppercase tracking-widest transition-colors group-hover:text-[var(--gmm-accent)]" style={{ color: 'var(--gmm-text-muted)' }}>
                 Agregar Factura o Gasto Médico
               </span>
             </button>
@@ -166,21 +185,21 @@ export default function FacturasTable({ invoices, onChange, onBack, onNext }: Fa
 
         {/* 📊 Summary */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 px-4">
-          <div className="flex items-center gap-2 p-3 bg-medical-cyan/5 border border-medical-cyan/10 rounded-2xl">
-            <div className="p-2 bg-medical-cyan/10 rounded-xl text-medical-cyan">
+          <div className="flex items-center gap-2 p-3 rounded-2xl border" style={{ background: 'rgba(255, 170, 0, 0.05)', borderColor: 'rgba(255, 170, 0, 0.15)' }}>
+            <div className="p-2 rounded-xl" style={{ background: 'rgba(255, 170, 0, 0.1)', color: 'var(--gmm-accent)' }}>
               <Sparkle size={16} fill="currentColor" />
             </div>
-            <p className="text-[10px] text-slate-500 leading-tight font-medium uppercase tracking-wider">
-              Los importes se consolidan en el <br/><span className="text-medical-cyan font-black">Expediente de n8n</span>
+            <p className="text-[10px] leading-tight font-medium uppercase tracking-wider" style={{ color: 'var(--gmm-text-muted)' }}>
+              Los importes se consolidan en el <br/><span className="font-black" style={{ color: 'var(--gmm-accent)' }}>Expediente de n8n</span>
             </p>
           </div>
 
-          <div className="flex items-center gap-6 bg-slate-950 border border-slate-800 px-8 py-5 rounded-3xl shadow-2xl shadow-medical-cyan/5 ring-1 ring-white/5">
+          <div className="flex items-center gap-6 px-8 py-5 rounded-3xl shadow-lg border" style={{ background: 'var(--gmm-bg-panel)', borderColor: 'var(--gmm-border)', boxShadow: 'var(--gmm-shadow)' }}>
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Cálculo Total</p>
-              <div className="flex items-center gap-1 justify-end">
-                <Calculator size={14} className="text-medical-cyan" />
-                <span className="text-3xl font-black text-white tabular-nums text-glow-cyan">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-1" style={{ color: 'var(--gmm-text-muted)' }}>Cálculo Total</p>
+              <div className="flex items-center gap-2 justify-end">
+                <Calculator size={14} style={{ color: 'var(--gmm-accent)' }} />
+                <span className="text-3xl font-black tabular-nums" style={{ color: 'var(--gmm-text)' }}>
                   ${total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
               </div>
@@ -192,19 +211,31 @@ export default function FacturasTable({ invoices, onChange, onBack, onNext }: Fa
         <div className="flex justify-between items-center mt-12">
           <button
             onClick={onBack}
-            className="px-8 py-4 text-xs font-black uppercase tracking-widest text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-2 group"
+            className="px-8 py-4 text-xs font-black uppercase tracking-widest transition-colors flex items-center gap-2 group"
+            style={{ color: 'var(--gmm-text-muted)', background: 'transparent' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--gmm-text)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--gmm-text-muted)'; }}
           >
             <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> ATRÁS
           </button>
           <button
             onClick={onNext}
             disabled={invoices.length === 0}
-            className={cn(
-              "px-12 py-4 rounded-2xl font-black text-sm transition-all flex items-center gap-3 shadow-xl",
-              invoices.length === 0 
-                ? "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700" 
-                : "bg-medical-cyan text-white shadow-medical-cyan/30 hover:scale-[1.03] active:scale-95 group"
-            )}
+            className="px-12 py-4 rounded-2xl font-black text-sm transition-all flex items-center gap-3 active:scale-[0.98] group"
+            style={invoices.length === 0 ? {
+              background: 'transparent',
+              border: '2px solid var(--gmm-border)',
+              color: 'var(--gmm-text-muted)',
+              cursor: 'not-allowed',
+              opacity: 0.6,
+              boxShadow: 'none'
+            } : {
+              background: '#FFAA00',
+              border: '2px solid transparent',
+              color: '#1a1a1a',
+              cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(255,170,0,0.25)'
+            }}
           >
             DOCUMENTACIÓN <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </button>
