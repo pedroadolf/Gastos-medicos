@@ -13,6 +13,20 @@
   --color-gmm-success:    #22c55e;   /* Verde — estados positivos */
   --color-gmm-white:      #FFFFFF;
 
+  /* Acentos Médicos */
+  --color-medical-cyan:    #06b6d4;
+  --color-medical-violet:  #8b5cf6;
+  --color-medical-emerald: #10b981;
+  --color-medical-amber:   #f59e0b;
+  --color-medical-red:     #ef4444;
+
+  /* Acentos Fintech */
+  --color-fintech-navy:       #0A1128;
+  --color-fintech-navy-light: #121E40;
+  --color-fintech-surface:    #1E293B;
+  --color-fintech-emerald:    #10B981;
+  --color-fintech-cyan:       #00F0FF;
+
   /* Semantic aliases (resolved at runtime via CSS vars) */
   --color-gmm-bg:         var(--gmm-bg);
   --color-gmm-bg-panel:   var(--gmm-bg-panel);

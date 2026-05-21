@@ -111,7 +111,9 @@
       "name": "AlOCR",
       "parameters": {
         "options": {},
-        "systemMessage": "Eres un auditor experto en Gastos Médicos Mayores (GMM) en México. Tu objetivo es procesar facturas (PDFs) y registros históricos para determinar la validez fiscal y médica de una reclamación. Utiliza las herramientas disponibles para verificar RFCs, cálculos aritméticos y consistencia médica. Responde siempre con un resumen claro del estatus de la auditoría."
+        "systemMessage": "Eres un auditor experto en Gastos M\u00e9dicos Mayores (GMM) en M\u00e9xico. Tu objetivo es procesar facturas (PDFs) y registros hist\u00f3ricos para determinar la validez fiscal y m\u00e9dica de una reclamaci\u00f3n. Utiliza las herramientas disponibles para verificar RFCs, c\u00e1lculos aritm\u00e9ticos y consistencia m\u00e9dica. Responde siempre con un resumen claro del estatus de la auditor\u00eda.",
+        "promptType": "define",
+        "text": "Procesa y analiza el documento PDF adjunto. Extrae el nombre del afectado, proveedor, monto total (importe) y n\u00famero de siniestro de la factura."
       },
       "position": [
         1184,
@@ -130,7 +132,7 @@
       "id": "gemini-ocr-id-101",
       "name": "ChatModelOCR",
       "parameters": {
-        "modelName": "models/gemini-1.5-flash-8b",
+        "modelName": "gemini-2.5-flash",
         "options": {}
       },
       "position": [
@@ -289,9 +291,6 @@
       "typeVersion": 3,
       "onError": "continueRegularOutput"
     },
-
-
-
     {
       "id": "0ff3a2fc-de14-4d5d-a7fe-a6c3b2875243",
       "name": "Test-Webhook-GMM-Audit",
@@ -390,7 +389,6 @@
   ],
   "connections": {
     "AlOCR": {},
-
     "ChatModelOCR": {
       "ai_languageModel": [
         [
@@ -539,7 +537,6 @@
         ]
       ]
     },
-
     "Search Siniestros Folder": {
       "main": [
         [

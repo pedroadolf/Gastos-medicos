@@ -34,9 +34,10 @@ export default function Stepper({ steps, currentStep }: StepperProps) {
                   currentStep > step.id 
                     ? "bg-emerald-500 border-emerald-500 text-white" 
                     : currentStep === step.id 
-                    ? "bg-medical-cyan border-medical-cyan text-white shadow-lg shadow-medical-cyan/20"
+                    ? "bg-cyan-500 border-cyan-500 text-white shadow-lg shadow-cyan-500/20"
                     : "bg-slate-900 border-slate-800 text-slate-500"
                 )}
+                style={currentStep === step.id ? { backgroundColor: '#06b6d4', borderColor: '#06b6d4' } : undefined}
               >
                 {currentStep > step.id ? (
                   <Check size={18} strokeWidth={3} />
@@ -47,15 +48,21 @@ export default function Stepper({ steps, currentStep }: StepperProps) {
               
               {/* Pulse effect for active step */}
               {currentStep === step.id && (
-                <span className="absolute inset-0 rounded-full bg-medical-cyan animate-ping opacity-20 pointer-events-none" />
+                <span 
+                  className="absolute inset-0 rounded-full bg-cyan-500 animate-ping opacity-20 pointer-events-none" 
+                  style={{ backgroundColor: '#06b6d4' }}
+                />
               )}
             </div>
             
-            <span className={cn(
-              "text-[10px] font-black uppercase tracking-widest absolute -bottom-6 w-max transition-all duration-300",
-              currentStep > step.id ? "text-emerald-500 scale-105" :
-              currentStep === step.id ? "text-medical-cyan" : "text-slate-500"
-            )}>
+            <span 
+              className={cn(
+                "text-[10px] font-black uppercase tracking-widest absolute -bottom-6 w-max transition-all duration-300",
+                currentStep > step.id ? "text-emerald-600 dark:text-emerald-400 scale-105" :
+                currentStep === step.id ? "text-slate-900 dark:text-slate-100 font-black" : "text-slate-500"
+              )}
+              style={currentStep === step.id ? { color: 'var(--gmm-text)' } : undefined}
+            >
               {currentStep > step.id ? (
                 <span className="flex items-center gap-1">
                    {step.label} <Check size={10} strokeWidth={4} />
@@ -71,7 +78,7 @@ export default function Stepper({ steps, currentStep }: StepperProps) {
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: currentStep > step.id ? 1 : 0 }}
                 style={{ originX: 0 }}
-                className="h-full bg-gradient-to-r from-medical-cyan to-emerald-500"
+                className="h-full bg-gradient-to-r from-cyan-500 to-emerald-500"
               />
             </div>
           )}
