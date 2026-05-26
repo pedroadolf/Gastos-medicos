@@ -247,6 +247,7 @@ export function GroupProfilesSection() {
   // Para el gauge usamos el total pagado vs suma de todas las SA de siniestros activos con póliza vigente
   const totalSAVigente = 3_961_725; // COVID póliza principal 2012432 como referencia base
   const consumoPct = Math.min((total.total_pagado / totalSAVigente) * 100, 100);
+  const totalCards = ASEGURADOS_GRUPO.reduce((acc, a) => acc + a.siniestros.length, 0);
 
   return (
     <div className="space-y-14">
@@ -269,7 +270,7 @@ export function GroupProfilesSection() {
           <div className="ml-auto flex items-center gap-6">
             <div>
               <p className="text-[8px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--gmm-text-muted)' }}>Siniestros con Carta</p>
-              <p className="text-[18px] font-black" style={{ color: 'var(--gmm-text)' }}>{total.count_siniestros} <span className="text-[10px] font-bold text-slate-400">de 16</span></p>
+              <p className="text-[18px] font-black" style={{ color: 'var(--gmm-text)' }}>{total.count_siniestros} <span className="text-[10px] font-bold text-slate-400">de {totalCards}</span></p>
             </div>
             <div>
               <p className="text-[8px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--gmm-text-muted)' }}>Total Pagado Grupo</p>
