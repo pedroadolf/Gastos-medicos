@@ -2,12 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  FileText, Search, Filter, ChevronRight, 
-  CheckCircle2, Clock, AlertCircle, MoreHorizontal, ArrowUpRight
+  FileText, Search, Filter, Clock, CheckCircle2, AlertCircle, ArrowUpRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-function TramiteNode({ tramite, index }: any) {
+const TIPO_LABELS = {
+  reembolso: 'Reembolso de Gastos Médicos',
+  programacion: 'Programación de Cirugía',
+  carta_pase: 'Carta Pase / Autorización'
+};
+
+function TramiteNode({ tramite, index }: { tramite: any; index: number }) {
   const isEven = index % 2 === 0;
   
   const statusConfig = {
@@ -22,7 +27,7 @@ function TramiteNode({ tramite, index }: any) {
   return (
     <div className={`relative flex items-center justify-center gap-12 mb-20 ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
       
-      {/* Targeta del Trámite */}
+      {/* Tarjeta del Trámite */}
       <motion.div 
         initial={{ opacity: 0, x: isEven ? -50 : 50 }}
         whileInView={{ opacity: 1, x: 0 }}
@@ -37,10 +42,10 @@ function TramiteNode({ tramite, index }: any) {
               </div>
               <div>
                 <h4 className="text-sm font-black text-gmm-text uppercase tracking-tight leading-tight italic">
-                  {tramite.nombre}
+                  {tramite.tipo_tramite_label}
                 </h4>
                 <p className="text-[10px] font-bold text-gmm-text-muted uppercase tracking-widest mt-1">
-                  ID: {tramite.id} · {tramite.asegurado}
+                  Asegurado: <span className="text-gmm-text font-black">{tramite.asegurado}</span>
                 </p>
               </div>
             </div>
@@ -49,10 +54,23 @@ function TramiteNode({ tramite, index }: any) {
             </button>
           </div>
 
+          {/* Contexto Médico */}
+          <div className="mb-6 bg-gmm-bg/20 border border-gmm-border/10 rounded-2xl p-4">
+            <p className="text-[9px] font-black text-gmm-text-muted uppercase tracking-wider mb-1">Contexto Médico</p>
+            <p className="text-[11px] font-black text-gmm-text uppercase tracking-tight italic mb-1">
+              Siniestro: {tramite.num_siniestro}
+            </p>
+            <p className="text-[10px] font-bold text-gmm-text-muted uppercase tracking-wide">
+              {tramite.padecimiento}
+            </p>
+          </div>
+
           <div className="bg-gmm-bg/30 rounded-2xl p-4 flex items-center justify-between">
               <div>
                 <p className="text-[9px] font-black text-gmm-text-muted uppercase tracking-wider mb-1">Monto Solicitado</p>
-                <p className="text-xs font-black text-gmm-text tracking-tighter">${(tramite.total / 1000).toFixed(1)}k MXN</p>
+                <p className="text-xs font-black text-gmm-text tracking-tighter">
+                  ${new Intl.NumberFormat('es-MX', { minimumFractionDigits: 2 }).format(tramite.total)} MXN
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-[9px] font-black text-gmm-text-muted uppercase tracking-wider mb-1">Estatus actual</p>
@@ -75,9 +93,11 @@ function TramiteNode({ tramite, index }: any) {
           {new Date(tramite.fecha).toLocaleDateString('es-MX', { month: 'long', day: 'numeric', year: 'numeric' })}
         </p>
         <p className="text-[11px] font-medium text-gmm-text/50 uppercase tracking-widest leading-relaxed max-w-sm">
-          {tramite.status === 'EN_TRAMITE' 
+          {tramite.dbStatus === 'pending' || tramite.dbStatus === 'borrador' || tramite.dbStatus === 'en_revision'
             ? "Validando facturas y relación médica en el centro de diagnóstico."
-            : tramite.status === 'EN_PAGO'
+            : tramite.dbStatus === 'audited'
+            ? "Auditoría completada exitosamente. Pre-autorizado para liquidación."
+            : tramite.dbStatus === 'processing' || tramite.dbStatus === 'procesando' || tramite.dbStatus === 'completed'
             ? "Transferencia enviada. Fondos disponibles en 24-48 horas hábiles."
             : "Incidencia detectada en la póliza. Ver comentarios del auditor."
           }
@@ -90,22 +110,63 @@ function TramiteNode({ tramite, index }: any) {
 export default function MisTramitesPage() {
   const [tramites, setTramites] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    fetch('/api/dashboard/estado-cuenta')
+    fetch('/api/tramites')
       .then(r => r.json())
       .then(data => {
-        // Flatten kanban items for timeline view
-        const all = [
-          ...(data.kanban?.en_tramite || []),
-          ...(data.kanban?.pre_autorizados || []),
-          ...(data.kanban?.en_pago || []),
-          ...(data.kanban?.rechazados || [])
-        ];
-        setTramites(all.sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()));
+        if (Array.isArray(data)) {
+          const mapped = data.map((t: any) => {
+            const numSiniestro = t.siniestros?.numero_siniestro || t.num_siniestro_ref || 'Sin Siniestro';
+            const padecimiento = t.siniestros?.nombre_siniestro || 'Sin Diagnóstico';
+            const total = (t.facturas || []).reduce((acc: number, f: any) => acc + Number(f.importe || 0), 0);
+            
+            let statusKey = 'EN_TRAMITE';
+            if (['pending', 'borrador', 'en_revision'].includes(t.status)) {
+              statusKey = 'EN_TRAMITE';
+            } else if (t.status === 'audited') {
+              statusKey = 'PRE_AUTORIZADO';
+            } else if (['processing', 'procesando', 'completed'].includes(t.status)) {
+              statusKey = 'EN_PAGO';
+            } else if (['error', 'rechazado'].includes(t.status)) {
+              statusKey = 'RECHAZADO';
+            }
+
+            const tipoKey = t.tipo as keyof typeof TIPO_LABELS;
+            const tipoLabel = TIPO_LABELS[tipoKey] || t.tipo || 'Trámite';
+
+            return {
+              id: t.id,
+              tipo: t.tipo,
+              tipo_tramite_label: tipoLabel,
+              asegurado: t.paciente_nombre || 'Asegurado',
+              num_siniestro: numSiniestro,
+              padecimiento: padecimiento,
+              total: total,
+              status: statusKey,
+              fecha: t.created_at,
+              dbStatus: t.status
+            };
+          });
+
+          setTramites(mapped.sort((a: any, b: any) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime()));
+        }
       })
+      .catch(err => console.error("❌ Error loading tramites:", err))
       .finally(() => setIsLoading(false));
   }, []);
+
+  const filteredTramites = tramites.filter((t: any) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      t.asegurado.toLowerCase().includes(term) ||
+      t.num_siniestro.toLowerCase().includes(term) ||
+      t.padecimiento.toLowerCase().includes(term) ||
+      t.tipo_tramite_label.toLowerCase().includes(term) ||
+      t.id.toLowerCase().includes(term)
+    );
+  });
 
   return (
     <div className="max-w-6xl mx-auto py-10 px-6">
@@ -125,6 +186,8 @@ export default function MisTramitesPage() {
             <input 
               type="text" 
               placeholder="Buscar trámite..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-12 pr-6 py-4 bg-white/50 border border-white/80 rounded-full text-[11px] font-bold uppercase tracking-widest focus:ring-2 focus:ring-gmm-accent outline-none w-64 shadow-sm"
             />
           </div>
@@ -135,17 +198,27 @@ export default function MisTramitesPage() {
       </div>
 
       <div className="relative">
-        {/* The Timeline Backbone is provided by the global layout */}
-        
         {isLoading ? (
           <div className="h-64 flex flex-col items-center justify-center gap-4 text-gmm-text/20">
             <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} className="w-10 h-10 border-t-2 border-gmm-accent rounded-full" />
             <p className="text-[10px] font-black uppercase tracking-[0.4em]">Sincronizando Hitos...</p>
           </div>
+        ) : filteredTramites.length === 0 ? (
+          <div className="h-64 flex flex-col items-center justify-center gap-4 bg-white/20 border border-dashed border-white/40 rounded-3xl p-8 text-center max-w-lg mx-auto shadow-sm backdrop-blur-sm">
+            <div className="w-16 h-16 rounded-full bg-gmm-bg flex items-center justify-center text-gmm-text/30">
+              <FileText size={32} />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-gmm-text uppercase tracking-wider mb-2 italic">Sin Trámites en Historial</h3>
+              <p className="text-[10px] font-bold text-gmm-text-muted uppercase tracking-widest leading-relaxed">
+                No se encontraron trámites en el historial. Comienza creando un nuevo trámite médico.
+              </p>
+            </div>
+          </div>
         ) : (
           <div className="space-y-12">
-            {tramites.map((t: any, i: number) => (
-              <TramiteNode key={i} tramite={{...t, icon: FileText, asegurado: 'Claudia Soto', total: 45000}} index={i} />
+            {filteredTramites.map((t: any, i: number) => (
+              <TramiteNode key={t.id} tramite={t} index={i} />
             ))}
           </div>
         )}
